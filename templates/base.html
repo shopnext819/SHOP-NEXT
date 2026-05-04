@@ -1,0 +1,653 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SHOP NEXT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.5">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .slider-box {
+            width: 90%;
+            margin: 30px auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .slider-box img {
+            width: 100%;
+            height: 300px;
+            /* tum change kar lena */
+            object-fit: cover;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 30%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            font-size: 25px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .slider-btn.left {
+            left: 10px;
+        }
+
+        .slider-btn.right {
+            right: 10px;
+        }
+
+        /* ================= MENU BUTTON ================= */
+        .menu-toggle {
+            position: fixed;
+            top: 25px;
+            left: 20px;
+            font-size: 35px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            z-index: 1200;
+        }
+
+        /* ================= BELL NOTIFICATIONS (MODERN PREMIUM DESIGN) ================= */
+        .notif-box {
+            position: absolute;
+            top: 75px;
+            right: 40px;
+            /* Anchored nicely relative to the screen/bell */
+            width: 320px;
+            max-height: 400px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 2000;
+            overflow: hidden;
+            flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #111;
+            border-bottom: 1px solid #eaeaea;
+            background: #fafafa;
+        }
+
+        .notif-badge {
+            background-color: #fca311;
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .notif-list {
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .notif-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .notif-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+
+        .notif-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px 20px;
+            gap: 15px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notif-card:hover {
+            background: #fdfdfd;
+        }
+
+        .notif-card.unread {
+            background: #fffcf5;
+        }
+
+        .notif-card.unread:hover {
+            background: #fff8e8;
+        }
+
+        .notif-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .notif-content {
+            flex: 1;
+        }
+
+        .notif-content h4 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            color: #222;
+        }
+
+        .notif-content p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .notif-time {
+            display: block;
+            margin-top: 6px;
+            font-size: 11px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        .notif-footer {
+            padding: 12px;
+            text-align: center;
+            border-top: 1px solid #eaeaea;
+            background: #fafafa;
+        }
+
+        .notif-footer a {
+            color: #fca311;
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .notif-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ================= SEARCH BAR ================= */
+        .search-container {
+            margin-top: 18px;
+            padding: 0 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            display: flex;
+            height: 55px;
+            border-radius: 35px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0 25px;
+            font-size: 16px;
+            height: 100%;
+        }
+
+        .search-box button {
+            width: 130px;
+            border: none;
+            background: #fca311;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            top: -10px;
+        }
+
+        /* ================= bell ================= */
+        .notification-bell {
+            position: absolute;
+            top: 35px;
+            left: 1311px;
+            font-size: 23px;
+            cursor: pointer;
+            z-index: 1200;
+            background: transparent;
+            padding: 0px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.0);
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: 0.3s ease;
+            overflow-y: auto;
+            z-index: 1300;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        /* ===== BRAND (SHOP NEXT) ===== */
+        .sidebar-brand {
+            margin-top: 60px;
+            margin-left: 25px;
+        }
+
+        .sidebar-brand h2 {
+            margin: 0;
+            font-size: 20px;
+            position: relative;
+            left: 40px;
+            /* Text ko aagay/pichay move karne ke liye */
+        }
+
+        .sidebar-line {
+            width: 65%;
+            /* Line ki length */
+            height: 2px;
+            background: #000;
+            margin-top: 9px;
+            /* Text aur line ka gap */
+            margin-left: 33px;
+            /* Line ko aagay/pichay move karne ke liye */
+        }
+
+        .profile-section {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: -40px;
+            font-weight: bold;
+            /* ✅ bold */
+            font-style: italic;
+            /* ✅ italic */
+            font-size: 20px;
+
+        }
+
+        .profile-img {
+            display: block;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 10px auto;
+        }
+
+        .menu-btn {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #f2f2f2;
+            padding-left: 25px;
+        }
+
+        /* ================= OVERLAY ================= */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            z-index: 1250;
+        }
+
+        #overlay.active {
+            display: block;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        /* ================= LOGOUT POPUP ================= */
+        .overlay-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .popup-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-row button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: #ffc107;
+            color: #fff;
+        }
+
+        /* --- GLOBAL ONBOARDING MODAL --- */
+        .onboarding-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .onboarding-modal.active {
+            display: flex;
+        }
+
+        .onboarding-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            position: relative;
+            animation: onboardingPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes onboardingPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .onboarding-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .onboarding-header h2 {
+            font-size: 24px;
+            color: #fca311;
+            margin-bottom: 10px;
+        }
+
+        .onboarding-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .onboarding-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .onboarding-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .onboarding-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #f9f9f9;
+        }
+
+        .onboarding-form input:focus {
+            outline: none;
+            border-color: #fca311;
+            background: #fff;
+        }
+
+        .onboarding-btn {
+            width: 100%;
+            padding: 15px;
+            background: #fca311;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .onboarding-btn:hover {
+            background: #e5940e;
+            transform: translateY(-2px);
+        }
+    </style>
+    {% block extra_style %}{% endblock %}
+</head>
+
+
+<body>
+    {% if request.path == '/cart/' or request.path == '/seller-dashboard-home/' or request.path == '/inbox/' %}
+    {% include 'loading.html' %}
+    {% endif %}
+
+    <div class="menu-toggle" id="menuBtn" onclick="toggleSidebar()">&#8942;</div>
+
+    {% if request.path == '/' %}
+    <!-- Correctly Restored Search Bar (Only for Home) -->
+    <div class="search-container">
+        <form method="GET" action="{% url 'home' %}" class="search-box">
+            <input type="text" name="q" placeholder="Search brands, products or categories..." required>
+            <button type="submit">SEARCH</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if request.path == '/' %}
+    <div class="notification-bell" onclick="toggleNotif(event)">🔔</div>
+    <div class="notif-box" id="notifBox">
+        <div class="notif-header">
+            Notifications
+            <span class="notif-badge" id="notifBadge">2 New</span>
+        </div>
+
+        <div class="notif-list" id="notifList">
+            <!-- Success -->
+            <div class="notif-card unread">
+                <div class="notif-icon" style="background-color: #dcfce7; color: #22c55e;">📦</div>
+                <div class="notif-content">
+                    <h4>Order Shipped</h4>
+                    <p>Your order #SN-4029 has been shipped.</p>
+                    <span class="notif-time">2 hours ago</span>
+                </div>
+            </div>
+
+            <!-- Message -->
+            <div class="notif-card">
+                <div class="notif-icon" style="background-color: #e0f2fe; color: #0ea5e9;">💬</div>
+                <div class="notif-content">
+                    <h4>New Message Received</h4>
+                    <p>Tap here to read the conversation.</p>
+                    <span class="notif-time">Yesterday</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="notif-footer">
+            <a href="#" onclick="clearNotifications(event)">Clear All Notifications</a>
+        </div>
+    </div>
+    {% endif %}
+    <div id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h2></h2>
+            <div class="sidebar-line"></div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="profile-section">
+            <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" class="profile-img">
+            <h4>{{ user.get_full_name }}</h4>
+        </div>
+        {% else %}
+        <a href="/accounts/login/" class="menu-btn">Login</a>
+        {% endif %}
+
+        <!-- ALL BUTTONS ADDED -->
+        <a href="{% url 'profile' %}" class="menu-btn">👤 Profile</a>
+        <a href="{% url 'home' %}" class="menu-btn">🏠 HOME</a>
+        <a href="/cart/" class="menu-btn">🛒 Cart</a>
+        <a href="{% url 'inbox' %}" class="menu-btn">📩 Inbox</a>
+        <a href="{% url 'admin_approval' %}" class="menu-btn">🛡️ Admin Approval</a>
+        <a href="{% url 'seller_center' %}" class="menu-btn">🏪 Seller Center</a>
+        <a href="{% url 'privacy_policy' %}" class="menu-btn">🔒 Privacy Policy</a>
+
+        <a href="{% url 'help' %}" class="menu-btn">❓ Help</a>
+
+
+    </div>
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- ONBOARDING MODAL -->
+    {% if user.is_authenticated and not user.userprofile.is_completed %}
+    <div class="onboarding-modal active" id="onboardingModal">
+        <div class="onboarding-content">
+            <div class="onboarding-header">
+                <h2>Welcome to SHOP NEXT! 🚀</h2>
+                <p>Please provide these details to complete your account.</p>
+            </div>
+            <form class="onboarding-form" method="POST" action="{% url 'complete_onboarding' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>👤 Real Name</label>
+                    <input type="text" name="real_name" placeholder="Enter your full name" value="{{ user.get_full_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>📱 Phone Number</label>
+                    <input type="tel" name="phone" placeholder="e.g. 03XXXXXXXXX" required>
+                </div>
+                <div class="form-group">
+                    <label>🎂 Birthday</label>
+                    <input type="date" name="birthday" required>
+                </div>
+                <div class="form-group">
+                    <label>📍 Location</label>
+                    <input type="text" name="location" placeholder="City, Country" required>
+                </div>
+                <button type="submit" class="onboarding-btn">Save & Get Started</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            var overlay = document.getElementById("overlay");
+            var button = document.getElementById("menuBtn");
+            sidebar.classList.toggle("active");
+            overlay.classList.toggle("active");
+            button.style.display = sidebar.classList.contains("active") ? "none" : "block";
+        }
+
+        function toggleNotif(event) {
+            if (event) event.stopPropagation(); // Stop click from propagating to document
+            var box = document.getElementById("notifBox");
+            if (box.style.display === "flex" || box.style.display === "block") {
+                box.style.display = "none";
+            } else {
+                box.style.display = "flex";
+            }
+        }
+
+        function clearNotifications(event) {
+            event.preventDefault();
+            var list = document.getElementById("notifList");
+            var badge = document.getElementById("notifBadge");
+            if (list) {
+                list.innerHTML = `
+                    <div style="padding: 40px 20px; text-align: center; color: #888;">
+                        <div style="font-size: 35px; margin-bottom: 10px;">📭</div>
+                        <h4 style="margin: 0; color: #444; font-size: 15px;">No notification yet</h4>
+                    </div>
+                `;
+            }
+            if (badge) badge.style.display = "none";
+        }
+
+        // Close notifications when clicking anywhere outside
+        document.addEventListener("click", function (event) {
+            var box = document.getElementById("notifBox");
+            var bell = document.querySelector(".notification-bell");
+            if (box && box.style.display !== "none") {
+                if (!box.contains(event.target) && (!bell || !bell.contains(event.target))) {
+                    box.style.display = "none";
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

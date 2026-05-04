@@ -1,0 +1,623 @@
+City — Province List
+Attock — Punjab
+Rawalpindi — Punjab
+Chakwal — Punjab
+Jhelum — Punjab
+Sargodha — Punjab
+Khushab — Punjab
+Mianwali — Punjab
+Bhakkar — Punjab
+Kasur — Punjab
+Sheikhupura — Punjab
+Nankana Sahib — Punjab
+Hafizabad — Punjab
+Mandi Bahauddin — Punjab
+Sialkot — Punjab
+Narowal — Punjab
+Chiniot — Punjab
+Toba Tek Singh — Punjab
+Jhang — Punjab
+Multan — Punjab
+Khanewal — Punjab
+Vehari — Punjab
+Lodhran — Punjab
+Bahawalpur — Punjab
+Rahim Yar Khan — Punjab
+Dera Ghazi Khan — Punjab
+Muzaffargarh — Punjab
+Layyah — Punjab
+Rajanpur — Punjab
+Sahiwal — Punjab
+Okara — Punjab
+Pakpattan — Punjab
+Badin — Sindh
+Sujawal — Sindh
+Mirpur Khas — Sindh
+Umerkot — Sindh
+Tharparkar — Sindh
+Sanghar — Sindh
+Shaheed Benazirabad (Nawabshah) — Sindh
+Naushahro Feroze — Sindh
+Khairpur — Sindh
+Sukkur — Sindh
+Ghotki — Sindh
+Larkana — Sindh
+Qambar Shahdadkot — Sindh
+Shikarpur — Sindh
+Jacobabad — Sindh
+Kashmore — Sindh
+Dadu — Sindh
+Jamshoro — Sindh
+Tando Allahyar — Sindh
+Tando Muhammad Khan — Sindh
+Matiari — Sindh
+Peshawar — Khyber Pakhtunkhwa
+Charsadda — Khyber Pakhtunkhwa
+Nowshera — Khyber Pakhtunkhwa
+Swabi — Khyber Pakhtunkhwa
+Haripur — Khyber Pakhtunkhwa
+Mansehra — Khyber Pakhtunkhwa
+Battagram — Khyber Pakhtunkhwa
+Kohistan Upper — Khyber Pakhtunkhwa
+Kolai Palas — Khyber Pakhtunkhwa
+Kohistan Lower — Khyber Pakhtunkhwa
+Torghar — Khyber Pakhtunkhwa
+Shangla — Khyber Pakhtunkhwa
+Lower Dir — Khyber Pakhtunkhwa
+Upper Dir — Khyber Pakhtunkhwa
+Buner — Khyber Pakhtunkhwa
+Lower Chitral — Khyber Pakhtunkhwa
+Upper Chitral — Khyber Pakhtunkhwa
+Dera Ismail Khan — Khyber Pakhtunkhwa
+Tank — Khyber Pakhtunkhwa
+Lakki Marwat — Khyber Pakhtunkhwa
+Kohat — Khyber Pakhtunkhwa
+Hangu — Khyber Pakhtunkhwa
+Karak — Khyber Pakhtunkhwa
+Orakzai — Khyber Pakhtunkhwa
+Khyber — Khyber Pakhtunkhwa
+Mohmand — Khyber Pakhtunkhwa
+Bajaur — Khyber Pakhtunkhwa
+Quetta — Balochistan
+Pishin — Balochistan
+Killa Abdullah — Balochistan
+Killa Saifullah — Balochistan
+Chaman — Balochistan
+Zhob — Balochistan
+Sherani — Balochistan
+Sibi — Balochistan
+Harnai — Balochistan
+Ziarat — Balochistan
+Loralai — Balochistan
+Duki — Balochistan
+Kohlu — Balochistan
+Musakhel — Balochistan
+Khuzdar — Balochistan
+Lasbela — Balochistan
+Hub — Balochistan
+Gwadar — Balochistan
+Kech (Turbat) — Balochistan
+Panjgur — Balochistan
+Kharan — Balochistan
+Nushki — Balochistan
+Washuk — Balochistan
+Kalat — Balochistan
+Mastung — Balochistan
+Surab — Balochistan
+Chagai — Balochistan
+Dera Bugti — Balochistan
+Nasirabad — Balochistan
+Jafarabad — Balochistan
+Kachhi (Bolan) — Balochistan
+Jhal Magsi — Balochistan
+Sohbatpur — Balochistan
+Gilgit — Gilgit-Baltistan
+Hunza — Gilgit-Baltistan
+Nagar — Gilgit-Baltistan
+Diamer — Gilgit-Baltistan
+Ghizer — Gilgit-Baltistan
+Ghanche — Gilgit-Baltistan
+Skardu — Gilgit-Baltistan
+Shigar — Gilgit-Baltistan
+Kharmang — Gilgit-Baltistan
+Astore — Gilgit-Baltistan
+Muzaffarabad — Azad Jammu & Kashmir
+Neelum — Azad Jammu & Kashmir
+Bagh — Azad Jammu & Kashmir
+Haveli — Azad Jammu & Kashmir
+Rawalakot (Poonch) — Azad Jammu & Kashmir
+Kotli — Azad Jammu & Kashmir
+Mirpur — Azad Jammu & Kashmir
+Bhimber — Azad Jammu & Kashmir
+Sudhnoti — Azad Jammu & Kashmir
+
+Lahore — Punjab
+Samanabad — Lahore — Punjab
+Rehmanpura — Lahore — Punjab
+Muslim Town — Lahore — Punjab
+Mansoorah — Lahore — Punjab
+Iqbal Town — Lahore — Punjab
+Abu Bakar Siddique — Lahore — Punjab
+Shamnagar — Lahore — Punjab
+Gulgasht — Lahore — Punjab
+Gulshan-e-Ravi — Lahore — Punjab
+Babu Sabu — Lahore — Punjab
+Rizwan Park — Lahore — Punjab
+Sodiwal — Lahore — Punjab
+Ichhra — Lahore — Punjab
+Naya Samanabad — Lahore — Punjab
+Shah Jamal — Lahore — Punjab
+Pakki Thatti — Lahore — Punjab
+Kashmir — Lahore — Punjab
+Nawan Kot — Lahore — Punjab
+Gulshan-e-Iqbal — Lahore — Punjab
+Sikandar — Lahore — Punjab
+
+Bahawalnagar — Punjab
+Quresh Colony-I — Bahawalnagar — Punjab
+Quresh Colony-II — Bahawalnagar — Punjab
+Quresh Colony (New Abadi) — Bahawalnagar — Punjab
+Faisal Colony — Bahawalnagar — Punjab
+Medical Colony — Bahawalnagar — Punjab
+Mohallah Jhangir Kot — Bahawalnagar — Punjab
+Islam Nagar — Bahawalnagar — Punjab
+Nazir Colony — Bahawalnagar — Punjab
+Khadimabad Colony — Bahawalnagar — Punjab
+Muslim Colony — Bahawalnagar — Punjab
+Sadat Colony — Bahawalnagar — Punjab
+Jinnah Colony — Bahawalnagar — Punjab
+Taqwa Colony — Bahawalnagar — Punjab
+Madni Colony — Bahawalnagar — Punjab
+Shehzad Nagar — Bahawalnagar — Punjab
+Nizam Pura — Bahawalnagar — Punjab
+Farooq Abad — Bahawalnagar — Punjab
+Model Town — Bahawalnagar — Punjab
+Urdu Road — Bahawalnagar — Punjab
+Madina Town — Bahawalnagar — Punjab
+Basti Sadar Din — Bahawalnagar — Punjab
+Wukla Colony — Bahawalnagar — Punjab
+
+Faisalabad — Punjab
+Ghanta Ghar — Faisalabad — Punjab
+Model Town — Faisalabad — Punjab
+Agricultural University — Faisalabad — Punjab
+Saeed Abad — Faisalabad — Punjab
+Jamil Town — Faisalabad — Punjab
+Ejaz Town — Faisalabad — Punjab
+Usman Ghani — Faisalabad — Punjab
+Rasheed Abad — Faisalabad — Punjab
+Bismillah Town — Faisalabad — Punjab
+Raja Wala — Faisalabad — Punjab
+Ghousia Town — Faisalabad — Punjab
+Shamas Abad — Faisalabad — Punjab
+Crescent Mills Colony — Faisalabad — Punjab
+Mustafa Abad — Faisalabad — Punjab
+Islam Nagar — Faisalabad — Punjab
+Taj Colony — Faisalabad — Punjab
+Bilal Ganj — Faisalabad — Punjab
+Gulistan Colony — Faisalabad — Punjab
+Neighban Pura — Faisalabad — Punjab
+Ahmad Abad — Faisalabad — Punjab
+Rehmat Abad — Faisalabad — Punjab
+Green Town — Faisalabad — Punjab
+Ghazi Abad — Faisalabad — Punjab
+Haji Abad — Faisalabad — Punjab
+Jamil Abad — Faisalabad — Punjab
+Nishat Abad — Faisalabad — Punjab
+Bhai Wala — Faisalabad — Punjab
+Sabina Town — Faisalabad — Punjab
+Manawal — Faisalabad — Punjab
+Malik Pur — Faisalabad — Punjab
+Naseerabad — Faisalabad — Punjab
+Manzoor Park — Faisalabad — Punjab
+Amin Town — Faisalabad — Punjab
+Mansoor Abad — Faisalabad — Punjab
+Mahmoodabad — Faisalabad — Punjab
+Tariq Abad — Faisalabad — Punjab
+Railway Colony — Faisalabad — Punjab
+Abdullah Pur — Faisalabad — Punjab
+Madina Town — Faisalabad — Punjab
+Koh-e-Noor Flats — Faisalabad — Punjab
+Aslam Gunj — Faisalabad — Punjab
+Saeed Colony — Faisalabad — Punjab
+Hassan Pura — Faisalabad — Punjab
+Himmat Pura — Faisalabad — Punjab
+National Colony — Faisalabad — Punjab
+Rehman Garden — Faisalabad — Punjab
+Muhammad Nagar — Faisalabad — Punjab
+Peoples Colony — Faisalabad — Punjab
+
+Gujranwala — Punjab
+Shamas Abad — Gujranwala — Punjab
+New Civil Line — Gujranwala — Punjab
+Mohallah Faisalabad — Gujranwala — Punjab
+Model Town — Gujranwala — Punjab
+Ameer Park — Gujranwala — Punjab
+Sharif Pura — Gujranwala — Punjab
+Gulshan-e-Iqbal — Gujranwala — Punjab
+Climax Abad — Gujranwala — Punjab
+Gill Road — Gujranwala — Punjab
+Katchi Fatumand — Gujranwala — Punjab
+Pakki Fatumand — Gujranwala — Punjab
+Chak Jagna — Gujranwala — Punjab
+Ratta Bajwa — Gujranwala — Punjab
+Khokharki — Gujranwala — Punjab
+Tariq Abad — Gujranwala — Punjab
+Satellite Town — Gujranwala — Punjab
+Popular Nursery — Gujranwala — Punjab
+Fareed Town — Gujranwala — Punjab
+Ali Park — Gujranwala — Punjab
+Sukh Chain Colony — Gujranwala — Punjab
+Wahdat Colony — Gujranwala — Punjab
+Chaman Shah — Gujranwala — Punjab
+Arfat Colony — Gujranwala — Punjab
+Mujahid Pura — Gujranwala — Punjab
+Abdullah Colony — Gujranwala — Punjab
+Kot Habib Ullah — Gujranwala — Punjab
+Peoples Colony — Gujranwala — Punjab
+Aliah Bakhsh Colony — Gujranwala — Punjab
+Kangni Wala — Gujranwala — Punjab
+Hashmi Colony — Gujranwala — Punjab
+Kashmir Colony — Gujranwala — Punjab
+Khali Shah Pur — Gujranwala — Punjab
+Gulzar Colony — Gujranwala — Punjab
+Jinnah Colony — Gujranwala — Punjab
+Mian Sansi — Gujranwala — Punjab
+Noshera Sansi — Gujranwala — Punjab
+Chiragh Nagar — Gujranwala — Punjab
+Chah Telian Wala — Gujranwala — Punjab
+Data Gunj Bakhsh — Gujranwala — Punjab
+Chah Malhian Wala — Gujranwala — Punjab
+Bakhtay Wala — Gujranwala — Punjab
+Mubarak Shah — Gujranwala — Punjab
+Gulshan Abad — Gujranwala — Punjab
+Baghban Pura — Gujranwala — Punjab
+Khalid Colony — Gujranwala — Punjab
+Ramzan Pura — Gujranwala — Punjab
+Shah Rukh Colony — Gujranwala — Punjab
+Kotli Rustam — Gujranwala — Punjab
+Gazafi Road — Gujranwala — Punjab
+Rehman Pura — Gujranwala — Punjab
+Sultan Pura — Gujranwala — Punjab
+Muslim Town — Gujranwala — Punjab
+Guru Nanak Pura — Gujranwala — Punjab
+Lakkar Wala Pull — Gujranwala — Punjab
+Muhammad Pura — Gujranwala — Punjab
+Gobind Garh — Gujranwala — Punjab
+Garjakh — Gujranwala — Punjab
+Nawab Chowk — Gujranwala — Punjab
+Islam Pura — Gujranwala — Punjab
+Dhullay — Gujranwala — Punjab
+Afzal Pura — Gujranwala — Punjab
+Muhammad Abad — Gujranwala — Punjab
+Shaheen Abad — Gujranwala — Punjab
+Lohian Wala — Gujranwala — Punjab
+Mandiala Warraich — Gujranwala — Punjab
+Aroop — Gujranwala — Punjab
+Wania Wala — Gujranwala — Punjab
+Jandiala Bagh Wala — Gujranwala — Punjab
+Rakh Kikran Wala — Gujranwala — Punjab
+Kohlo Wala — Gujranwala — Punjab
+Abu Rai — Gujranwala — Punjab
+
+Gujrat — Punjab
+Shadman — Gujrat — Punjab
+Chak Mehmada — Gujrat — Punjab
+Muslim Abad — Gujrat — Punjab
+Gari Shah Doula — Gujrat — Punjab
+Kalra Kalan — Gujrat — Punjab
+Chah Kholay — Gujrat — Punjab
+Khalid Abad — Gujrat — Punjab
+Dasonchi Pura — Gujrat — Punjab
+Faiz Abad — Gujrat — Punjab
+Ali Pura — Gujrat — Punjab
+Fattupura — Gujrat — Punjab
+Gila Dhaki — Gujrat — Punjab
+
+Jhelum — Punjab
+Dhoke Firdous — Jhelum — Punjab
+Bilal Town — Jhelum — Punjab
+Dhoke Muqarab — Jhelum — Punjab
+Piraghaib — Jhelum — Punjab
+Shumali Mohallah — Jhelum — Punjab
+Bagh Mohallah — Jhelum — Punjab
+Madni Mohallah — Jhelum — Punjab
+Dhoke Abdullah — Jhelum — Punjab
+Dhoke Jumma — Jhelum — Punjab
+Machine Mohallah — Jhelum — Punjab
+Suleman Paras — Jhelum — Punjab
+Mujahida Abad — Jhelum — Punjab
+Makhdoom Abad — Jhelum — Punjab
+Gujjarpur — Jhelum — Punjab
+Kashmir Colony — Jhelum — Punjab
+Kala Gujran — Jhelum — Punjab
+Aima Jattan — Jhelum — Punjab
+Islampura — Jhelum — Punjab
+Mohallah Chishtian — Jhelum — Punjab
+Islamia School — Jhelum — Punjab
+Abbas Pura — Jhelum — Punjab
+Jada — Jhelum — Punjab
+Mirza Abad — Jhelum — Punjab
+
+Karachi — Sindh
+Abbas Town — Karachi — Sindh
+Abdullah Goth — Karachi — Sindh
+Aisha Manzil — Karachi — Sindh
+Azam Basti — Karachi — Sindh
+Landhi Colony — Karachi — Sindh
+Liaquatabad — Karachi — Sindh
+Lyari — Karachi — Sindh
+
+Hyderabad — Sindh
+Barrage Colony — Hyderabad — Sindh
+Hussainabad — Hyderabad — Sindh
+Ilyasabad — Hyderabad — Sindh
+Latifabad — Hyderabad — Sindh
+Noorani Basti — Hyderabad — Sindh
+Qasimabad — Hyderabad — Sindh
+Tando Jahania — Hyderabad — Sindh
+Tando Thoro — Hyderabad — Sindh
+
+Abbottabad — Khyber Pakhtunkhwa
+Abbottabad Central — Abbottabad — Khyber Pakhtunkhwa
+Bagan — Abbottabad — Khyber Pakhtunkhwa
+Bagh — Abbottabad — Khyber Pakhtunkhwa
+Bagnotar — Abbottabad — Khyber Pakhtunkhwa
+Bakot — Abbottabad — Khyber Pakhtunkhwa
+Bal Dheri — Abbottabad — Khyber Pakhtunkhwa
+Banda Pir Khan — Abbottabad — Khyber Pakhtunkhwa
+Banda Qazi — Abbottabad — Khyber Pakhtunkhwa
+Bandi Atti Khan — Abbottabad — Khyber Pakhtunkhwa
+Bandi Dhundan — Abbottabad — Khyber Pakhtunkhwa
+
+Mardan — Khyber Pakhtunkhwa
+Alo — Mardan — Khyber Pakhtunkhwa
+Babini — Mardan — Khyber Pakhtunkhwa
+Babozai — Mardan — Khyber Pakhtunkhwa
+Baghicha Dheri — Mardan — Khyber Pakhtunkhwa
+Bakhshali — Mardan — Khyber Pakhtunkhwa
+Bala Garhi — Mardan — Khyber Pakhtunkhwa
+Bari Cham — Mardan — Khyber Pakhtunkhwa
+Bazar Mardan — Mardan — Khyber Pakhtunkhwa
+Chak Hoti — Mardan — Khyber Pakhtunkhwa
+
+Swat — Khyber Pakhtunkhwa
+Bahrain — Swat — Khyber Pakhtunkhwa
+Balakot — Swat — Khyber Pakhtunkhwa
+Manglawar — Swat — Khyber Pakhtunkhwa
+Matta — Swat — Khyber Pakhtunkhwa
+
+Awaran — Balochistan
+Awaran — Awaran — Balochistan
+Teertage — Awaran — Balochistan
+Gishkaur — Awaran — Balochistan
+Camp Jahoo — Awaran — Balochistan
+Korak — Awaran — Balochistan
+Gajjar — Awaran — Balochistan
+Nokjo — Awaran — Balochistan
+Parwar — Awaran — Balochistan
+
+Barkhan — Balochistan
+Saddar Barkhan — Barkhan — Balochistan
+Nahar Kot — Barkhan — Balochistan
+Vatakari — Barkhan — Balochistan
+Chohar Kot — Barkhan — Balochistan
+Eshani — Barkhan — Balochistan
+Takhra — Barkhan — Balochistan
+Baghao — Barkhan — Balochistan
+Tomni — Barkhan — Balochistan
+Rakhni — Barkhan — Balochistan
+Ochari — Barkhan — Balochistan
+Rarkan — Barkhan — Balochistan
+Chapper — Barkhan — Balochistan
+
+Islamabad — Islamabad Capital Territory
+E-7 — Islamabad — Islamabad Capital Territory
+E-8 — Islamabad — Islamabad Capital Territory
+E-9 — Islamabad — Islamabad Capital Territory
+E-10 — Islamabad — Islamabad Capital Territory
+E-11 — Islamabad — Islamabad Capital Territory
+E-12 — Islamabad — Islamabad Capital Territory
+E-16 — Islamabad — Islamabad Capital Territory
+E-17 — Islamabad — Islamabad Capital Territory
+F-5 — Islamabad — Islamabad Capital Territory
+F-6 — Islamabad — Islamabad Capital Territory
+F-7 — Islamabad — Islamabad Capital Territory
+F-8 — Islamabad — Islamabad Capital Territory
+G-8 — Islamabad — Islamabad Capital Territory
+G-9 — Islamabad — Islamabad Capital Territory
+
+Countries:
+- Afghanistan
+- Albania
+- Algeria
+- Andorra
+- Angola
+- Antigua and Barbuda
+- Argentina
+- Armenia
+- Australia
+- Austria
+- Azerbaijan
+- Bahamas
+- Bahrain
+- Bangladesh
+- Barbados
+- Belarus
+- Belgium
+- Belize
+- Benin
+- Bhutan
+- Bolivia
+- Bosnia and Herzegovina
+- Botswana
+- Brazil
+- Brunei
+- Bulgaria
+- Burkina Faso
+- Burundi
+-burma [myanmar]
+- Cambodia
+- Cameroon
+- Canada
+- Cape Verde
+- Central African Republic
+- Chad
+- Chile
+- China
+- Colombia
+- Comoros
+- Congo (Congo-Brazzaville)
+- Congo (DRC)
+- Costa Rica
+- Croatia
+- Cuba
+- Cyprus
+- Czech Republic
+- Denmark
+- Djibouti
+- Dominica
+- Dominican Republic
+- East Timor (Timor-Leste)
+- Ecuador
+- Egypt
+- El Salvador
+- Equatorial Guinea
+- Eritrea
+- Estonia
+- Eswatini (Swaziland)
+- Ethiopia
+- Fiji
+- Finland
+- France
+- Gabon
+- Gambia
+- Georgia
+- Germany
+- Ghana
+- Greece
+- Grenada
+- Guatemala
+- Guinea
+- Guinea-Bissau
+- Guyana
+- Haiti
+- Honduras
+- Hungary
+- Iceland
+- India
+- Indonesia
+- Iran
+- Iraq
+- Ireland
+
+- Italy
+- Jamaica
+- Japan
+- Jordan
+- Kazakhstan
+- Kenya
+- Kiribati
+- Kuwait
+- Kyrgyzstan
+- Laos
+- Latvia
+- Lebanon
+- Lesotho
+- Liberia
+- Libya
+- Liechtenstein
+- Lithuania
+- Luxembourg
+- Madagascar
+- Malawi
+- Malaysia
+- Maldives
+- Mali
+- Malta
+- Marshall Islands
+- Mauritania
+- Mauritius
+- Mexico
+- Micronesia
+- Moldova
+- Monaco
+- Mongolia
+- Montenegro
+- Morocco
+- Mozambique
+- Myanmar
+- Namibia
+- Nauru
+- Nepal
+- Netherlands
+- New Zealand
+- Nicaragua
+- Niger
+- Nigeria
+- North Korea
+- North Macedonia
+- Norway
+- Oman
+- Pakistan
+- Palau
+- Palestine
+- Panama
+- Papua New Guinea
+- Paraguay
+- Peru
+- Philippines
+- Poland
+- Portugal
+- Qatar
+- Romania
+- Russia
+- Rwanda
+- Saint Kitts and Nevis
+- Saint Lucia
+- Saint Vincent and the Grenadines
+- Samoa
+- San Marino
+- Sao Tome and Principe
+-saudia arabia
+- Senegal
+- Serbia
+- Seychelles
+- Sierra Leone
+- Singapore
+- Slovakia
+- Slovenia
+- Solomon Islands
+- Somalia
+- South Africa
+- South Korea
+- South Sudan
+- Spain
+- Sri Lanka
+- Sudan
+- Suriname
+- Sweden
+- Switzerland
+- Syria
+- Taiwan
+- Tajikistan
+- Tanzania
+- Thailand
+- Togo
+- Tonga
+- Trinidad and Tobago
+- Tunisia
+- Turkey
+- Turkmenistan
+- Tuvalu
+- Uganda
+- Ukraine
+- Uruguay
+- Uzbekistan
+- Vanuatu
+- Vatican City
+- Venezuela
+- Vietnam
+- Yemen
+- Zambia
+- Zimbabwe

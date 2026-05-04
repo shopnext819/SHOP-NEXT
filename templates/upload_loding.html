@@ -1,0 +1,87 @@
+{% load static %}
+<style>
+    .upload-loader-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 1.5rem;
+    }
+
+    .loader-parts-mini {
+        position: relative;
+        perspective: 600px;
+        transform-style: preserve-3d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 120px;
+    }
+
+    .loader-content-mini {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transform: translateZ(0);
+        z-index: 10;
+    }
+
+    .loader-logo-mini {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f05c04;
+    }
+
+    .loader-text-mini {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+        color: #f05c04;
+        letter-spacing: 1px;
+    }
+
+    .orbit-ring-mini {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        border-top: 4px solid #f05c04;
+        filter: drop-shadow(0 0 5px rgba(240, 92, 4, 0.4));
+        transform-style: preserve-3d;
+        animation: spin-ring-mini 1.5s linear infinite;
+    }
+
+    @keyframes spin-ring-mini {
+        0% { transform: rotateX(70deg) rotateZ(0deg); }
+        100% { transform: rotateX(70deg) rotateZ(360deg); }
+    }
+
+    .upload-text {
+        margin-top: 10px;
+        font-size: 12px;
+        font-weight: bold;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="upload-loader-container">
+    <div class="loader-parts-mini">
+        <div class="loader-content-mini">
+            <img src="{% static 'profile.img/bag.png' %}" alt="" class="loader-logo-mini">
+            <div class="loader-text-mini">SHOP NEXT</div>
+        </div>
+        <div class="orbit-ring-mini"></div>
+    </div>
+    <div class="upload-text">Uploading Image...</div>
+</div>

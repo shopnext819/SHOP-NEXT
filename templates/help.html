@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .help-page-wrapper {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 40px 20px;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+
+    .help-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .help-container h1,
+    .help-container h2,
+    .help-container h3 {
+        color: #F39C00;
+    }
+
+    .help-container h1 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .help-container h2 {
+        margin-top: 25px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .help-container h3 {
+        margin-top: 20px;
+    }
+
+    .help-container p {
+        margin-bottom: 10px;
+    }
+
+    .help-container ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .help-container ul li {
+        margin-bottom: 8px;
+    }
+
+    .help-container strong {
+        color: #F39C00;
+    }
+
+    /* Hide details arrow */
+    details>summary {
+        list-style: none;
+    }
+
+    details>summary::-webkit-details-marker {
+        display: none;
+    }
+</style>
+
+<div class="help-page-wrapper">
+    <div class="help-container">
+        <h1>Help & Support for SHOP NEXT</h1>
+
+        <h2>Frequently Asked Questions (FAQs)</h2>
+
+        <h3>1. How do I log in to my account?</h3>
+        <p>For security and ease of use, SHOP NEXT uses <strong>Google Authentication exclusively</strong>. Traditional
+            usernames and passwords are not supported or required! Follow these steps:</p>
+        <div
+            style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+            <ul style="margin-bottom: 0;">
+                <li><strong>Step 1:</strong> Go to the main homepage of SHOP NEXT.</li>
+                <li><strong>Step 2:</strong> Click on the <strong>"Login with Google"</strong> button from the Sidebar
+                    or Top Menu.</li>
+                <li><strong>Step 3:</strong> A secure Google pop-up will appear. Select your preferred Gmail account.
+                </li>
+                <li><strong>Step 4:</strong> Once verified by Google, you will be automatically logged in to your
+                    dashboard!</li>
+            </ul>
+        </div>
+
+        <h3>2. How do I contact a seller?</h3>
+        <p>If you have questions about a product or an existing order, you can communicate directly with the shop owner using our <strong>Inbox messaging system</strong>:</p>
+        <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+            <ul style="margin-bottom: 0;">
+                <li><strong>Step 1:</strong> Navigate to the specific product page you are interested in or go to your Orders list.</li>
+                <li><strong>Step 2:</strong> Look for the Seller's Profile section on the page.</li>
+                <li><strong>Step 3:</strong> Click the <strong>"Message Seller"</strong> or "Contact" button.</li>
+                <li><strong>Step 4:</strong> Type your query in the Inbox and hit send. The seller will be notified instantly!</li>
+            </ul>
+        </div>
+
+        <h3>3. What is your return policy?</h3>
+        <p>We want to ensure your complete satisfaction. Therefore, we provide a robust <strong>7-Day Return Policy</strong> based on specific conditions:</p>
+        <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+            <ul style="margin-bottom: 0;">
+                <li><strong>Eligibility:</strong> Returns are accepted <em>only</em> if the product is physically defective, damaged upon arrival, or significantly not as described by the seller.</li>
+                <li><strong>Condition:</strong> The item must remain completely unused and enclosed in its original, undamaged packaging.</li>
+                <li><strong>Process:</strong> Go to your Orders list, select the item in question, and click "Request Return". Upload photo evidence of the defect to speed up the process.</li>
+                <li><strong>Timeline:</strong> Once the seller and administration approve the return, the refund will be processed and returned to your source account within 3 to 5 business days.</li>
+            </ul>
+        </div>
+
+        <h3 style="margin-top: 20px;">4. How do I become a seller on SHOP NEXT (Step-by-Step Guide)?</h3>
+            <div style="padding-top: 15px; animation: fadeIn 0.3s ease;">
+                <p>Becoming a seller is easy! Follow these exact steps to register your store on our platform:</p>
+                <ol>
+                    <li><strong>Navigate to Sidebar:</strong> First, open the main sidebar menu.</li>
+                    <li><strong>Get Started:</strong> Click on the <strong>"Get Started"</strong> button located in the
+                        seller
+                        section of the sidebar.</li>
+                    <li><strong>Create New Account:</strong> Select <strong>"Create New Account"</strong> to begin your
+                        seller
+                        application.</li>
+                </ol>
+                <p>Once the registration form opens, you will need to fill it out carefully. Here is exactly what you
+                    need to
+                    provide:</p>
+
+                <div
+                    style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+                    <p><strong>Phase 1: Initial Store Setup</strong></p>
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Store Name:</strong> Enter the name of your shop (e.g., Electro Zone).</li>
+                        <li><strong>Store Code:</strong> Enter a unique identifier for your store (e.g., EZ-001).</li>
+                        <li><strong>Store Description:</strong> Write a brief description of what you are selling.</li>
+                        <li><strong>Upload Store Banner:</strong> Upload a banner image that represents your store.</li>
+                        <li><strong>Upload Profile Picture:</strong> Upload your store's main logo or profile picture.
+                        </li>
+                        <li>Click <strong>"Start Application ❯"</strong> to proceed.</li>
+                    </ul>
+                </div>
+
+                <div
+                    style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+                    <p><strong>Phase 2: Step 1 - Contact & Location</strong></p>
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Primary Business Category:</strong> Select the category of goods you sell (e.g.,
+                            Smartphones, Computers, Gaming).</li>
+                        <li><strong>Complete Business Address:</strong> Provide your full warehouse or shop area.</li>
+                        <li><strong>City & Postal Code:</strong> Enter your city and postal/zip code.</li>
+                        <li><strong>Email & Phone:</strong> Enter your official business email address and active mobile
+                            number.
+                        </li>
+                    </ul>
+                </div>
+
+                <div
+                    style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+                    <p><strong>Phase 3: Step 2 - ID Card Verification (KYC)</strong></p>
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Full Legal Name:</strong> Enter your exact name as printed on your National Identity
+                            Card.
+                        </li>
+                        <li><strong>Date of Birth:</strong> Enter your date of birth.</li>
+                        <li><strong>ID Card Pictures:</strong> Upload clear images of your <strong>ID Card
+                                Front</strong> and
+                            <strong>ID Card Back</strong>.
+                        </li>
+                    </ul>
+                </div>
+
+                <div
+                    style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+                    <p><strong>Phase 4: Step 3 - Final Details & Submit</strong></p>
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Social Media Links:</strong> Enter the URLs for your store's Facebook Page and
+                            Instagram
+                            Profile.</li>
+                        <li><strong>Terms and Conditions:</strong> Read carefully and check the box to agree to the
+                            terms.</li>
+                        <li>Click <strong>"Submit ✔"</strong> to finish your application. Our team will review and
+                            approve your
+                            account shortly!</li>
+                    </ul>
+                </div>
+            </div>
+
+        <h3>5. How is my shipping address added?</h3>
+        <p>To speed up your checkout process and assure accurate delivery tracking, we feature an advanced Auto-fill Location tool integrated with OpenStreetMap:</p>
+        <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+            <ul style="margin-bottom: 0;">
+                <li><strong>Step 1:</strong> During checkout or profile creation, look for the <strong>"Auto-Fill Location"</strong> button.</li>
+                <li><strong>Step 2:</strong> When clicked, your browser will ask for location permission. Click <strong>"Allow"</strong>.</li>
+                <li><strong>Step 3:</strong> Our system will immediately ping OpenStreetMap and retrieve your exact Coordinates, City, and Postal Code.</li>
+                <li><strong>Step 4:</strong> The form fields will automatically populate so you don't have to type them manually!</li>
+            </ul>
+        </div>
+
+        <h3>6. How do I know if a product is in stock?</h3>
+        <p>Inventory management on SHOP NEXT is highly transparent. You can explicitly see stock levels on every individual product page:</p>
+        <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; border-left: 4px solid #F39C00; margin-bottom: 20px;">
+            <ul style="margin-bottom: 0;">
+                <li><strong>Availability Tag:</strong> A green "Available" tag signifies the item is currently active and can be purchased immediately.</li>
+                <li><strong>Stock Counter:</strong> Sellers dynamically manage their stock quantities. You will see a live counter (e.g., "15 Items Left" or "Out of Stock") so you never place a false order.</li>
+                <li><strong>Reservations:</strong> As soon as you complete checkout, the server automatically updates and deducts the inventory.</li>
+            </ul>
+        </div>
+
+        <h2>Contact Us</h2>
+        <p>If you couldn't find the answer to your question or need further assistance, please contact our core
+            administration:</p>
+        <ul>
+            <li><strong>Email:</strong> shopnext819@email.com</li>
+            <li><strong>Phone:</strong> 03014827246</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

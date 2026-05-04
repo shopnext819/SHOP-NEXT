@@ -1,0 +1,172 @@
+{% load static %}
+<style>
+    /* Global loader container */
+    #shop-global-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background-color: transparent; /* Seamless overlay over the page */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.8s ease-in-out;
+    }
+
+    /* Container holding the 3D space */
+    .loader-parts-container {
+        position: relative;
+        perspective: 1200px;
+        transform-style: preserve-3d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 279px;
+    }
+
+    /* The Static Content (Logo + Text) kept securely at Z=0 */
+    .loader-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22.32px;
+        transform: translateZ(0);
+        /* Anchor it horizontally in 3D center */
+        z-index: 10;
+    }
+
+    .loader-logo-img {
+        width: 74.4px;
+        height: 74.4px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid hsl(22, 97%, 48%);
+        box-shadow: 0 5px 15px rgba(240, 92, 4, 0.3);
+    }
+
+    .loader-text {
+        font-family: 'Segoe UI', -apple-system, sans-serif;
+        font-size: 3.255rem;
+        font-weight: 900;
+        color: #f05c04;
+        text-shadow: 2px 2px 8px rgba(240, 92, 4, 0.2);
+        letter-spacing: 2px;
+        white-space: nowrap;
+    }
+
+    /* The Orbiting Line (Agay aur Pichay janay wali) */
+    .orbit-ring {
+        position: absolute;
+        width: min(502.2px, 88.35vw);
+        height: min(502.2px, 88.35vw);
+        border-radius: 50%;
+
+        /* The visible "Line" part of the ring */
+        border: 6px solid transparent;
+        border-top: 6px solid #f05c04;
+        border-right: 6px solid rgba(240, 92, 4, 0.3);
+
+        /* Adding a shadow effect to make it glow slightly */
+        filter: drop-shadow(0 0 8px rgba(240, 92, 4, 0.6));
+
+        /* preserve-3d is crucial so it actually passes through the Z-space in front AND behind text */
+        transform-style: preserve-3d;
+
+        animation: spin-ring 1.8s linear infinite;
+    }
+
+    /* Second thin line for a magical multi-ring effect */
+    .orbit-ring-inner {
+        position: absolute;
+        width: min(446.4px, 83.7vw);
+        height: min(446.4px, 83.7vw);
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-bottom: 3px solid #ffceb3;
+        border-left: 3px solid rgba(240, 92, 4, 0.5);
+        transform-style: preserve-3d;
+        animation: spin-ring-reverse 2.5s linear infinite;
+    }
+
+    /* Keyframes for spinning the ring physically vertically/horizontally around them */
+    @keyframes spin-ring {
+
+        /* rotateX(70deg) tilts it into a flat floor-like disc. rotateZ drives the comet line around the track */
+        0% {
+            transform: rotateX(70deg) rotateY(-10deg) rotateZ(0deg);
+        }
+
+        100% {
+            transform: rotateX(70deg) rotateY(-10deg) rotateZ(360deg);
+        }
+    }
+
+    @keyframes spin-ring-reverse {
+        0% {
+            transform: rotateX(70deg) rotateY(15deg) rotateZ(360deg);
+        }
+
+        100% {
+            transform: rotateX(70deg) rotateY(15deg) rotateZ(0deg);
+        }
+    }
+
+    /* Merged State (When loading finishes, rings fade out) */
+    #shop-global-loader.merging .orbit-ring,
+    #shop-global-loader.merging .orbit-ring-inner {
+        opacity: 0;
+        transform: scale(1.2) rotateX(70deg);
+        transition: all 0.6s ease;
+    }
+</style>
+
+<div id="shop-global-loader">
+    <div class="loader-parts-container">
+
+        <!-- The Static Content (Logo + Text) -->
+        <div class="loader-content">
+            <img src="{% static 'profile.img/bag.png' %}" alt="Shop Next Logo" class="loader-logo-img">
+            <div class="loader-text">SHOP NEXT</div>
+        </div>
+
+        <!-- The Rotating Lines that orbit around them in 3D -->
+        <div class="orbit-ring"></div>
+        <div class="orbit-ring-inner"></div>
+
+    </div>
+</div>
+
+<script>
+    // Record the exact time the loader started showing
+    const loaderStartTime = Date.now();
+    // Minimum time to show the animation (2500ms ensures the rings complete a full beautiful orbit at least once!)
+    const MIN_LOADER_TIME = 2500; 
+
+    function triggerLoaderClose() {
+        const globalLoader = document.getElementById('shop-global-loader');
+        if (globalLoader) {
+            // Step 1: Fade out the spinning rings
+            globalLoader.classList.add('merging');
+            
+            // Step 2: Fade out the container completely
+            setTimeout(() => {
+                globalLoader.style.opacity = '0';
+                
+                // Step 3: Remove from screen so user can interact with the page
+                setTimeout(() => {
+                    globalLoader.style.display = 'none';
+                }, 800);
+            }, 600);
+        }
+    }
+
+    // When the browser finishes loading the page data...
+    window.addEventListener('load', function () {
+        const timeElapsed = Date.now() - loaderStartTime;
+        // Calculate the difference. If it loaded instantly, we still wait for MIN_LOADER_TIME.
+        const timeRemaining = Math.max(0, MIN_LOADER_TIME - timeElapsed);
+        
+        setTimeout(triggerLoaderClose, timeRemaining);
+    });
+</script>

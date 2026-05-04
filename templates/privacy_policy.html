@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .privacy-page-wrapper {
+        font-family: Arial, sans-serif;
+        font-size: 102%;
+        line-height: 1.6;
+        margin: 0;
+        padding: 40px 20px;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+
+    .privacy-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .privacy-container h1,
+    .privacy-container h2 {
+        color: #F39C00;
+    }
+
+    .privacy-container h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.1em;
+    }
+
+    .privacy-container h2 {
+        margin-top: 30px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 8px;
+    }
+
+    .privacy-container ul {
+        list-style-type: disc;
+        margin-left: 20px;
+        padding-left: 0;
+    }
+
+    .privacy-container p {
+        margin-bottom: 12px;
+    }
+
+    .privacy-container strong {
+        color: #000;
+    }
+</style>
+
+<div class="privacy-page-wrapper">
+    <div class="privacy-container">
+        <h1>Privacy Policy for SHOP NEXT</h1>
+
+        <h2>1. Introduction</h2>
+        <p><strong>Welcome to SHOP NEXT. We value your privacy and are committed to protecting your personal data based on how our specific platform operates. This Privacy Policy outlines exactly what information is collected across our marketplace, user messaging system, and seller dashboard.</strong></p>
+
+        <h2>2. Information We Collect</h2>
+        <p><strong>Because SHOP NEXT serves both buyers and sellers, we collect multiple types of data:</strong></p>
+        <ul>
+            <li><strong>Standard User Profile:</strong> First name, last name, username, password, email, phone number, and birthday. We may also ask how you found our platform (source) and safety questions.</li>
+            <li><strong>Seller Account & KYC Info:</strong> Legal name, store name, store description, business address, and social links (Facebook/Instagram). To verify identity and process payouts, we collect your Date of Birth, Bank/Wallet account details, and images of your National ID (Front/Back) and checkbook.</li>
+            <li><strong>Communications:</strong> Any direct messages you send to other users via our Inbox messaging system are stored on our servers.</li>
+            <li><strong>Location Data:</strong> When establishing business or shipping addresses, we utilize browser Geolocation APIs and OpenStreetMap to auto-fill your physical location details if you explicitly grant permission.</li>
+        </ul>
+
+        <h2>3. How We Store Your Information</h2>
+        <ul>
+            <li><strong>Database Storage:</strong> All primary information, products, messages, and encrypted passwords are fundamentally stored securely in our designated internal relational database.</li>
+            <li><strong>Internal Text Files (Automated Backups):</strong> For system auditing and internal operations, standard User Profile identifiers (names, birthday, phone, and source data) are automatically backed up as protected local text files on our servers.</li>
+            <li><strong>Media Storage:</strong> Seller verification documents (ID cards, checkbooks) and store banners are stored securely in our designated media directories.</li>
+        </ul>
+
+        <h2>4. How We Use & Share Your Information</h2>
+        <p><strong>We do not sell your personal data to unauthorized external entities. Your information is strictly utilized to:</strong></p>
+        <ul>
+            <li>Facilitate the buying, selling, and internal messaging processes on the SHOP NEXT platform.</li>
+            <li>Verify seller identities (KYC process) to prevent fraudulent stores and validate online/bank payouts.</li>
+            <li>Auto-detect your region/location via mapping services when allowed, purely for rapid shipping address generation.</li>
+        </ul>
+
+        <h2>5. Your Rights & Security</h2>
+        <p><strong>We implement standard database encryptions and session controls. However, remember the internet is never completely secure. As a user, you hold the right to request modifications or the deletion of your account, messaging history, and KYC data.</strong></p>
+
+        <h2>6. Contact Us</h2>
+        <p><strong>If you have any questions, please contact our core administration at:</strong></p>
+        <ul>
+            <li><strong>Email: shopnext819@email.com</strong></li>
+            <li><strong>Phone: 03014827246</strong></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

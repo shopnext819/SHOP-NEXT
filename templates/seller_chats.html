@@ -1,0 +1,593 @@
+{% load static %}
+<div class="flex bg-white rounded-[3rem] overflow-hidden mx-auto shadow-2xl border border-gray-100" style="height: 664px; width: fit-content; max-width: 100%;">
+    <!-- Sidebar: Conversations List -->
+    <div class="w-[350px] flex-shrink-0 border-r border-gray-100 flex flex-col bg-gray-50/30 h-full">
+        <div class="p-8 border-b border-gray-100">
+            <h3 class="text-2xl font-black text-gray-900 mb-6 uppercase tracking-tight">Chats</h3>
+            <div class="relative">
+                <input type="text" placeholder="Search chats..." 
+                    class="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold placeholder-gray-400 focus:ring-4 focus:ring-[#FF9900]/10 focus:border-[#FF9900] outline-none transition-all">
+                <svg class="w-5 h-5 absolute left-4 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="flex-grow overflow-y-auto p-4 space-y-2 custom-scrollbar">
+            <!-- SHOP NEXT Conversation -->
+            <div onclick="openChat('seller_1122', '0', 'SHOP NEXT')" 
+                class="flex items-center gap-4 p-4 rounded-[2rem] bg-white border border-gray-100 hover:border-[#FF9900] shadow-sm cursor-pointer group transition-all" id="chat-tab-seller_1122-0">
+                <div class="relative">
+                    <div class="w-14 h-14 rounded-2xl bg-[#FF9900] flex items-center justify-center text-white font-black text-xl shadow-lg">SN</div>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <div class="flex justify-between items-start mb-1">
+                        <h4 class="font-black text-gray-900 truncate text-sm">SHOP NEXT</h4>
+                        <span class="text-[9px] font-black text-[#FF9900] uppercase">Official</span>
+                    </div>
+                    <p class="text-[11px] font-bold text-gray-400 truncate">Welcome to SHOP NEXT support!</p>
+                </div>
+            </div>
+
+            {% if not chats %}
+            <div class="p-4 text-center text-gray-500 font-bold text-sm">No conversations yet.</div>
+            {% endif %}
+
+            {% for c in chats %}
+            <div onclick="openChat('{{ c.user }}', '{{ c.product }}', '{{ c.display_name }}')" 
+                class="flex items-center gap-4 p-4 rounded-[2rem] bg-white border border-gray-100 hover:border-[#FF9900] shadow-sm cursor-pointer group transition-all" id="chat-tab-{{ c.user }}-{{ c.product }}">
+                <div class="relative">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#14213d] to-blue-900 flex items-center justify-center text-white font-black text-xl shadow-lg uppercase">{{ c.user|make_list|first }}</div>
+                    {% if c.unread %}
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full animate-pulse" id="unread-dot-{{ c.user }}-{{ c.product }}"></div>
+                    {% endif %}
+                </div>
+                <div class="flex-grow min-w-0">
+                    <div class="flex justify-between items-start mb-1">
+                        <h4 class="font-black text-gray-900 truncate text-sm">{{ c.display_name }}</h4>
+                        <span class="text-[9px] font-black text-gray-400">{{ c.time }}</span>
+                    </div>
+                    <p class="text-[11px] font-bold text-gray-500 truncate {% if c.unread %}text-[#FF9900]{% endif %}">{{ c.last }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Right Area (Chat Window) -->
+    <div class="flex flex-col bg-white h-full relative" style="width: 917px;">
+        
+        <!-- Empty State -->
+        <div id="chat-empty-state" class="flex-grow flex flex-col items-center justify-center p-20 text-center bg-gray-50/20 h-full">
+            <div class="w-32 h-32 bg-orange-100 rounded-[3rem] flex items-center justify-center mb-8 shadow-inner">
+                <svg class="w-16 h-16 text-[#FF9900]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+            </div>
+            <h3 class="text-3xl font-black text-gray-900 mb-3">No Active Conversation</h3>
+            <p class="text-gray-400 font-bold max-w-sm mx-auto text-base leading-relaxed">
+                Select a chat from the sidebar to view messages and start a conversation.
+            </p>
+        </div>
+
+        <!-- Chat Window (Hidden by default) -->
+        <div id="chat-window" class="hidden flex-grow flex flex-col h-full overflow-hidden animate-fadeIn">
+            <!-- Chat Header -->
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-[#FF9900] flex items-center justify-center text-white font-black shadow-md" id="chat-header-avatar">U</div>
+                    <div>
+                        <h4 class="font-black text-gray-900" id="chat-header-name">User Name</h4>
+                        <p class="text-[10px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                            Online
+                        </p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                    </button>
+                    <button class="p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="flex-grow overflow-y-auto p-8 space-y-6 custom-scrollbar bg-gray-50/20" id="messages-container">
+                <!-- Incoming Message -->
+                <div class="flex items-end gap-3 max-w-[85%] group">
+                    <div class="w-8 h-8 rounded-lg bg-[#FF9900] flex-shrink-0 flex items-center justify-center text-white font-black text-[10px] shadow-sm">SN</div>
+                    <div class="flex flex-col gap-1 items-start">
+                        <div class="bg-white border border-gray-100 py-3 px-5 rounded-t-[1.5rem] rounded-br-[1.5rem] shadow-sm text-gray-700 font-medium text-sm leading-relaxed w-fit">
+                            Assalam-o-Alaikum! Welcome to SHOP NEXT. How can we help you today with your store?
+                        </div>
+                        <span class="text-[9px] font-black text-gray-400 uppercase ml-2 opacity-0 group-hover:opacity-100 transition-opacity">Official</span>
+                    </div>
+                </div>
+
+                <!-- Outgoing Message -->
+                <div class="flex flex-row-reverse items-end gap-3 max-w-[85%] ml-auto group">
+                    <div class="w-8 h-8 rounded-lg bg-[#14213d] flex-shrink-0 flex items-center justify-center text-white font-black text-[10px] shadow-sm">Me</div>
+                    <div class="flex flex-col gap-1 items-end">
+                        <div class="bg-[#14213d] text-white py-3 px-5 rounded-t-[1.5rem] rounded-bl-[1.5rem] shadow-lg text-sm font-medium leading-relaxed w-fit">
+                            I need help with my product listings.
+                        </div>
+                        <div class="flex items-center gap-1 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="text-[9px] font-black text-gray-400 uppercase">Seen</span>
+                            <svg class="w-2.5 h-2.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview Area (Multi-image support) -->
+            <div id="image-preview-container" class="hidden px-8 py-4 bg-white border-t border-gray-100 animate-fadeIn overflow-x-auto custom-scrollbar">
+                <div id="preview-list" class="flex gap-4 items-center">
+                    <!-- Thumbnails will be injected here -->
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 bg-white border-t border-gray-100">
+                <div class="flex gap-2 items-center bg-gray-50 border border-gray-200 rounded-[1.5rem] p-1.5 shadow-inner focus-within:ring-4 focus-within:ring-[#FF9900]/10 focus-within:border-[#FF9900] transition-all">
+                    <!-- Hidden File Input -->
+                    <input type="file" id="image-upload-input" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
+                    
+                    <!-- Compact Attachment Pin -->
+                    <button onclick="triggerFileInput()" class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl hover:bg-gray-200 transition-colors text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Larger Input Area -->
+                    <input type="text" id="chat-input-field" placeholder="Type your message..." 
+                        class="flex-grow bg-transparent border-none outline-none text-sm font-bold placeholder-gray-400 text-gray-700 py-2 px-1"
+                        onkeypress="handleChatEnter(event)">
+                    
+                    <!-- Send Button -->
+                    <button id="send-msg-btn" onclick="sendMessage()" class="w-10 h-10 flex-shrink-0 bg-[#14213d] hover:bg-[#FF9900] text-white flex items-center justify-center rounded-xl transition-all shadow-md hover:shadow-orange-200/50 transform hover:-translate-y-0.5 active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Editor Modal (Iframe 3.html) -->
+<div id="editor-modal" class="hidden fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-10 backdrop-blur-sm animate-fadeIn">
+    <div class="w-full h-full max-w-5xl bg-black rounded-[3rem] overflow-hidden shadow-2xl relative border border-white/10">
+        <iframe id="editor-iframe" src="" class="w-full h-full border-none"></iframe>
+    </div>
+</div>
+
+<!-- Image Lightbox Modal -->
+<div id="lightbox-modal" class="hidden fixed inset-0 z-[200] bg-black/95 flex items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeLightbox()">
+    <button onclick="closeLightbox()" class="absolute top-[10%] right-[10%] text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors z-[210]">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+    <div class="w-[80vw] h-[80vh] flex items-center justify-center" onclick="event.stopPropagation()">
+        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl scale-95 transition-transform duration-300">
+    </div>
+</div>
+
+<script>
+    let isUploading = false;
+    let pendingImages = []; // Will store objects: { src: string, loading: boolean, id: number }
+    let imgCounterId = 0;
+    let editorPendingSrc = null;
+
+    let currentSocket = null;
+    let me = "{{ me }}";
+    let currentOther = null;
+    let currentProductId = null;
+
+    function openChat(user, productId, displayName) {
+        document.getElementById('chat-empty-state').classList.add('hidden');
+        document.getElementById('chat-window').classList.remove('hidden');
+        document.getElementById('chat-window').classList.add('flex');
+        
+        // Update header
+        document.getElementById('chat-header-name').innerText = displayName;
+        document.getElementById('chat-header-avatar').innerText = user.charAt(0).toUpperCase();
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('[id^="chat-tab-"]').forEach(el => el.classList.remove('bg-gray-100', 'border-[#FF9900]'));
+        let activeTab = document.getElementById(`chat-tab-${user}-${productId}`);
+        if(activeTab) activeTab.classList.add('bg-gray-100', 'border-[#FF9900]');
+
+        // Remove unread dot
+        let unreadDot = document.getElementById(`unread-dot-${user}-${productId}`);
+        if(unreadDot) unreadDot.remove();
+
+        currentOther = user;
+        currentProductId = productId;
+
+        // Setup WebSocket
+        if (currentSocket) {
+            currentSocket.close();
+        }
+        
+        currentSocket = new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + "/ws/chat/" + user + "/" + productId + "/");
+
+        const container = document.getElementById('messages-container');
+        container.innerHTML = ''; // Clear old messages while loading
+
+        currentSocket.onmessage = function(e) {
+            let data = JSON.parse(e.data);
+
+            if(data.type === "chat_history") {
+                container.innerHTML = "";
+                data.messages.forEach(m => insertRealMessage(m));
+            }
+
+            if(data.message || data.image || data.voice){
+                insertRealMessage(data);
+                if(data.sender !== me && !document.getElementById('chat-window').classList.contains('hidden')) {
+                    currentSocket.send(JSON.stringify({seen: true, id: data.id}));
+                }
+            }
+        };
+
+        // Auto scroll to bottom
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+    
+    function insertRealMessage(m) {
+        let isMe = (m.sender === me);
+        const container = document.getElementById('messages-container');
+        
+        let imagesHtml = '';
+        if (m.image) {
+            imagesHtml = `
+                <div class="msg-image-container group/img cursor-pointer bg-[#0a1224] flex items-center justify-center" onclick="openLightbox(this)">
+                    <img src="${m.image}" class="max-w-full max-h-full object-contain transition-opacity">
+                </div>
+            `;
+        }
+
+        let messageHtml = '';
+        if (isMe) {
+            messageHtml = `
+                <div class="flex flex-row-reverse items-end gap-3 max-w-[85%] ml-auto group animate-fadeIn mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-[#14213d] flex-shrink-0 flex items-center justify-center text-white font-black text-[10px] shadow-sm">Me</div>
+                    <div class="flex flex-col gap-1 items-end">
+                        ${imagesHtml ? `<div class="flex flex-row flex-wrap gap-2 mb-2 p-2 bg-[#14213d] rounded-t-[1.5rem] rounded-bl-[1.5rem] shadow-lg w-fit ml-auto">${imagesHtml}</div>` : ''}
+                        ${m.message ? `<div class="bg-[#14213d] text-white py-3 px-5 rounded-t-[1.5rem] rounded-bl-[1.5rem] shadow-lg text-sm font-medium leading-relaxed w-fit">${m.message}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        } else {
+            messageHtml = `
+                <div class="flex items-end gap-3 max-w-[85%] group mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-[#FF9900] flex-shrink-0 flex items-center justify-center text-white font-black text-[10px] shadow-sm uppercase">${m.sender.charAt(0)}</div>
+                    <div class="flex flex-col gap-1 items-start">
+                        ${imagesHtml ? `<div class="flex flex-row flex-wrap gap-2 mb-2 p-2 bg-white border border-gray-100 rounded-t-[1.5rem] rounded-br-[1.5rem] shadow-lg w-fit">${imagesHtml}</div>` : ''}
+                        ${m.message ? `<div class="bg-white border border-gray-100 py-3 px-5 rounded-t-[1.5rem] rounded-br-[1.5rem] shadow-sm text-gray-700 font-medium text-sm leading-relaxed w-fit">${m.message}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.insertAdjacentHTML('beforeend', messageHtml);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function triggerFileInput() {
+        if (pendingImages.length >= 5) {
+            alert("Aap sirf 5 images hi bhej saktay hain.");
+            return;
+        }
+        if (!isUploading) document.getElementById('image-upload-input').click();
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                openEditor(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function openEditor(src) {
+        const modal = document.getElementById('editor-modal');
+        const iframe = document.getElementById('editor-iframe');
+        editorPendingSrc = src;
+        iframe.src = '';
+        iframe.src = "{% url 'chat_editor' %}";
+        modal.classList.remove('hidden');
+    }
+
+    // Listen for messages from the editor iframe (3.html)
+    window.addEventListener('message', function(e) {
+        const iframe = document.getElementById('editor-iframe');
+        if (e.data.action === 'ready') {
+            if (editorPendingSrc) {
+                iframe.contentWindow.postMessage({ action: 'load', src: editorPendingSrc }, '*');
+                editorPendingSrc = null;
+            }
+        } else if (e.data.action === 'close') {
+            document.getElementById('editor-modal').classList.add('hidden');
+        } else if (e.data.action === 'done') {
+            document.getElementById('editor-modal').classList.add('hidden');
+            if (e.data.caption) {
+                document.getElementById('chat-input-field').value = e.data.caption;
+            }
+            showPreview(e.data.image);
+            
+            // If they provided a caption, they probably want to send it now!
+            if (e.data.caption) {
+                setTimeout(sendMessage, 500);
+            }
+        }
+    });
+
+    function showPreview(imageSrc) {
+        const id = imgCounterId++;
+        pendingImages.push({ src: imageSrc, loading: true, id: id });
+        renderPreviews();
+        updateSendButtonState();
+        
+        // Simulate upload to preview box
+        setTimeout(() => {
+            const imgObj = pendingImages.find(img => img.id === id);
+            if (imgObj) {
+                imgObj.loading = false;
+                renderPreviews();
+                updateSendButtonState();
+            }
+        }, 2000); // 2 seconds upload loading
+    }
+
+    function renderPreviews() {
+        const container = document.getElementById('image-preview-container');
+        const list = document.getElementById('preview-list');
+        list.innerHTML = '';
+        
+        if (pendingImages.length === 0) {
+            container.classList.add('hidden');
+            return;
+        }
+        
+        container.classList.remove('hidden');
+        
+        pendingImages.forEach((item, index) => {
+            const loaderHtml = item.loading ? `
+                <div class="msg-image-loading-overlay rounded-xl">
+                    <div class="loader-parts-mini">
+                        <div class="loader-content-mini">
+                            <img src="{% static 'profile.img/bag.png' %}" alt="" class="loader-logo-mini">
+                            <div class="loader-text-mini">SHOP NEXT</div>
+                        </div>
+                        <div class="orbit-ring-mini"></div>
+                    </div>
+                </div>
+            ` : '';
+
+            const removeBtn = item.loading ? '' : `
+                <button onclick="removeImage(${index})" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all z-30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+
+            const itemHtml = `
+                <div class="relative w-fit flex-shrink-0 group">
+                    <div class="w-20 h-20 rounded-xl border-2 border-gray-100 overflow-hidden shadow-md relative bg-gray-50 flex items-center justify-center">
+                        <img src="${item.src}" class="max-w-full max-h-full object-contain ${item.loading ? 'opacity-30' : ''}">
+                        ${loaderHtml}
+                    </div>
+                    ${removeBtn}
+                </div>
+            `;
+            list.insertAdjacentHTML('beforeend', itemHtml);
+        });
+    }
+
+    function updateSendButtonState() {
+        const btn = document.getElementById('send-msg-btn');
+        const isAnyLoading = pendingImages.some(img => img.loading);
+        if (isAnyLoading) {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    function removeImage(index) {
+        pendingImages.splice(index, 1);
+        renderPreviews();
+        updateSendButtonState();
+        if (pendingImages.length === 0) {
+            document.getElementById('image-upload-input').value = '';
+        }
+    }
+
+    function removePreview() {
+        pendingImages = [];
+        renderPreviews();
+        updateSendButtonState();
+        document.getElementById('image-upload-input').value = '';
+    }
+
+    function handleChatEnter(e) {
+        if (e.key === 'Enter' && !document.getElementById('send-msg-btn').disabled) {
+            sendMessage();
+        }
+    }
+
+    let messageIdCounter = 0;
+
+    function sendMessage() {
+        if (isUploading || !currentSocket) return;
+        
+        const input = document.getElementById('chat-input-field');
+        const text = input.value.trim();
+        
+        if (text || pendingImages.length > 0) {
+            // If there are images, send them one by one through the socket
+            if (pendingImages.length > 0) {
+                pendingImages.forEach((item) => {
+                    currentSocket.send(JSON.stringify({image: item.src}));
+                });
+            }
+            
+            // Send text if present
+            if (text) {
+                currentSocket.send(JSON.stringify({message: text}));
+            }
+            
+            // Reset
+            input.value = '';
+            removePreview();
+        }
+    }
+
+    function openLightbox(container) {
+        // Prevent opening if it's still loading
+        const loader = container.querySelector('.msg-image-loading-overlay');
+        if (loader) return; 
+        
+        const img = container.querySelector('img');
+        const modal = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+        
+        lightboxImg.src = img.src;
+        modal.classList.remove('hidden');
+        
+        // Trigger animations
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            lightboxImg.classList.remove('scale-95');
+            lightboxImg.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeLightbox() {
+        const modal = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+        
+        modal.classList.add('opacity-0');
+        lightboxImg.classList.remove('scale-100');
+        lightboxImg.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e5e7eb;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #d1d5db;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Loading and Image Styles */
+    .loader-parts-mini {
+        position: relative;
+        perspective: 600px;
+        transform-style: preserve-3d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        transform: scale(0.5); /* Scale down to fit 5x5 box */
+    }
+    .loader-content-mini {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transform: translateZ(0);
+        z-index: 10;
+    }
+    .loader-logo-mini {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f05c04;
+    }
+    .loader-text-mini {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+        color: #f05c04;
+        letter-spacing: 1px;
+    }
+    .orbit-ring-mini {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        border-top: 4px solid #f05c04;
+        filter: drop-shadow(0 0 5px rgba(240, 92, 4, 0.4));
+        transform-style: preserve-3d;
+        animation: spin-ring-mini 1.5s linear infinite;
+    }
+    @keyframes spin-ring-mini {
+        0% { transform: rotateX(70deg) rotateZ(0deg); }
+        100% { transform: rotateX(70deg) rotateZ(360deg); }
+    }
+
+    .msg-image-container {
+        position: relative;
+        width: 5rem;
+        height: 5rem;
+        overflow: hidden;
+        border-radius: 0.75rem;
+    }
+    .msg-image-loading-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.85);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+    }
+</style>
+
+
+
+

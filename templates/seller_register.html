@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+    /* Styling */
+    .wizard-wrapper { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .setup-container { max-width: 500px; margin: 80px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    
+    /* Progress Tracker */
+    .progress-container { display: flex; justify-content: space-between; position: relative; margin-bottom: 40px; margin-top:20px;}
+    .progress-container::before { content: ""; position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 4px; width: 100%; background: #e0e0e0; z-index: 1; }
+    .progress-bar-fill { content: ""; position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 4px; width: 0%; background: #f59e0b; z-index: 2; transition: 0.3s ease; }
+    .circle { background: #fff; border: 4px solid #e0e0e0; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #999; z-index: 3; transition: 0.3s ease; }
+    .circle.active { border-color: #f59e0b; color: #f59e0b; }
+    .circle.completed { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+
+    /* Steps */
+    .step-content { display: none; animation: fadeIn 0.4s ease; }
+    .step-content.active { display: block; }
+
+    /* Forms & Buttons */
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; outline: none; transition: border 0.2s; }
+    .form-control:focus { border-color: #f59e0b; }
+    .file-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .btn-row { display: flex; justify-content: space-between; margin-top: 30px; }
+    .btn { padding: 12px 30px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .btn-prev { background: #e0e0e0; color: #333; }
+    .btn-prev:hover { background: #ccc; }
+    .btn-next { background: #f59e0b; color: #fff; margin-left: auto; }
+    .btn-next:hover { background: #d97706; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Custom Alert Popup */
+    #customAlertOverlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); z-index: 9999; display: none;
+        align-items: center; justify-content: center; backdrop-filter: blur(4px);
+    }
+    #customAlertBox {
+        background: #fff; padding: 35px 40px; border-radius: 16px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.25); text-align: center;
+        max-width: 420px; width: 90%; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    #customAlertBox h3 { font-family: 'Inter', sans-serif; margin-top: 0; color: #b91c1c; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px;}
+    #customAlertBox p { color: #555; font-size: 16px; margin: 15px 0 25px; line-height: 1.5; font-weight: 500;}
+    #customAlertBox button {
+        background: #000; color: #fff; padding: 12px 35px; border: none; border-radius: 30px;
+        font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    #customAlertBox button:hover { background: #f59e0b; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); }
+    @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+</style>
+
+<!-- Custom Alert UI -->
+<div id="customAlertOverlay">
+    <div id="customAlertBox">
+        <h3>⚠️ Action Required</h3>
+        <p id="customAlertMessage">Message goes here</p>
+        <button onclick="closeCustomAlert()">Got it</button>
+    </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="mainRegisterForm">
+    {% csrf_token %}
+    <input type="hidden" name="store_name" id="hiddenStoreName">
+    <input type="hidden" name="store_code" id="hiddenStoreCode">
+    <input type="hidden" name="store_desc" id="hiddenStoreDesc">
+
+<!-- SCREEN 1: Setup Details & Image Uploads (Then hidden) -->
+<div id="initial-setup" class="setup-container">
+    <h2 style="text-align: center; margin-bottom: 5px; font-weight: 700;">Create Store</h2>
+    <p style="text-align: center; color: #666; margin-bottom: 30px;">Let's setup the foundation of your store.</p>
+    
+    <div class="form-group">
+        <label>Store Name</label>
+        <input type="text" id="setupStoreName" class="form-control" placeholder="E.g. Electro Zone">
+    </div>
+    <div class="form-group">
+        <label>Store Code (Unique Identifier)</label>
+        <input type="text" id="setupStoreCode" class="form-control" placeholder="E.g. EZ-001">
+    </div>
+    <div class="form-group">
+        <label>Store Description</label>
+        <textarea id="setupStoreDesc" class="form-control" rows="3" placeholder="What do you sell?"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Upload Store Banner</label>
+        <input type="file" id="setupBanner" name="banner" class="form-control" accept="image/*">
+    </div>
+    <div class="form-group">
+        <label>Upload Profile Picture</label>
+        <input type="file" id="setupProfile" name="profile" class="form-control" accept="image/*">
+    </div>
+
+    <button type="button" class="btn btn-next" style="width: 100%; margin-top: 15px; margin-left: 0;" onclick="goToWizard()">Start Application ❯</button>
+</div>
+
+<!-- SCREEN 2: The 4-Step Wizard Flow (Hidden by default) -->
+<div id="wizard-flow" class="wizard-wrapper" style="display: none; padding: 30px 40px;">
+
+    <!-- STORE HEADER (Outside Steps): Banner + Profile + Name ONLY -->
+    <div class="store-header-box" style="position: relative; margin-bottom: 10px; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding-bottom: 20px;">
+        <!-- Banner Display -->
+        <div style="width: 100%; height: 200px; background: #eaedf2; position: relative;">
+            <img id="bannerPreview" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+            <div id="bannerPlaceholder" style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); color: #888; font-weight: bold; text-align: center;">
+                📷 No Banner Uploaded
+            </div>
+        </div>
+
+        <!-- Profile Circle & Name Display -->
+        <div style="display: flex; align-items: flex-end; padding: 0 30px; margin-top: -50px; position: relative; gap: 20px;">
+            <!-- Profile Pic -->
+            <div style="width: 120px; height: 120px; border-radius: 50%; background: #fff; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; overflow: hidden; flex-shrink: 0;">
+                <img id="profilePreview" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                <div id="profilePlaceholder" style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); color: #888; font-size: 12px; font-weight: bold; text-align: center;">
+                    📷<br>Logo
+                </div>
+            </div>
+
+            <!-- Store Name ONLY (no code underneath) -->
+            <div style="flex: 1; padding-bottom: 10px;">
+                <h2 id="finalStoreName" style="margin: 0; font-size: 26px; font-weight: 700; color: #111;">Store Name</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Tracker (3 Steps) -->
+    <div class="progress-container">
+        <div class="progress-bar-fill" id="progressFill"></div>
+        <div class="circle active" id="circle-1">1</div>
+        <div class="circle" id="circle-2">2</div>
+        <div class="circle" id="circle-3">3</div>
+    </div>
+
+        <!-- STEP 1: Basic Info -->
+        <div class="step-content active" id="step-1">
+            <h2>Step 1: Contact & Location</h2>
+            
+            <div class="form-group">
+                <label>Primary Business Category</label>
+                <select name="category" class="form-control" required>
+                    <option value="" disabled selected>Choose a category</option>
+                    <option value="smartphones">Smartphones</option>
+                    <option value="computers">Computers / Laptops</option>
+                    <option value="components">Components / Semiconductors</option>
+                    <option value="audio">Audio</option>
+                    <option value="tv_appliances">TV / Home Appliances</option>
+                    <option value="cameras">Cameras</option>
+                    <option value="networking">Networking</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="industrial">Industrial Electronics</option>
+                    <option value="iot">IoT / Wearables</option>
+                    <option value="power">Power Supplies / Batteries</option>
+                    <option value="peripherals">Peripherals / Accessories</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Complete Business / Warehouse Address</label>
+                <textarea name="address" class="form-control" rows="2" placeholder="Street, City, etc."></textarea>
+            </div>
+            <div class="file-input-grid">
+                <div class="form-group">
+                    <label>City</label>
+                    <input name="city" type="text" class="form-control" placeholder="e.g Lahore">
+                </div>
+                <div class="form-group">
+                    <label>Postal Code / Zip</label>
+                    <input name="zipcode" type="number" class="form-control" placeholder="54000">
+                </div>
+            </div>
+            <div class="file-input-grid">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input name="email" type="email" class="form-control" placeholder="store@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input name="phone" type="tel" class="form-control" placeholder="03XXXXXXXXX">
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn btn-next" onclick="nextStep(1)">Next Step ❯</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: KYC -->
+        <div class="step-content" id="step-2">
+            <h2>Step 2: ID Card Verification</h2>
+            
+            <div class="file-input-grid">
+                <div class="form-group">
+                    <label>Full Legal Name (As per ID)</label>
+                    <input name="legal_name" type="text" class="form-control" placeholder="Shop Next">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input name="dob" type="date" class="form-control">
+                </div>
+            </div>
+
+            <label style="font-weight: 600; margin-top: 20px; display:block;">CNIC / ID Card Details</label>
+            <div class="file-input-grid">
+                <div class="form-group">
+                    <label style="font-size: 13px; color: #666;">ID Card Front</label>
+                    <input name="id_front" type="file" class="form-control" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 13px; color: #666;">ID Card Back</label>
+                    <input name="id_back" type="file" class="form-control" accept="image/*">
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn btn-prev" onclick="prevStep(2)">❮ Previous</button>
+                <button type="button" class="btn btn-next" onclick="nextStep(2)">Next Step ❯</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Submit -->
+        <div class="step-content" id="step-3">
+            <h2>Step 3: Final Details & Submit</h2>
+            
+            <label style="font-weight: 600; display:block; margin-bottom: 10px;">Store Social Media (Optional)</label>
+            <div class="file-input-grid" style="margin-bottom: 30px;">
+                <div class="form-group">
+                    <label style="font-size: 13px; color: #666;">Facebook Page Link</label>
+                    <input type="url" class="form-control" name="facebook">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 13px; color: #666;">Instagram Profile Link</label>
+                    <input type="url" class="form-control" name="instagram">
+                </div>
+            </div>
+
+            <div style="background: #eef9ee; padding: 20px; border-radius: 8px; border-left: 5px solid #2ecc71; margin-bottom: 25px;">
+                <h4 style="margin-top: 0;">Almost done!</h4>
+                <p style="margin-bottom: 0;">Review your provided information carefully before submitting.</p>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: flex-start; gap: 10px;">
+                <input type="checkbox" name="terms" style="width: 20px; height: 20px; margin-top: 2px;" required>
+                <label style="font-weight: normal;">I agree to the <b>Terms and Conditions</b>.</label>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn btn-prev" onclick="prevStep(3)">❮ Previous</button>
+                <button type="submit" class="btn btn-next" style="background: #2ecc71;">Submit ✔</button>
+            </div>
+        </div>
+
+</div>
+
+</form>
+
+<script>
+    // --- Custom Alert Logic ---
+    let pendingFocusElement = null;
+    function showError(msg, el = null) {
+        pendingFocusElement = el;
+        document.getElementById('customAlertMessage').innerText = msg;
+        document.getElementById('customAlertOverlay').style.display = 'flex';
+    }
+    function closeCustomAlert() {
+        document.getElementById('customAlertOverlay').style.display = 'none';
+        if(pendingFocusElement) { pendingFocusElement.focus(); pendingFocusElement = null; }
+    }
+
+    // 1. Transition from Setup -> Wizard
+    function goToWizard() {
+        let nameField = document.getElementById("setupStoreName");
+        let codeField = document.getElementById("setupStoreCode");
+        let descField = document.getElementById("setupStoreDesc");
+        let bannerInput = document.getElementById("setupBanner");
+        let profileInput = document.getElementById("setupProfile");
+
+        if(nameField.value.trim() === "") {
+            showError("Please enter a Store Name.", nameField);
+            return;
+        }
+        if(codeField.value.trim() === "") {
+            showError("Please enter a Unique Store Code.", codeField);
+            return;
+        }
+        if(!bannerInput.files || bannerInput.files.length === 0) {
+            showError("Please upload a Store Banner.");
+            return;
+        }
+        if(!profileInput.files || profileInput.files.length === 0) {
+            showError("Please upload a Profile Picture.");
+            return;
+        }
+
+        // Hide Setup, Show Wizard
+        document.getElementById("initial-setup").style.display = "none";
+        document.getElementById("wizard-flow").style.display = "block";
+
+        // Inject Name
+        document.getElementById("finalStoreName").innerText = nameField.value;
+        document.getElementById("hiddenStoreName").value = nameField.value;
+        document.getElementById("hiddenStoreCode").value = codeField.value;
+        document.getElementById("hiddenStoreDesc").value = descField.value;
+
+        // Display Uploaded Banner
+        if (bannerInput.files && bannerInput.files[0]) {
+            let reader1 = new FileReader();
+            reader1.onload = function(e) {
+                document.getElementById('bannerPreview').src = e.target.result;
+                document.getElementById('bannerPreview').style.display = 'block';
+                document.getElementById('bannerPlaceholder').style.display = 'none';
+            };
+            reader1.readAsDataURL(bannerInput.files[0]);
+        }
+
+        // Display Uploaded Profile
+        if (profileInput.files && profileInput.files[0]) {
+            let reader2 = new FileReader();
+            reader2.onload = function(e) {
+                document.getElementById('profilePreview').src = e.target.result;
+                document.getElementById('profilePreview').style.display = 'block';
+                document.getElementById('profilePlaceholder').style.display = 'none';
+            };
+            reader2.readAsDataURL(profileInput.files[0]);
+        }
+        
+        window.scrollTo(0, 0);
+    }
+
+    // 2. 4-Step Navigation
+    function updateProgress(currentStep) {
+        let fillWidth = ((currentStep - 1) / 2) * 100;
+        document.getElementById("progressFill").style.width = fillWidth + "%";
+        for (let i = 1; i <= 3; i++) {
+            let circle = document.getElementById("circle-" + i);
+            if (i < currentStep) {
+                circle.classList.add("completed");
+                circle.classList.remove("active");
+            } else if (i === currentStep) {
+                circle.classList.add("active");
+                circle.classList.remove("completed");
+            } else {
+                circle.classList.remove("active");
+                circle.classList.remove("completed");
+            }
+        }
+    }
+
+    function nextStep(current) {
+        // Validation Logic for current step
+        let stepDiv = document.getElementById("step-" + current);
+        let inputs = stepDiv.querySelectorAll("input:not([type='file']), select, textarea");
+        let files = stepDiv.querySelectorAll("input[type='file']");
+        
+        // Loop text inputs and selects
+        for(let i=0; i<inputs.length; i++) {
+            let input = inputs[i];
+            
+            // Skip hidden inputs (e.g. inactive Payment Type fields)
+            if(input.offsetParent === null) continue; 
+
+            // Skip social media optionality checks since user specified only Description is optional, so social MUST be filled.
+            if(input.value.trim() === "") {
+                showError("Please fill all visible fields on this step before proceeding.", input);
+                return;
+            }
+        }
+        
+        // Loop file inputs
+        for(let i=0; i<files.length; i++) {
+            let fileInput = files[i];
+            
+            // Skip hidden file inputs
+            if(fileInput.offsetParent === null) continue;
+            
+            if(!fileInput.files || fileInput.files.length === 0) {
+                showError("Please upload all required pictures/documents on this step before proceeding.", fileInput);
+                return;
+            }
+        }
+
+        document.getElementById("step-" + current).classList.remove("active");
+        document.getElementById("step-" + (current + 1)).classList.add("active");
+        updateProgress(current + 1);
+        window.scrollTo(0, 0);
+    }
+
+    function prevStep(current) {
+        document.getElementById("step-" + current).classList.remove("active");
+        document.getElementById("step-" + (current - 1)).classList.add("active");
+        updateProgress(current - 1);
+        window.scrollTo(0, 0);
+    }
+
+
+</script>
+{% endblock %}

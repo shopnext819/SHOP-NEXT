@@ -1,0 +1,448 @@
+<script>
+    // Raw string parsed dynamically on client side for zero-backend dependency
+    const RAW_REGIONS_TEXT = `City — Province List
+Attock — Punjab
+Rawalpindi — Punjab
+Chakwal — Punjab
+Jhelum — Punjab
+Sargodha — Punjab
+Khushab — Punjab
+Mianwali — Punjab
+Bhakkar — Punjab
+Lahore — Punjab
+Kasur — Punjab
+Sheikhupura — Punjab
+Nankana Sahib — Punjab
+Hafizabad — Punjab
+Gujranwala — Punjab
+Gujrat — Punjab
+Mandi Bahauddin — Punjab
+Sialkot — Punjab
+Narowal — Punjab
+Faisalabad — Punjab
+Chiniot — Punjab
+Toba Tek Singh — Punjab
+Jhang — Punjab
+Multan — Punjab
+Khanewal — Punjab
+Vehari — Punjab
+Lodhran — Punjab
+Bahawalpur — Punjab
+Bahawalnagar — Punjab
+Rahim Yar Khan — Punjab
+Dera Ghazi Khan — Punjab
+Muzaffargarh — Punjab
+Layyah — Punjab
+Rajanpur — Punjab
+Sahiwal — Punjab
+Okara — Punjab
+Pakpattan — Punjab
+Karachi — Sindh
+Hyderabad — Sindh
+Thatta — Sindh
+Badin — Sindh
+Sujawal — Sindh
+Mirpur Khas — Sindh
+Umerkot — Sindh
+Tharparkar — Sindh
+Sanghar — Sindh
+Shaheed Benazirabad (Nawabshah) — Sindh
+Naushahro Feroze — Sindh
+Khairpur — Sindh
+Sukkur — Sindh
+Ghotki — Sindh
+Larkana — Sindh
+Qambar Shahdadkot — Sindh
+Shikarpur — Sindh
+Jacobabad — Sindh
+Kashmore — Sindh
+Dadu — Sindh
+Jamshoro — Sindh
+Tando Allahyar — Sindh
+Tando Muhammad Khan — Sindh
+Matiari — Sindh
+Peshawar — Khyber Pakhtunkhwa
+Charsadda — Khyber Pakhtunkhwa
+Nowshera — Khyber Pakhtunkhwa
+Swabi — Khyber Pakhtunkhwa
+Mardan — Khyber Pakhtunkhwa
+Abbottabad — Khyber Pakhtunkhwa
+Haripur — Khyber Pakhtunkhwa
+Mansehra — Khyber Pakhtunkhwa
+Battagram — Khyber Pakhtunkhwa
+Kohistan Upper — Khyber Pakhtunkhwa
+Kolai Palas — Khyber Pakhtunkhwa
+Kohistan Lower — Khyber Pakhtunkhwa
+Torghar — Khyber Pakhtunkhwa
+Swat — Khyber Pakhtunkhwa
+Shangla — Khyber Pakhtunkhwa
+Lower Dir — Khyber Pakhtunkhwa
+Upper Dir — Khyber Pakhtunkhwa
+Buner — Khyber Pakhtunkhwa
+Lower Chitral — Khyber Pakhtunkhwa
+Upper Chitral — Khyber Pakhtunkhwa
+Dera Ismail Khan — Khyber Pakhtunkhwa
+Tank — Khyber Pakhtunkhwa
+Lakki Marwat — Khyber Pakhtunkhwa
+Kohat — Khyber Pakhtunkhwa
+Hangu — Khyber Pakhtunkhwa
+Karak — Khyber Pakhtunkhwa
+Orakzai — Khyber Pakhtunkhwa
+Khyber — Khyber Pakhtunkhwa
+Mohmand — Khyber Pakhtunkhwa
+Bajaur — Khyber Pakhtunkhwa
+Quetta — Balochistan
+Pishin — Balochistan
+Killa Abdullah — Balochistan
+Killa Saifullah — Balochistan
+Chaman — Balochistan
+Zhob — Balochistan
+Sherani — Balochistan
+Sibi — Balochistan
+Harnai — Balochistan
+Ziarat — Balochistan
+Loralai — Balochistan
+Barkhan — Balochistan
+Duki — Balochistan
+Kohlu — Balochistan
+Musakhel — Balochistan
+Khuzdar — Balochistan
+Awaran — Balochistan
+Lasbela — Balochistan
+Hub — Balochistan
+Gwadar — Balochistan
+Kech (Turbat) — Balochistan
+Panjgur — Balochistan
+Kharan — Balochistan
+Nushki — Balochistan
+Washuk — Balochistan
+Kalat — Balochistan
+Mastung — Balochistan
+Surab — Balochistan
+Chagai — Balochistan
+Dera Bugti — Balochistan
+Nasirabad — Balochistan
+Jafarabad — Balochistan
+Kachhi (Bolan) — Balochistan
+Jhal Magsi — Balochistan
+Sohbatpur — Balochistan
+Gilgit — Gilgit-Baltistan
+Hunza — Gilgit-Baltistan
+Nagar — Gilgit-Baltistan
+Diamer — Gilgit-Baltistan
+Ghizer — Gilgit-Baltistan
+Ghanche — Gilgit-Baltistan
+Skardu — Gilgit-Baltistan
+Shigar — Gilgit-Baltistan
+Kharmang — Gilgit-Baltistan
+Astore — Gilgit-Baltistan
+Muzaffarabad — Azad Jammu & Kashmir
+Neelum — Azad Jammu & Kashmir
+Bagh — Azad Jammu & Kashmir
+Haveli — Azad Jammu & Kashmir
+Rawalakot (Poonch) — Azad Jammu & Kashmir
+Kotli — Azad Jammu & Kashmir
+Mirpur — Azad Jammu & Kashmir
+Bhimber — Azad Jammu & Kashmir
+Sudhnoti — Azad Jammu & Kashmir
+Islamabad — Islamabad Capital Territory
+all country 
+Countries:
+- Afghanistan
+- Albania
+- Algeria
+- Andorra
+- Angola
+- Antigua and Barbuda
+- Argentina
+- Armenia
+- Australia
+- Austria
+- Azerbaijan
+- Bahamas
+- Bahrain
+- Bangladesh
+- Barbados
+- Belarus
+- Belgium
+- Belize
+- Benin
+- Bhutan
+- Bolivia
+- Bosnia and Herzegovina
+- Botswana
+- Brazil
+- Brunei
+- Bulgaria
+- Burkina Faso
+- Burundi
+- Cambodia
+- Cameroon
+- Canada
+- Cape Verde
+- Central African Republic
+- Chad
+- Chile
+- China
+- Colombia
+- Comoros
+- Congo (Congo-Brazzaville)
+- Congo (DRC)
+- Costa Rica
+- Croatia
+- Cuba
+- Cyprus
+- Czech Republic
+- Denmark
+- Djibouti
+- Dominica
+- Dominican Republic
+- East Timor (Timor-Leste)
+- Ecuador
+- Egypt
+- El Salvador
+- Equatorial Guinea
+- Eritrea
+- Estonia
+- Eswatini (Swaziland)
+- Ethiopia
+- Fiji
+- Finland
+- France
+- Gabon
+- Gambia
+- Georgia
+- Germany
+- Ghana
+- Greece
+- Grenada
+- Guatemala
+- Guinea
+- Guinea-Bissau
+- Guyana
+- Haiti
+- Honduras
+- Hungary
+- Iceland
+- India
+- Indonesia
+- Iran
+- Iraq
+- Ireland
+
+- Italy
+- Jamaica
+- Japan
+- Jordan
+- Kazakhstan
+- Kenya
+- Kiribati
+- Kuwait
+- Kyrgyzstan
+- Laos
+- Latvia
+- Lebanon
+- Lesotho
+- Liberia
+- Libya
+- Liechtenstein
+- Lithuania
+- Luxembourg
+- Madagascar
+- Malawi
+- Malaysia
+- Maldives
+- Mali
+- Malta
+- Marshall Islands
+- Mauritania
+- Mauritius
+- Mexico
+- Micronesia
+- Moldova
+- Monaco
+- Mongolia
+- Montenegro
+- Morocco
+- Mozambique
+- Myanmar
+- Namibia
+- Nauru
+- Nepal
+- Netherlands
+- New Zealand
+- Nicaragua
+- Niger
+- Nigeria
+- North Korea
+- North Macedonia
+- Norway
+- Oman
+- Pakistan
+- Palau
+- Palestine
+- Panama
+- Papua New Guinea
+- Paraguay
+- Peru
+- Philippines
+- Poland
+- Portugal
+- Qatar
+- Romania
+- Russia
+- Rwanda
+- Saint Kitts and Nevis
+- Saint Lucia
+- Saint Vincent and the Grenadines
+- Samoa
+- San Marino
+- Sao Tome and Principe
+
+- Senegal
+- Serbia
+- Seychelles
+- Sierra Leone
+- Singapore
+- Slovakia
+- Slovenia
+- Solomon Islands
+- Somalia
+- South Africa
+- South Korea
+- South Sudan
+- Spain
+- Sri Lanka
+- Sudan
+- Suriname
+- Sweden
+- Switzerland
+- Syria
+- Taiwan
+- Tajikistan
+- Tanzania
+- Thailand
+- Togo
+- Tonga
+- Trinidad and Tobago
+- Tunisia
+- Turkey
+- Turkmenistan
+- Tuvalu
+- Uganda
+- Ukraine
+
+- Uruguay
+- Uzbekistan
+- Vanuatu
+- Vatican City
+- Venezuela
+- Vietnam
+- Yemen
+- Zambia
+- Zimbabwe
+palestine
+kashmir
+mayamar [barma]`;
+
+    const REGION_DATA = { pakistan_provinces: {}, otherCountries: [] };
+    let _parsingCountries = false;
+
+    RAW_REGIONS_TEXT.split('\n').forEach(line => {
+        line = line.trim();
+        if (!line) return;
+
+        if (line.toLowerCase().includes("countries:")) {
+            _parsingCountries = true;
+            return;
+        }
+
+        if (!_parsingCountries) {
+            if (line.includes("—") || line.includes("-")) {
+                let parts = line.split(/[—\-]/);
+                if (parts.length >= 2) {
+                    let city = parts[0].trim();
+                    let prov = parts[1].trim();
+                    if (city.toLowerCase() === 'city') return;
+
+                    if (!REGION_DATA.pakistan_provinces[prov]) {
+                        REGION_DATA.pakistan_provinces[prov] = [];
+                    }
+                    REGION_DATA.pakistan_provinces[prov].push(city);
+                }
+            }
+        } else {
+            if (line.startsWith("-")) {
+                let c = line.substring(1).trim();
+                if (c.toLowerCase() !== 'pakistan') REGION_DATA.otherCountries.push(c);
+            } else if (line.length > 2 && !line.toLowerCase().includes("all country")) {
+                let c = line.trim();
+                if (c.toLowerCase() !== 'pakistan') REGION_DATA.otherCountries.push(c);
+            }
+        }
+    });
+
+    // Remove duplicates and sort
+    REGION_DATA.otherCountries = [...new Set(REGION_DATA.otherCountries)].sort();
+    for (let prov in REGION_DATA.pakistan_provinces) {
+        REGION_DATA.pakistan_provinces[prov] = [...new Set(REGION_DATA.pakistan_provinces[prov])].sort();
+    }
+
+    function renderLocationDropdowns(prefix) {
+        let countrySel = document.getElementById(prefix + 'Country');
+        let provSel = document.getElementById(prefix + 'Province');
+        let citySel = document.getElementById(prefix + 'City');
+
+        if (!countrySel || !provSel || !citySel) return;
+
+        // Clear
+        countrySel.innerHTML = '<option value="" disabled selected>Select Country</option>';
+        provSel.innerHTML = '<option value="" disabled selected>Select Province</option>';
+        citySel.innerHTML = '<option value="" disabled selected>Select City</option>';
+
+        // Populate Countries
+        countrySel.insertAdjacentHTML('beforeend', '<option value="Pakistan" class="font-bold text-green-600">Pakistan</option>');
+
+        REGION_DATA.otherCountries.forEach(c => {
+            countrySel.insertAdjacentHTML('beforeend', '<option value="' + c + '" disabled class="text-gray-400">' + c + ' (Not Available)</option>');
+        });
+
+        // Country Logic
+        countrySel.addEventListener('change', function () {
+            if (this.value === 'Pakistan') {
+                provSel.disabled = false;
+                provSel.innerHTML = '<option value="" disabled selected>Select Province</option>';
+                citySel.innerHTML = '<option value="" disabled selected>Select City</option>';
+                citySel.disabled = true;
+
+                Object.keys(REGION_DATA.pakistan_provinces).sort().forEach(p => {
+                    provSel.insertAdjacentHTML('beforeend', '<option value="' + p + '">' + p + '</option>');
+                });
+            } else {
+                provSel.disabled = true;
+                citySel.disabled = true;
+            }
+        });
+
+        // Province Logic
+        provSel.addEventListener('change', function () {
+            citySel.disabled = false;
+            citySel.innerHTML = '<option value="" disabled selected>Select City</option>';
+            if (REGION_DATA.pakistan_provinces[this.value]) {
+                REGION_DATA.pakistan_provinces[this.value].forEach(c => {
+                    citySel.insertAdjacentHTML('beforeend', '<option value="' + c + '">' + c + '</option>');
+                });
+            }
+        });
+
+        // Trigger reset initially
+        countrySel.value = "";
+        provSel.disabled = true;
+        citySel.disabled = true;
+    }
+
+    // Auto Initialize matching standard prefixes if present
+    document.addEventListener("DOMContentLoaded", () => {
+        ['wh_', 'rt_'].forEach(p => renderLocationDropdowns(p));
+    });
+</script>

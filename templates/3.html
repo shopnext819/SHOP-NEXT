@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor 1 | Shop Next</title>
+
+    <!-- Libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js" type="module"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #fca311;
+            --bg-dark: #070707;
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --accent-green: #2ecc71;
+            --accent-blue: #3498db;
+            --danger: #e74c3c;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ecf0f1;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .toolbar {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(25px);
+            padding: 20px 12px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .tool-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            overflow: hidden;
+        }
+        .tool-btn i { font-style: normal; font-size: 20px; }
+        .tool-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); color: var(--primary); }
+        .tool-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        .editor-viewport {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #070707 100%);
+        }
+
+        .edit-surface { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        #image { display: block; max-width: 90vw; max-height: 75vh; opacity: 0; }
+        .canvas-container { position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; }
+
+        .bottom-bar {
+            padding: 12px 25px;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .caption-input {
+            flex: 1;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            padding: 14px 22px;
+            border-radius: 35px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        /* ─── FLOATING PANELS ─── */
+        .floating-panel {
+            position: absolute;
+            background: rgba(18, 18, 18, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 15px;
+            z-index: 1100;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+        #textPanel, #drawPanel { left: 100px; top: 50%; transform: translateY(-50%); width: 220px; }
+        #emojiBox { right: 20px; bottom: 100px; }
+
+        .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-dot.active { border-color: white; transform: scale(1.1); }
+        
+        .hex-row { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
+        .hex-input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 5px 8px; border-radius: 6px; font-size: 12px; }
+
+        .more-btn { background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+
+        /* ─── UPLOAD OVERLAY ─── */
+        .upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; cursor: pointer; }
+        .upload-card { background: #111; border: 1px solid #222; padding: 40px; border-radius: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar" id="editor-tools" style="display:none;">
+        <button class="tool-btn" id="cropBtn" onclick="toggleCrop()">
+            <i id="cropIcon">✂️</i> <span id="cropText">Crop</span>
+        </button>
+        <button class="tool-btn" id="textBtn" onclick="toggleTextPanel()">
+            <i>Aa</i> <span>Text</span>
+        </button>
+        <button class="tool-btn" id="drawBtn" onclick="toggleDraw()">
+            <i>✏️</i> <span>Draw</span>
+        </button>
+        <button class="tool-btn" onclick="toggleEmoji()">
+            <i>😀</i> <span>Emoji</span>
+        </button>
+        <button class="tool-btn" style="background:var(--danger);border:none;margin-top:10px;" onclick="cancel()">
+            <i>❌</i> <span>Close</span>
+        </button>
+    </div>
+
+    <div class="editor-viewport" id="editorViewport">
+        <input type="file" id="fileInput" hidden accept="image/*">
+        <div class="upload-overlay" id="uploadOverlay" onclick="triggerUpload()">
+            <div class="upload-card">
+                <div style="font-size:50px;">📤</div>
+                <h2>Upload Photo</h2>
+            </div>
+        </div>
+
+        <div class="edit-surface">
+            <img id="image" alt="">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <!-- Text Panel -->
+        <div id="textPanel" class="floating-panel">
+            <div style="font-size:11px; opacity:0.5; text-align:center;">TEXT COLOR</div>
+            <div class="color-grid" id="textColorGrid"></div>
+            <button class="more-btn" id="textMoreBtn" onclick="expandColors('text')">More Colors...</button>
+            <div class="hex-row">
+                <input type="text" class="hex-input" id="textHex" placeholder="#FFFFFF" maxlength="7" oninput="applyHex('text', this.value)">
+            </div>
+            <button class="tool-btn" style="width:100%; height:40px; margin-top:5px;" onclick="addText()">Add New Text</button>
+        </div>
+
+        <!-- Draw Panel -->
+        <div id="drawPanel" class="floating-panel">
+            <div style="font-size:11px; opacity:0.5; text-align:center;">PENCIL COLOR</div>
+            <div class="color-grid" id="drawColorGrid"></div>
+            <button class="more-btn" id="drawMoreBtn" onclick="expandColors('draw')">More Colors...</button>
+            <div class="hex-row">
+                <input type="text" class="hex-input" id="drawHex" placeholder="#FCA311" maxlength="7" oninput="applyHex('draw', this.value)">
+            </div>
+            <input type="range" min="1" max="40" value="5" oninput="canvas.freeDrawingBrush.width=parseInt(this.value)" style="width:100%;">
+        </div>
+
+        <!-- Emoji Panel -->
+        <div id="emojiBox" class="floating-panel">
+            <emoji-picker></emoji-picker>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="tool-btn" style="width:100%; height:54px; background:linear-gradient(135deg, var(--accent-green), #27ae60); border:none; font-size:16px; font-weight:900; letter-spacing:1px; color:white; border-radius:15px;" onclick="finish()">
+            📤 UPLOAD NOW
+        </button>
+    </div>
+
+    <script>
+        let cropper = null;
+        let canvas = new fabric.Canvas('canvas');
+        let isCropping = false;
+        let activeTextColor = '#ffffff';
+        let activeDrawColor = '#fca311';
+
+        const mainColors = ['#ffffff', '#000000', '#fca311', '#e74c3c', '#2ecc71', '#3498db'];
+        const extraColors = [
+            '#1abc9c', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#2c3e50', '#f1c40f', '#e67e22', '#e74c3c', '#ecf0f1', '#95a5a6', '#7f8c8d',
+            '#ff5733', '#c70039', '#900c3f', '#581845', '#ffc300', '#daf7a6', '#00ff7f', '#00ced1', '#1e90ff', '#ff1493', '#ff00ff', '#8a2be2',
+            '#deb887', '#5f9ea0', '#7fff00', '#d2691e', '#ff7f50', '#6495ed', '#fff8dc', '#dc143c', '#00ffff', '#00008b', '#008b8b', '#b8860b',
+            '#a9a9a9', '#006400', '#bdb76b', '#8b008b', '#556b2f', '#ff8c00', '#9932cc', '#8b0000', '#e9967a', '#8fbc8f', '#483d8b', '#2f4f4f'
+        ];
+
+        window.addEventListener('message', e => {
+            if (e.data.action === 'load' && e.data.src) startCropping(e.data.src);
+        });
+        window.parent.postMessage({ action: 'ready' }, '*');
+
+        function triggerUpload() { document.getElementById('fileInput').click(); }
+        document.getElementById('fileInput').onchange = e => {
+            const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = ev => startCropping(ev.target.result); r.readAsDataURL(f); }
+        };
+
+        function startCropping(src) {
+            const img = document.getElementById('image');
+            
+            // If canvas has objects, bake them into the image before cropping
+            if (canvas.getObjects().length > 1) { // more than just the background image
+                src = canvas.toDataURL({ format: 'png', quality: 1 });
+            }
+
+            img.src = src;
+            img.onload = () => {
+                document.getElementById('uploadOverlay').style.display = 'none';
+                document.getElementById('editor-tools').style.display = 'flex';
+                img.style.opacity = 1;
+                canvas.getElement().parentNode.style.display = 'none';
+                
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(img, { viewMode: 1, dragMode: 'move', autoCropArea: 0.85, background: false });
+                isCropping = true;
+                document.getElementById('cropIcon').innerText = '✅';
+                document.getElementById('cropText').innerText = 'Done';
+                document.getElementById('cropBtn').classList.add('active');
+            };
+        }
+
+        function toggleCrop() { if (isCropping) applyCrop(); else startCropping(document.getElementById('image').src); }
+
+        function applyCrop() {
+            if (!cropper) return;
+            const c = cropper.getCroppedCanvas();
+            const src = c.toDataURL();
+            isCropping = false;
+            document.getElementById('cropIcon').innerText = '✂️';
+            document.getElementById('cropText').innerText = 'Crop';
+            document.getElementById('cropBtn').classList.remove('active');
+            cropper.destroy(); cropper = null;
+            document.getElementById('image').style.display = 'none';
+            canvas.getElement().parentNode.style.display = 'block';
+            
+            const vp = document.getElementById('editorViewport');
+            const maxW = vp.clientWidth * 0.9; const maxH = vp.clientHeight * 0.8;
+            let w = c.width, h = c.height; const r = w / h;
+            if (w > maxW) { w = maxW; h = w / r; } if (h > maxH) { h = maxH; w = h * r; }
+            canvas.setWidth(w); canvas.setHeight(h);
+            fabric.Image.fromURL(src, img => {
+                img.set({ selectable: false, evented: false });
+                img.scaleToWidth(w);
+                canvas.clear(); canvas.add(img); canvas.sendToBack(img);
+            });
+        }
+
+        function toggleTextPanel() {
+            if (isCropping) applyCrop();
+            const p = document.getElementById('textPanel');
+            const open = p.style.display === 'flex';
+            closeAllPanels();
+            if (!open) { p.style.display = 'flex'; renderColors('text'); addText(); }
+        }
+
+        function addText() {
+            const t = new fabric.IText('Text Here', {
+                left: canvas.width / 2, top: canvas.height / 2,
+                fill: activeTextColor, fontSize: 35, fontWeight: '900', originX: 'center', originY: 'center', fontFamily: 'Outfit'
+            });
+            canvas.add(t); canvas.setActiveObject(t); t.enterEditing(); t.selectAll(); canvas.renderAll();
+        }
+
+        function toggleDraw() {
+            if (isCropping) applyCrop();
+            const p = document.getElementById('drawPanel');
+            const currentlyOpen = p.style.display === 'flex';
+            
+            closeAllPanels();
+            
+            if (!currentlyOpen) {
+                canvas.isDrawingMode = true;
+                p.style.display = 'flex'; 
+                renderColors('draw');
+                canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+                canvas.freeDrawingBrush.color = activeDrawColor;
+                canvas.freeDrawingBrush.width = 5;
+                document.getElementById('drawBtn').classList.add('active');
+            }
+        }
+
+        function renderColors(type, all = false) {
+            const grid = document.getElementById(type === 'text' ? 'textColorGrid' : 'drawColorGrid');
+            grid.innerHTML = '';
+            const list = all ? [...mainColors, ...extraColors] : mainColors;
+            list.forEach(c => {
+                const d = document.createElement('div');
+                d.className = 'color-dot' + (c === (type === 'text' ? activeTextColor : activeDrawColor) ? ' active' : '');
+                d.style.background = c;
+                d.onclick = () => selectColor(type, c);
+                grid.appendChild(d);
+            });
+        }
+
+        function selectColor(type, c) {
+            if (type === 'text') {
+                activeTextColor = c;
+                document.getElementById('textHex').value = c.toUpperCase();
+                const obj = canvas.getActiveObject(); if (obj && obj.type === 'i-text') { obj.set('fill', c); canvas.renderAll(); }
+            } else {
+                activeDrawColor = c;
+                document.getElementById('drawHex').value = c.toUpperCase();
+                if (canvas.freeDrawingBrush) canvas.freeDrawingBrush.color = c;
+            }
+            renderColors(type, document.getElementById(type + 'MoreBtn').style.display === 'none');
+        }
+
+        function expandColors(type) {
+            renderColors(type, true);
+            document.getElementById(type + 'MoreBtn').style.display = 'none';
+        }
+
+        function applyHex(type, val) {
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) selectColor(type, val);
+        }
+
+        function toggleEmoji() { if (isCropping) applyCrop(); const b = document.getElementById('emojiBox'); const open = b.style.display === 'block'; closeAllPanels(); if (!open) b.style.display = 'block'; }
+        document.querySelector('emoji-picker').addEventListener('emoji-click', e => {
+            const em = new fabric.Text(e.detail.unicode, { left: canvas.width/2, top: canvas.height/2, fontSize: 60 });
+            canvas.add(em); canvas.setActiveObject(em); document.getElementById('emojiBox').style.display = 'none';
+        });
+
+        function closeAllPanels() {
+            document.getElementById('textPanel').style.display = 'none';
+            document.getElementById('drawPanel').style.display = 'none';
+            document.getElementById('emojiBox').style.display = 'none';
+            document.getElementById('drawBtn').classList.remove('active');
+            canvas.isDrawingMode = false;
+        }
+
+        function cancel() { window.parent.postMessage({ action: 'close' }, '*'); }
+        function finish() {
+            if (isCropping) applyCrop();
+            setTimeout(() => {
+                const d = canvas.toDataURL({ format: 'png', quality: 0.8 });
+                const capEl = document.getElementById('captionText');
+                const cap = capEl ? capEl.value : '';
+                window.parent.postMessage({ action: 'done', image: d, caption: cap }, '*');
+            }, 100);
+        }
+    </script>
+</body>
+</html>

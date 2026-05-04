@@ -1,0 +1,842 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap">
+<style>
+    /* General Reset & Variables */
+    :root {
+        --primary: #FFD700; /* Yellow for buttons and accents */
+        --secondary: #FFFFFF; /* White background */
+        --accent: #FFC107; /* Slightly darker yellow for hover */
+        --danger: #DC3545; /* Red for danger actions */
+        --border: #E0E0E0; /* Light grey border */
+        --text: #333333; /* Black text on white background */
+        --text-on-primary: #FFFFFF; /* White text on yellow buttons */
+        --text-muted: #888888; /* Grey for muted text */
+        --card-bg: #F8F8F8; /* Slightly off-white for cards */
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .profile-container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Card Styling */
+    .card-effect {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        padding: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .card-effect:hover {
+        border-color: var(--primary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    /* --- HEADER SECTION ------------------------------------ */
+    .profile-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-avatar {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        color: var(--text-on-primary);
+        border: 4px solid var(--primary);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        margin-bottom: 20px;
+        margin-left: 10%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .profile-name {
+        font-size: 44px;
+        font-weight: 800;
+        margin-bottom: 5px;
+        color: var(--text);
+        margin-left: 10%;
+    }
+
+    .profile-username {
+        font-size: 18px;
+        color: var(--primary);
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .profile-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        color: var(--text-muted);
+        margin-bottom: 25px;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.2); opacity: 0.7; }
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-left: 10%;
+    }
+
+    .action-btn {
+        padding: 12px 25px;
+        border: 1px solid var(--primary);
+        background-color: var(--primary);
+        color: var(--text-on-primary);
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    }
+
+    .action-btn:hover {
+        background-color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 0 12px rgba(255, 193, 7, 0.7);
+    }
+
+    .action-btn.danger {
+        border-color: var(--danger);
+        background-color: var(--danger);
+        color: var(--text-on-primary);
+        box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+    }
+
+    .action-btn.danger:hover {
+        background-color: #C82333;
+        border-color: #C82333;
+        box-shadow: 0 0 12px rgba(200, 35, 51, 0.7);
+    }
+
+    /* --- TABS SECTION ------------------------------------ */
+    .profile-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        padding: 15px 30px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .tab-btn.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+
+    .tab-btn:hover {
+        color: var(--primary);
+    }
+
+    /* --- TAB CONTENT ------------------------------------ */
+    .tab-content {
+        display: none;
+        padding: 20px 0;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- ABOUT TAB ------------------------------------ */
+    .about-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+    }
+
+    .info-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-5px);
+    }
+
+    .info-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .info-value {
+        font-size: 17px;
+        color: var(--text);
+        font-weight: 500;
+        word-break: break-all;
+    }
+
+    .info-value.highlight {
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    /* --- SELLER INFO TAB ------------------------------------ */
+    .seller-section {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .seller-section:hover {
+        border-color: var(--primary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .seller-header {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .seller-badge {
+        width: 90px;
+        height: 90px;
+        background-color: var(--primary);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 45px;
+        color: var(--text-on-primary);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    }
+
+    .seller-details h3 {
+        font-size: 24px;
+        margin-bottom: 8px;
+        color: var(--text);
+    }
+
+    .seller-details p {
+        color: var(--text-muted);
+        font-size: 15px;
+    }
+
+    .seller-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    /* --- SECURITY TAB ------------------------------------ */
+    .security-item {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .security-item:hover {
+        border-color: var(--primary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        transform: translateX(5px);
+    }
+
+    .security-info h4 {
+        font-size: 17px;
+        margin-bottom: 6px;
+        color: var(--text);
+    }
+
+    .security-info p {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    .security-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .status-badge {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    }
+
+    .status-badge.warning {
+        background: var(--accent);
+        box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+    }
+
+    /* --- ACTIVITY TAB ------------------------------------ */
+    .activity-timeline {
+        position: relative;
+        padding: 20px 0 20px 20px;
+        border-left: 2px solid var(--border);
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 25px;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -33px; /* Adjust to align with border */
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        z-index: 1;
+    }
+
+    .activity-dot {
+        width: 50px;
+        height: 50px;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+    }
+
+    .activity-content {
+        flex: 1;
+        padding: 15px 20px;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .activity-content:hover {
+        border-color: var(--primary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .activity-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: var(--text);
+    }
+
+    .activity-time {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    /* --- MODAL ------------------------------------ */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 35px;
+        max-width: 550px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideUp 0.4s ease-out;
+        box-shadow: var(--shadow);
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(80px) scale(0.95);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--primary);
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 28px;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+        color: var(--primary);
+        transform: rotate(90deg);
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 14px 18px;
+        background-color: #F0F0F0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: #333333;
+        font-family: 'Poppins', sans-serif;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+        background-color: #FFFBE6;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--text-on-primary);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--accent);
+        transform: translateY(-3px);
+        box-shadow: 0 0 12px rgba(255, 193, 7, 0.7);
+    }
+
+    .btn-secondary {
+        background-color: #E0E0E0;
+        color: #333333;
+        border: 1px solid #CCCCCC;
+    }
+
+    /* --- RESPONSIVE ------------------------------------ */
+    @media (min-width: 769px) {
+        .profile-container {
+            grid-template-columns: 1fr 2fr;
+        }
+        .profile-header {
+            grid-column: 1 / 2;
+            padding: 30px;
+        }
+        .profile-tabs-content-wrapper {
+            grid-column: 2 / 3;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 25px;
+        }
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            font-size: 60px;
+            margin-left: 0;
+            margin-right: auto;
+        }
+        .profile-name {
+            font-size: 30px;
+            margin-left: 0;
+        }
+        .profile-actions {
+            flex-direction: column;
+            align-items: stretch;
+            margin-left: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- PROFILE HEADER -->
+    <div class="profile-header card-effect">
+        <div class="profile-content">
+            <div class="profile-avatar">
+                {% if user.is_authenticated and user.socialaccount_set.all %}
+                    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    👤
+                {% endif %}
+            </div>
+
+            <div class="profile-name" style="margin-left: 10%;">{{ user.get_full_name|default:user.username }}</div>
+            <div class="profile-email" style="font-size: 18px; color: var(--text-muted); margin-bottom: 10px; margin-left: 10%;">{{ user.email }}</div>
+
+
+            <div class="profile-actions" style="display: flex; justify-content: flex-start; gap: 10px; margin-left: 10%;">
+                <button class="action-btn primary" onclick="openEditModal()">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+                <button class="action-btn danger" onclick="openLogoutModal()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS AND CONTENT -->
+    <div class="profile-tabs-content-wrapper">
+        <div class="profile-tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'about')">About</button>
+            <button class="tab-btn" onclick="switchTab(event, 'seller')">Seller Info</button>
+            <button class="tab-btn" onclick="switchTab(event, 'security')">Security</button>
+            <button class="tab-btn" onclick="switchTab(event, 'activity')">Activity</button>
+        </div>
+
+        <!-- ABOUT TAB -->
+        <div id="about" class="tab-content active card-effect">
+            <div class="about-grid">
+                <div class="info-card">
+                    <div class="info-label">📧 Email</div>
+                    <div class="info-value">{{ user.email }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">📱 Phone</div>
+                    <div class="info-value">{{ profile.phone|default:"+1 (555) 123-4567" }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">🎂 Birthday</div>
+                    <div class="info-value">{{ profile.birthday|date:"F d, Y"|default:"January 01, 1990" }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">📍 Location</div>
+                    <div class="info-value">{{ profile.source|default:"New York, USA" }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">✅ Member Since</div>
+                    <div class="info-value">January 01, 2023</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">🔗 Account Status</div>
+                    <div class="info-value highlight">Active</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SELLER INFO TAB -->
+        <div id="seller" class="tab-content card-effect">
+            <div class="seller-section">
+                <div class="seller-header">
+                    <div class="seller-badge">🏪</div>
+                    <div class="seller-details">
+                        <h3>ElectroShop</h3>
+                        <p>Store Code: <strong>ES12345</strong></p>
+                        <p>Status: <strong>Approved ✓</strong></p>
+                    </div>
+                </div>
+                <div class="seller-grid">
+                    <div class="info-card">
+                        <div class="info-label">🏢 Legal Name</div>
+                        <div class="info-value">ElectroShop Inc.</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">📍 City</div>
+                        <div class="info-value">New York</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">📧 Email</div>
+                        <div class="info-value">shop@electroshop.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECURITY TAB -->
+        <div id="security" class="tab-content card-effect">
+            <div class="security-item">
+                <div class="security-info">
+                    <h4>🔐 Password</h4>
+                    <p>Last changed 3 months ago</p>
+                </div>
+                <div class="security-status">
+                    <div class="status-badge"></div>
+                    <button class="action-btn" onclick="openChangePasswordModal()">Change</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVITY TAB -->
+        <div id="activity" class="tab-content card-effect">
+            <div class="activity-timeline">
+                <div class="activity-item">
+                    <div class="activity-dot">🔓</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Logged in</div>
+                        <div class="activity-time">Today at 10:30 AM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-edit"></i> Edit Profile
+            <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+        </div>
+        <form onsubmit="alert('Profile update simulated!'); closeModal('editModal'); return false;">
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" value="John" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="callModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-phone-alt"></i> Start a Call
+            <button class="modal-close" onclick="closeModal('callModal')">✕</button>
+        </div>
+        <form onsubmit="alert('Call initiated!'); closeModal('callModal'); return false;">
+            <div class="form-group">
+                <label>Recipient Username</label>
+                <input type="text" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('callModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Initiate Call</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-comment-dots"></i> Send Message
+            <button class="modal-close" onclick="closeModal('messageModal')">✕</button>
+        </div>
+        <form onsubmit="alert('Message sent!'); closeModal('messageModal'); return false;">
+            <div class="form-group">
+                <label>Message</label>
+                <textarea required></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('messageModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-key"></i> Change Password
+            <button class="modal-close" onclick="closeModal('changePasswordModal')">✕</button>
+        </div>
+        <form onsubmit="alert('Password change simulated!'); closeModal('changePasswordModal'); return false;">
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('changePasswordModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- LOGOUT MODAL -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <i class="fas fa-sign-out-alt"></i> Logout
+                <button class="modal-close" onclick="closeModal('logoutModal')">✕</button>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 25px;">Are you sure you want to log out?</p>
+            <div class="modal-footer">
+                <form method="POST" action="{% url 'account_logout' %}" style="flex:1;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="background: var(--danger); width: 100%;">Yes, Logout</button>
+                </form>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('logoutModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function switchTab(event, tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        const selectedTab = document.getElementById(tabName);
+        if (selectedTab) selectedTab.classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function openEditModal() { document.getElementById('editModal').classList.add('active'); }
+    function openCallModal() { document.getElementById('callModal').classList.add('active'); }
+    function openMessageModal() { document.getElementById('messageModal').classList.add('active'); }
+    function openChangePasswordModal() { document.getElementById('changePasswordModal').classList.add('active'); }
+    function openLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
+    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+    });
+</script>
+{% endblock %}

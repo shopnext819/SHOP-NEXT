@@ -1,0 +1,20 @@
+{
+    "pythonVersion": "3.12",
+    "venvPath": "C:\\SHOP NEXT",
+    "venv": ".venv",
+    "pythonPlatform": "Windows",
+    "typeCheckingMode": "off",
+    "useLibraryCodeForTypes": true,
+    "reportMissingModuleSource": "none",
+    "reportMissingImports": "none",
+    "reportMissingModules": "none",
+    "reportUnusedImport": "none",
+    "extraPaths": [
+        "C:\\SHOP NEXT",
+        "C:\\SHOP NEXT\\.venv\\Lib\\site-packages",
+        "C:\\Users\\Ameer Hamza\\AppData\\Roaming\\Python\\Python314\\site-packages"
+    ],
+    "exclude": [
+        "C:\\__pyrefly_virtual__"
+    ]
+}

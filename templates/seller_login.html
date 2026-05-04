@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+    body { background: #fdfdfd; }
+    .login-wrapper { max-width: 450px; margin: 100px auto; background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+    .login-wrapper h2 { font-weight: 700; margin-bottom: 5px; color: #111; }
+    .login-wrapper p { color: #666; margin-bottom: 25px; }
+    
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; outline: none; transition: 0.2s; }
+    .form-control:focus { border-color: #f59e0b; }
+    
+    .btn-login { width: 100%; padding: 12px; background: #000; color: #fff; font-weight: bold; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+    .btn-login:hover { background: #f59e0b; }
+    
+    .error-box { background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 6px; margin-bottom: 20px; font-weight: 600; font-size: 14px; border: 1px solid #fca5a5; }
+    
+    .create-link { display: inline-block; margin-top: 25px; color: #f59e0b; font-weight: 600; text-decoration: none; transition: 0.2s; }
+    .create-link:hover { color: #d97706; text-decoration: underline; }
+</style>
+
+<div class="login-wrapper">
+    <h2>Seller Login</h2>
+    <p>Welcome back to Shop Next Seller Center.</p>
+
+    {% if error %}
+    <div class="error-box">
+        ⚠ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Store Name</label>
+            <input type="text" name="store_name" class="form-control" placeholder="Enter your Store Name" required>
+        </div>
+        <div class="form-group">
+            <label>Store Code</label>
+            <input type="text" name="store_code" class="form-control" placeholder="Enter your Unique Store Code" required>
+        </div>
+        
+        <button type="submit" class="btn-login">Login as Seller</button>
+    </form>
+
+    <a href="{% url 'seller_register' %}" class="create-link">Create New Account</a>
+</div>
+{% endblock %}

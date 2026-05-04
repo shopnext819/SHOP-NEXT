@@ -1,0 +1,3001 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-screen bg-transparent font-sans">
+
+    <div class="w-full pb-10 mt-6"> <!-- added mt-6 to prevent overlapping with base search bar -->
+
+        <!-- HEADER BANNER & PROFILE PIC -->
+        <div class="w-full bg-transparent border-b border-gray-200 shadow-sm relative mb-12">
+            <!-- Banner -->
+            <!-- Hidden file input for banner editor -->
+            <input type="file" id="bannerFileInput" hidden accept="image/*" onchange="beOnFileSelect(this)">
+
+            <div class="w-full h-48 md:h-72 overflow-hidden bg-gradient-to-r from-blue-400 to-indigo-500 relative"
+                id="bannerArea" onclick="dashboardViewBanner()" style="cursor:pointer;">
+
+                <!-- Settings Gear Button (stops click propagation) -->
+                <a href="{% url 'store_settings' %}" onclick="event.stopPropagation()"
+                    class="absolute top-5 right-5 bg-white/90 hover:bg-white text-gray-900 p-3 rounded-full shadow-lg backdrop-blur-sm transition-all z-20 group border border-gray-200">
+                    <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </a>
+
+                <!-- Hover hint overlay -->
+                <div style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:background 0.3s;z-index:10;display:flex;align-items:center;justify-content:center;pointer-events:none;"
+                    id="bannerHoverHint" onmouseenter="this.style.background='rgba(0,0,0,0.45)'"
+                    onmouseleave="this.style.background='rgba(0,0,0,0)'">
+                </div>
+                <div style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity 0.3s;"
+                    id="bannerEditLabel">
+                    <div
+                        style="background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.25);backdrop-filter:blur(12px);padding:12px 28px;border-radius:50px;color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;">
+                        📷 <span>Click to see banner</span>
+                    </div>
+                </div>
+
+                {% if banner_data %}
+                <img src="{{ banner_data }}" alt="Store Banner" class="w-full h-full object-cover"
+                    id="currentBannerImg">
+                {% else %}
+                <img src="" alt="Store Banner" class="w-full h-full object-cover" id="currentBannerImg"
+                    style="display:none;">
+                {% endif %}
+            </div>
+
+            <script>
+                /* hover show/hide label */
+                var _ba = document.getElementById('bannerArea');
+                var _bl = document.getElementById('bannerEditLabel');
+                if (_ba && _bl) {
+                    _ba.addEventListener('mouseenter', function () { _bl.style.opacity = '1'; });
+                    _ba.addEventListener('mouseleave', function () { _bl.style.opacity = '0'; });
+                }
+            </script>
+
+            <!-- Profile Content Overlapping -->
+            <div class="px-6 md:px-12 relative max-w-screen-2xl mx-auto">
+                <div class="absolute -top-16 md:-top-24 left-6 md:left-12 flex items-end gap-6 w-full z-10">
+                    <div
+                        class="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 md:border-[6px] border-white shadow-lg bg-[#ebf3ff] overflow-hidden flex items-center justify-center flex-shrink-0">
+                        {% if profile_data %}
+                        <img src="{{ profile_data }}" alt="Store Profile"
+                            class="w-full h-full object-contain mx-auto bg-white">
+                        {% else %}
+                        <svg class="w-16 h-16 md:w-24 md:h-24" viewBox="0 0 64 64" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 28L32 16L52 28V48C52 50.2091 50.2091 52 48 52H16C13.7909 52 12 50.2091 12 48V28Z"
+                                fill="#D6E4FE" />
+                            <path d="M12 28L32 16L52 28H12Z" fill="#A4C2FF" />
+                            <path d="M26 36L32 42L38 36V32L32 38L26 32V36Z" fill="#1841C5" />
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div
+                        class="pb-2 md:pb-4 drop-shadow-md bg-white/50 px-4 py-1.5 rounded-xl backdrop-blur-md -ml-2 mb-2">
+                        <h2 class="text-2xl md:text-4xl text-gray-900 font-black italic"
+                            style="font-weight: 900; font-family: 'Segoe UI', -apple-system, sans-serif;"><b><i>
+                                    {{store_name }}</i></b></h2>
+                    </div>
+                </div>
+                <div class="h-20 md:h-32 w-full"></div>
+            </div>
+        </div>
+
+        <!-- MAIN NAVIGATION TABS -->
+        <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl mb-12 -mt-2">
+            <div class="flex justify-center gap-4 w-full flex-wrap">
+                <button id="navTabHome" onclick="switchMainNav('home')"
+                    class="py-[18px] px-[15px] rounded-xl text-base font-black text-white bg-[#FF9900] border-2 border-black shadow-md transition-all w-[23%] min-w-[100px]">Home</button>
+                <button id="navTabProducts" onclick="switchMainNav('products')"
+                    class="py-[18px] px-[15px] rounded-xl text-base font-black text-white bg-[#FF9900] shadow-sm hover:scale-105 transition-all w-[23%] min-w-[100px]">Products</button>
+                <button id="navTabChats" onclick="switchMainNav('chats')"
+                    class="py-[18px] px-[15px] rounded-xl text-base font-black text-white bg-[#FF9900] shadow-sm hover:scale-105 transition-all w-[23%] min-w-[100px]">Chats</button>
+                <button id="navTabComplains" onclick="switchMainNav('complains')"
+                    class="py-[18px] px-[15px] rounded-xl text-base font-black text-white bg-[#FF9900] shadow-sm hover:scale-105 transition-all w-[23%] min-w-[100px]">Complain</button>
+            </div>
+        </div>
+
+        <!-- MAIN PADDED CONTENT -->
+        <div id="mainSectionHome" class="block w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-6 max-w-screen-2xl">
+
+            <!-- MAIN ORANGE TODO CONTAINER -->
+            <div class="w-full rounded-2xl overflow-hidden shadow border border-[#FF9B00]/10 flex flex-col pt-8"
+                style="background-color: #FF9B00;">
+
+                <div class="px-8 pb-10">
+                    <h2 class="text-white text-xl font-bold mb-8">To Do</h2>
+
+                    <!-- Progress Tracker -->
+                    <div class="relative flex items-center justify-between w-full max-w-4xl mx-auto text-white">
+                        <!-- Connecting lines behind circles -->
+                        <div class="absolute top-[1.125rem] left-[10%] right-[10%] h-[1px] bg-white/30 z-0"></div>
+
+                        <!-- Step 1 -->
+                        <div onclick="switchTab('email')"
+                            class="relative z-10 flex flex-col items-center gap-2 cursor-pointer group">
+                            <div id="circle-email"
+                                class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#f05c04] font-bold shadow-md transition-all duration-300">
+                                <svg id="icon-email" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span id="num-email">1</span>
+                            </div>
+                            <span
+                                class="text-sm font-bold tracking-wide transition-opacity group-hover:opacity-80">Email</span>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div onclick="switchTab('address')"
+                            class="relative z-10 flex flex-col items-center gap-2 cursor-pointer group">
+                            <div id="circle-address"
+                                class="w-9 h-9 rounded-full border border-white bg-[#f05c04] flex items-center justify-center text-white transition-all duration-300">
+                                <svg id="icon-address" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span id="num-address">2</span>
+                            </div>
+                            <span
+                                class="text-sm font-bold tracking-wide transition-opacity group-hover:opacity-80">Address</span>
+                        </div>
+
+                        <!-- Step 3  -->
+                        <div onclick="switchTab('idbank')"
+                            class="relative z-10 flex flex-col items-center gap-2 cursor-pointer group">
+                            <div id="circle-idbank"
+                                class="w-9 h-9 rounded-full border border-white bg-[#f05c04] flex items-center justify-center text-white transition-all duration-300 font-bold">
+                                <svg id="icon-idbank" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span id="num-idbank">3</span>
+                            </div>
+                            <span
+                                class="text-sm font-bold tracking-wide text-white transition-opacity group-hover:opacity-80">ID
+                                Bank</span>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div onclick="switchTab('product')"
+                            class="relative z-10 flex flex-col items-center gap-2 cursor-pointer group">
+                            <div id="circle-product"
+                                class="w-9 h-9 rounded-full border border-white bg-[#f05c04] flex items-center justify-center text-white font-medium transition-all duration-300">
+                                4
+                            </div>
+                            <span
+                                class="text-sm font-bold tracking-wide text-white transition-opacity group-hover:opacity-80">Product</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inner White Card container -->
+                <div
+                    class="bg-white rounded-t-2xl px-6 py-12 w-full flex flex-col items-center shadow-[0_-10px_15px_rgba(0,0,0,0.05)] relative z-10 min-h-[400px]">
+
+                    <!-- ======================= -->
+                    <!-- TAB 1: EMAIL (Visible)  -->
+                    <!-- ======================= -->
+                    <div id="tab-email" class="w-full max-w-4xl animation-fadeIn">
+                        <div class="bg-gray-50 border border-gray-100 rounded-xl p-8 space-y-8 text-left">
+
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-6">
+                                <div class="w-full max-w-sm">
+                                    <p class="text-sm text-gray-500 font-medium mb-1">Login Email address</p>
+                                    <input type="email" id="email-field" value="{{ seller_email|default:'' }}"
+                                        placeholder="Not Provided"
+                                        class="text-lg text-gray-900 font-bold bg-transparent border-0 p-0 focus:ring-0 w-full outline-none placeholder-gray-400"
+                                        readonly>
+                                </div>
+                                <div class="flex items-center">
+                                    <button id="modify-email-btn" onclick="promptForModify('email')"
+                                        class="text-[#f05c04] font-bold text-sm hover:underline px-4 py-2 hover:bg-orange-50 rounded transition-colors">Modify</button>
+                                    <button id="save-email-btn" onclick="uiSaveField('email')"
+                                        class="hidden text-white bg-[#f05c04] hover:bg-[#d85102] font-bold text-sm px-6 py-2 rounded-lg transition-all shadow-sm">Save</button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-6">
+                                <div class="w-full max-w-sm">
+                                    <p class="text-sm text-gray-500 font-medium mb-1">Login Phone Number</p>
+                                    <input type="tel" id="phone-field" value="{{ seller_phone|default:'' }}"
+                                        placeholder="Not Provided"
+                                        class="text-lg text-gray-900 font-bold bg-transparent border-0 p-0 focus:ring-0 w-full outline-none placeholder-gray-400"
+                                        readonly>
+                                </div>
+                                <div class="flex items-center">
+                                    <button id="modify-phone-btn" onclick="promptForModify('phone')"
+                                        class="text-[#f05c04] font-bold text-sm hover:underline px-4 py-2 hover:bg-orange-50 rounded transition-colors">Modify</button>
+                                    <button id="save-phone-btn" onclick="uiSaveField('phone')"
+                                        class="hidden text-white bg-[#f05c04] hover:bg-[#d85102] font-bold text-sm px-6 py-2 rounded-lg transition-all shadow-sm">Save</button>
+                                </div>
+                            </div>
+
+
+
+                            <!-- Custom Password Verification Modal -->
+                            <div id="passwordVerifyModal"
+                                class="hidden fixed inset-0 bg-black/60 z-[9999] flex justify-center items-center backdrop-blur-sm transition-opacity">
+                                <div
+                                    class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all scale-100 opacity-100 m-4 relative">
+                                    <button onclick="closePasswordModal()"
+                                        class="absolute top-3 right-3 text-gray-500 hover:text-red-600 transition-colors border-2 border-gray-300 hover:border-red-500 rounded-sm bg-transparent hover:bg-transparent w-8 h-8 flex items-center justify-center z-[100] group">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                    <!-- Step 1: Verify Current Password -->
+                                    <div id="modal-step-1">
+                                        <div class="mb-6 pr-8">
+                                            <h3 class="text-xl font-bold text-gray-900">Security Verification</h3>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mb-6">Please enter your <strong>Store
+                                                Code</strong> to proceed.</p>
+
+                                        <div class="space-y-5">
+                                            <div>
+                                                <label class="block text-sm font-bold text-gray-700 mb-2">Store
+                                                    Code</label>
+                                                <input type="password" id="verify-current-password"
+                                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] transition-all bg-gray-50 focus:bg-white"
+                                                    placeholder="Enter store code...">
+                                                <p id="verify-error-msg"
+                                                    class="text-xs text-red-500 font-bold mt-2 hidden"></p>
+                                            </div>
+                                            <div class="flex gap-4 pt-2">
+                                                <button onclick="closePasswordModal()"
+                                                    class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
+                                                <button onclick="submitVerifyPassword()"
+                                                    class="flex-1 px-4 py-3 bg-[#f05c04] text-white font-bold rounded-xl hover:bg-[#d04b02] transition-colors shadow-[0_4px_14px_0_rgba(240,92,4,0.39)] hover:shadow-[0_6px_20px_rgba(240,92,4,0.23)]">Verify</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: Action Selection (Hidden initially) -->
+                                    <div id="modal-step-action" class="hidden">
+                                        <div class="mb-6">
+                                            <h3 class="text-xl font-bold text-gray-900">Verification Successful</h3>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mb-6">What would you like to do next?</p>
+                                        <div class="space-y-4">
+                                            <button onclick="showViewPassword()"
+                                                class="w-full text-left px-4 py-4 border-2 border-[#f05c04] text-[#f05c04] font-bold rounded-xl hover:bg-orange-50 transition-colors flex items-center justify-between">
+                                                <span>See Password</span>
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                            <button onclick="showChangePassword()"
+                                                class="w-full text-left px-4 py-4 bg-[#f05c04] text-white font-bold rounded-xl hover:bg-[#d04b02] transition-colors flex items-center justify-between shadow-[0_4px_14px_0_rgba(240,92,4,0.39)] hover:shadow-[0_6px_20px_rgba(240,92,4,0.23)]">
+                                                <span>Change Password</span>
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3: View Password (Hidden initially) -->
+                                    <div id="modal-step-view" class="hidden">
+                                        <div class="mb-6">
+                                            <h3 class="text-xl font-bold text-gray-900">Your Password</h3>
+                                        </div>
+                                        <div class="p-6 bg-gray-50 border border-gray-200 rounded-xl mb-6 text-center">
+                                            <p class="text-sm text-gray-500 mb-2">Current Login Password:</p>
+                                            <p id="view-actual-pass"
+                                                class="text-2xl font-black text-gray-900 tracking-wider">XYZ</p>
+                                        </div>
+                                        <div class="flex gap-4">
+                                            <button onclick="backToActionStep()"
+                                                class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">Back</button>
+                                            <button onclick="closePasswordModal()"
+                                                class="flex-1 px-4 py-3 bg-[#f05c04] text-white font-bold rounded-xl hover:bg-[#d04b02] transition-colors">Done</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 4: Change Password (Hidden initially) -->
+                                    <div id="modal-step-change" class="hidden">
+                                        <div class="mb-6">
+                                            <h3 class="text-xl font-bold text-gray-900">Change Password</h3>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mb-6">Enter a new secure password.</p>
+                                        <div class="space-y-5">
+                                            <div>
+                                                <input type="text" id="new-password-input"
+                                                    class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] transition-all bg-gray-50 focus:bg-white"
+                                                    placeholder="Type new password...">
+                                                <p id="change-error-msg"
+                                                    class="text-xs text-red-500 font-bold mt-2 hidden"></p>
+                                            </div>
+                                            <div class="flex gap-4 pt-2">
+                                                <button onclick="backToActionStep()"
+                                                    class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">Back</button>
+                                                <button onclick="saveNewPassword()"
+                                                    class="flex-1 px-4 py-3 bg-[#f05c04] text-white font-bold rounded-xl hover:bg-[#d04b02] transition-colors shadow-[0_4px_14px_0_rgba(240,92,4,0.39)] hover:shadow-[0_6px_20px_rgba(240,92,4,0.23)]">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Step 5: Success (Hidden initially) -->
+                                    <div id="modal-step-success" class="hidden text-center py-6">
+                                        <div
+                                            class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Success!</h3>
+                                        <p class="text-sm text-gray-500">Password saved successfully.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                                let emailSaved = false;
+                                let phoneSaved = false;
+
+
+
+                                function uiSaveField(field) {
+                                    let val = document.getElementById(field + '-field').value;
+                                    let btn = document.getElementById('save-' + field + '-btn');
+
+                                    if (val.trim() === '') {
+                                        alert("Field cannot be empty!");
+                                        return;
+                                    }
+
+                                    // Visual processing state
+                                    btn.innerHTML = "Saving...";
+                                    btn.disabled = true;
+
+                                    fetch('/update-seller-settings/', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ action: field, value: val })
+                                    })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            btn.disabled = false;
+                                            if (data.status === 'success') {
+                                                btn.innerHTML = "Saved &#10003;";
+                                                btn.classList.replace('bg-[#f05c04]', 'bg-green-500');
+                                                btn.classList.replace('hover:bg-[#d85102]', 'hover:bg-green-600');
+
+                                                setTimeout(() => {
+                                                    btn.classList.add('hidden');
+                                                    btn.innerHTML = "Save";
+                                                    btn.classList.replace('bg-green-500', 'bg-[#f05c04]');
+                                                    btn.classList.replace('hover:bg-green-600', 'hover:bg-[#d85102]');
+
+                                                    // Re-lock field after saving safely
+                                                    document.getElementById(field + '-field').setAttribute('readonly', 'true');
+                                                    let modBtn = document.getElementById('modify-' + field + '-btn');
+                                                    if (modBtn) modBtn.classList.remove('hidden');
+                                                }, 2000);
+
+                                                if (field === 'email') emailSaved = true;
+                                                if (field === 'phone') phoneSaved = true;
+                                                uiCheckStep1Completion();
+                                            } else {
+                                                btn.innerHTML = "Save";
+                                                alert("Failed to save. Please try again.");
+                                            }
+                                        }).catch(err => {
+                                            btn.disabled = false;
+                                            btn.innerHTML = "Save";
+                                            console.error(err);
+                                        });
+                                }
+
+                                function uiCheckStep1Completion() {
+                                    let svgNode = document.getElementById('icon-email');
+                                    let txtNode = document.getElementById('num-email');
+                                    if (!svgNode || !txtNode) return false;
+
+                                    if (emailSaved && phoneSaved) {
+                                        txtNode.classList.add('hidden');
+                                        svgNode.classList.remove('hidden');
+                                        return true;
+                                    } else {
+                                        txtNode.classList.remove('hidden');
+                                        svgNode.classList.add('hidden');
+                                        return false;
+                                    }
+                                }
+
+                                function uiCheckStep2Completion() {
+                                    const details = document.getElementById('wh_AddressDetails')?.value || '';
+                                    const svgNode = document.getElementById('icon-address');
+                                    const txtNode = document.getElementById('num-address');
+                                    if (!svgNode || !txtNode) return false;
+
+                                    if (details.trim() !== '') {
+                                        txtNode.classList.add('hidden');
+                                        svgNode.classList.remove('hidden');
+                                        return true;
+                                    } else {
+                                        txtNode.classList.remove('hidden');
+                                        svgNode.classList.add('hidden');
+                                        return false;
+                                    }
+                                }
+
+                                function uiCheckStep3Completion() {
+                                    const nameOnId = document.querySelector('input[placeholder="Input exactly the same as photo uploaded"]')?.value || '';
+                                    const accNo = document.querySelector('input[placeholder="Account Number"]')?.value || '';
+
+                                    const svgNode = document.getElementById('icon-idbank');
+                                    const txtNode = document.getElementById('num-idbank');
+                                    if (!svgNode || !txtNode) return false;
+
+                                    if (nameOnId.trim() !== '' && accNo.trim() !== '') {
+                                        txtNode.classList.add('hidden');
+                                        svgNode.classList.remove('hidden');
+                                        return true;
+                                    } else {
+                                        txtNode.classList.remove('hidden');
+                                        svgNode.classList.add('hidden');
+                                        return false;
+                                    }
+                                }
+
+                                document.addEventListener('input', (e) => {
+                                    if (e.target.closest('#tab-address')) uiCheckStep2Completion();
+                                    if (e.target.closest('#tab-idbank')) uiCheckStep3Completion();
+                                });
+                                document.addEventListener('change', (e) => {
+                                    if (e.target.closest('#tab-address')) uiCheckStep2Completion();
+                                    if (e.target.closest('#tab-idbank')) uiCheckStep3Completion();
+                                });
+
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    // Step 1 check
+                                    let eVal = document.getElementById('email-field')?.value || '';
+                                    let pVal = document.getElementById('phone-field')?.value || '';
+                                    if (eVal.trim() !== '') emailSaved = true;
+                                    if (pVal.trim() !== '') phoneSaved = true;
+
+                                    const s1 = uiCheckStep1Completion();
+                                    const s2 = uiCheckStep2Completion();
+                                    const s3 = uiCheckStep3Completion();
+
+                                    if (!s1) switchTab('email');
+                                    else if (!s2) switchTab('address');
+                                    else if (!s3) switchTab('idbank');
+                                    else switchTab('product');
+                                });
+
+                                function saveAddress() {
+                                    const details = document.getElementById('wh_AddressDetails').value;
+                                    const country = document.getElementById('wh_Country').value;
+                                    const province = document.getElementById('wh_Province').value;
+                                    const city = document.getElementById('wh_City').value;
+
+                                    fetch('/update-seller-settings/', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            action: 'address_update',
+                                            value: { details, country, province, city }
+                                        })
+                                    }).then(res => res.json()).then(data => {
+                                        if (data.status === 'success') {
+                                            alert("Address Saved Successfully!");
+                                            uiCheckStep2Completion();
+                                        }
+                                    });
+                                }
+
+                                function saveIdBank() {
+                                    const legal_name = document.querySelector('input[placeholder="Input exactly the same as photo uploaded"]').value;
+                                    const account_no = document.querySelector('input[placeholder="Account Number"]').value;
+                                    const bank_name = document.getElementById('bank_name')?.value || "";
+                                    const id_no = document.querySelector('input[placeholder="The official number on ID"]').value;
+                                    const tax_no = document.querySelector('input[placeholder="National Tax Number"]').value;
+                                    const iban = document.querySelector('input[placeholder="IBAN"]').value;
+                                    const bank_code = document.querySelector('input[placeholder="Bank Code"]').value;
+                                    const bank_branch = document.querySelector('input[placeholder="Bank Branch"]').value;
+                                    const business_address = document.querySelector('textarea[placeholder="Address Details: Number, Street, Landmark, etc."]').value;
+                                    const seller_type = document.querySelector('input[name="seller_type"]:checked')?.value || "personal";
+
+                                    fetch('/update-seller-settings/', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            action: 'idbank_update',
+                                            value: { legal_name, account_no, bank_name, id_no, tax_no, iban, bank_code, bank_branch, business_address, seller_type }
+                                        })
+                                    }).then(res => res.json()).then(data => {
+                                        if (data.status === 'success') {
+                                            alert("ID & Bank Info Saved Successfully!");
+                                            uiCheckStep3Completion();
+                                        }
+                                    });
+                                }
+
+                                window.activeModificationTarget = null;
+
+                                function promptForModify(targetType) {
+                                    window.activeModificationTarget = targetType;
+                                    let modal = document.getElementById('passwordVerifyModal');
+
+                                    // Reset steps
+                                    document.getElementById('modal-step-1').classList.remove('hidden');
+                                    document.getElementById('modal-step-action').classList.add('hidden');
+                                    document.getElementById('modal-step-view').classList.add('hidden');
+                                    document.getElementById('modal-step-change').classList.add('hidden');
+                                    document.getElementById('modal-step-success').classList.add('hidden');
+
+                                    // Reset error styling
+                                    document.getElementById('verify-error-msg').classList.add('hidden');
+                                    document.getElementById('change-error-msg').classList.add('hidden');
+
+                                    document.getElementById('verify-current-password').value = '';
+                                    modal.classList.remove('hidden');
+                                    document.getElementById('verify-current-password').focus();
+                                }
+
+                                function closePasswordModal() {
+                                    let modal = document.getElementById('passwordVerifyModal');
+                                    modal.classList.add('hidden');
+                                }
+
+                                function backToActionStep() {
+                                    document.getElementById('modal-step-1').classList.add('hidden');
+                                    document.getElementById('modal-step-view').classList.add('hidden');
+                                    document.getElementById('modal-step-change').classList.add('hidden');
+                                    document.getElementById('modal-step-action').classList.remove('hidden');
+                                }
+
+                                function submitVerifyPassword() {
+                                    let enteredPass = document.getElementById('verify-current-password').value;
+                                    let correctPass = "{{ seller_password|escapejs }}";
+                                    let errorMsg = document.getElementById('verify-error-msg');
+
+                                    if (enteredPass.trim() === "") {
+                                        errorMsg.textContent = "Store code cannot be empty.";
+                                        errorMsg.classList.remove('hidden');
+                                        return;
+                                    }
+
+                                    if (correctPass !== "" && enteredPass !== correctPass) {
+                                        errorMsg.textContent = "Incorrect store code. Please try again.";
+                                        errorMsg.classList.remove('hidden');
+                                        return;
+                                    }
+
+                                    errorMsg.classList.add('hidden');
+
+                                    if (window.activeModificationTarget === 'password') {
+                                        // Store email login password for view
+                                        let emailPass = document.getElementById('login-password-input').value;
+                                        document.getElementById('view-actual-pass').textContent = emailPass;
+
+                                        // Switch to actions
+                                        document.getElementById('modal-step-1').classList.add('hidden');
+                                        document.getElementById('modal-step-action').classList.remove('hidden');
+                                    } else {
+                                        // Direct unlock for email/phone fields!
+                                        let field = window.activeModificationTarget;
+                                        let input = document.getElementById(field + '-field');
+                                        let modifyBtn = document.getElementById('modify-' + field + '-btn');
+                                        let saveBtn = document.getElementById('save-' + field + '-btn');
+
+                                        input.removeAttribute('readonly');
+                                        modifyBtn.classList.add('hidden');
+                                        saveBtn.classList.remove('hidden');
+                                        if (field === 'email') emailSaved = false;
+                                        if (field === 'phone') phoneSaved = false;
+                                        uiCheckStep1Completion();
+
+                                        closePasswordModal();
+                                    }
+                                }
+
+                                function showViewPassword() {
+                                    document.getElementById('modal-step-action').classList.add('hidden');
+                                    document.getElementById('modal-step-view').classList.remove('hidden');
+                                }
+
+                                function showChangePassword() {
+                                    document.getElementById('modal-step-action').classList.add('hidden');
+                                    document.getElementById('change-error-msg').classList.add('hidden');
+                                    document.getElementById('new-password-input').value = '';
+                                    document.getElementById('modal-step-change').classList.remove('hidden');
+                                    document.getElementById('new-password-input').focus();
+                                }
+
+                                function saveNewPassword() {
+                                    let newVal = document.getElementById('new-password-input').value;
+                                    let errorMsg = document.getElementById('change-error-msg');
+
+                                    if (newVal.trim() === "") {
+                                        errorMsg.textContent = "New password cannot be empty.";
+                                        errorMsg.classList.remove('hidden');
+                                        return;
+                                    }
+
+                                    errorMsg.classList.add('hidden');
+
+                                    fetch('/update-seller-settings/', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ action: 'password', value: newVal })
+                                    })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data.status === 'success') {
+                                                // Update main input field manually behind the modal
+                                                document.getElementById('login-password-input').value = newVal;
+
+                                                // Switch to success modal step
+                                                document.getElementById('modal-step-change').classList.add('hidden');
+                                                document.getElementById('modal-step-success').classList.remove('hidden');
+
+                                                // Auto close after 2 seconds
+                                                setTimeout(() => {
+                                                    closePasswordModal();
+                                                }, 2000);
+                                            } else {
+                                                errorMsg.textContent = "Server failed to securely process password synchronization.";
+                                                errorMsg.classList.remove('hidden');
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error(err);
+                                            errorMsg.textContent = "Connection error. Please try again.";
+                                            errorMsg.classList.remove('hidden');
+                                        });
+                                }
+                            </script>
+
+                        </div>
+                    </div>
+
+                    <!-- ======================= -->
+                    <!-- TAB 2: ADDRESS          -->
+                    <!-- ======================= -->
+                    <div id="tab-address" class="w-full max-w-4xl animation-fadeIn hidden text-left">
+
+                        <!-- Warehouse Address -->
+                        <div class="mb-10 text-left">
+                            <h3 class="text-xl font-bold text-gray-900 mb-6">Warehouse Address</h3>
+
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Address Details (Number,
+                                        Street, Landmark, etc.) <span
+                                            class="text-[#f05c04] text-xs font-normal ml-2 px-2 py-0.5 bg-orange-100 rounded">Required</span></label>
+                                    <textarea id="wh_AddressDetails" rows="3"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] focus:border-transparent text-gray-700 bg-white shadow-sm"
+                                        placeholder="Address Details: Number, Street, Landmark, etc.">{{ seller_obj.address|default:'' }}</textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Country <span
+                                                class="text-[#f05c04] text-xs font-normal ml-2">Required</span></label>
+                                        <select id="wh_Country"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm font-medium">
+                                            <option value="" disabled selected>Select Country</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Province <span
+                                                class="text-[#f05c04] text-xs font-normal ml-2">Required</span></label>
+                                        <select id="wh_Province" disabled
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed font-medium">
+                                            <option value="" disabled selected>Select Province</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">City/District <span
+                                                class="text-[#f05c04] text-xs font-normal ml-2">Required</span></label>
+                                        <select id="wh_City" disabled
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed font-medium">
+                                            <option value="" disabled selected>Select City</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Detect Location Button -->
+                                <div class="mt-2 w-full flex justify-start">
+                                    <button type="button" id="btnDetectLoc" onclick="autoFillLocation()"
+                                        class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 w-max">
+                                        <svg class="w-4 h-4 text-[#f05c04]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        Auto-Fill Location (Asking Permission)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-200 mb-8">
+
+                        <!-- Return Address -->
+                        <div class="text-left">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-xl font-bold text-gray-900">Return Address</h3>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded-lg transition-colors shadow-sm select-none">
+                                    <input type="checkbox" id="sameAddressCheck"
+                                        class="w-4 h-4 text-[#f05c04] border-gray-300 rounded focus:ring-[#f05c04]"
+                                        onchange="toggleReturnAddress()">
+                                    <span class="text-gray-700 font-bold text-sm">Same as Warehouse Address</span>
+                                </label>
+                            </div>
+
+                            <div id="returnAddressSection"
+                                class="space-y-5 transition-all duration-300 origin-top overflow-hidden">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Address Details (Number,
+                                        Street, Landmark, etc.)</label>
+                                    <textarea rows="3"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] focus:border-transparent text-gray-700 bg-white shadow-sm"
+                                        placeholder="Please enter return address"></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Country</label>
+                                        <select id="rt_Country"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm font-medium">
+                                            <option value="" disabled selected>Select Country</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Province</label>
+                                        <select id="rt_Province" disabled
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed font-medium">
+                                            <option value="" disabled selected>Select Province</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">City/District</label>
+                                        <select id="rt_City" disabled
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed font-medium">
+                                            <option value="" disabled selected>Select City</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-start">
+                            <button onclick="saveAddress()"
+                                class="mt-8 bg-[#f05c04] hover:bg-[#d85102] text-white font-bold py-[12px] px-10 rounded-md transition-colors shadow-sm focus:outline-none focus:ring-4 focus:ring-orange-200">
+                                Save Address
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ======================= -->
+                    <!-- TAB 3: ID BANK          -->
+                    <!-- ======================= -->
+                    <div id="tab-idbank"
+                        class="w-full max-w-4xl animation-fadeIn hidden flex-col items-center text-left">
+                        <div class="w-full bg-white text-left text-gray-800">
+
+                            <!-- 1. Business Address -->
+                            <div class="mb-10">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Business Address</h3>
+                                <div class="space-y-5">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Address Details: Number, Street,
+                                            Landmark, etc.
+                                        </label>
+                                        <textarea rows="3"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Address Details: Number, Street, Landmark, etc.">{{ seller_obj.business_address|default:'' }}</textarea>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-2"><span
+                                                    class="text-red-500">*</span> Country</label>
+                                            <select id="ba_Country"
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm font-medium">
+                                                <option value="" disabled selected>Select Country</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-2"><span
+                                                    class="text-red-500">*</span> Province</label>
+                                            <select id="ba_Province" disabled
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed font-medium">
+                                                <option value="" disabled selected>Select Province</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-2"><span
+                                                    class="text-red-500">*</span> City/District</label>
+                                            <select id="ba_City" disabled
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed font-medium">
+                                                <option value="" disabled selected>Select City</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 mb-8">
+
+                            <!-- 2. Seller Type -->
+                            <div class="mb-10">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Seller Type</h3>
+                                <div class="flex items-center gap-6">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="seller_type" value="personal"
+                                            class="w-5 h-5 text-[#f05c04] focus:ring-[#f05c04]" {% if seller_obj.seller_type == 'personal' or not seller_obj.seller_type %}checked{% endif %}>
+                                        <span class="text-gray-700 font-medium text-lg">Personal</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="seller_type" value="business"
+                                            class="w-5 h-5 text-[#f05c04] focus:ring-[#f05c04]" {% if seller_obj.seller_type == 'business' %}checked{% endif %}>
+                                        <span class="text-gray-700 font-medium text-lg">Business</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 mb-8">
+
+                            <!-- 3. Upload ID Document -->
+                            <div class="mb-10">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Upload ID Document</h3>
+
+                                <div class="mb-5">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        <span class="text-red-500">*</span> ID Type
+                                    </label>
+                                    <input type="text" value="Personal ID" readonly
+                                        class="w-full max-w-md px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-600 font-medium cursor-not-allowed">
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+                                    <!-- ID Front -->
+                                    <div>
+                                        <h4 class="font-bold text-gray-700 mb-2">ID Document Upload</h4>
+                                        <p class="text-gray-500 mb-4 text-xs">You may follow these sample type(s). Full
+                                            list below.</p>
+                                        <div class="flex items-center justify-center w-full">
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden">
+                                                <div
+                                                    class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
+                                                    <svg class="w-10 h-10 mb-3 text-orange-400" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                        </path>
+                                                    </svg>
+                                                    <p class="mb-2 text-sm text-gray-500 font-bold">Drag or Click to
+                                                        Upload</p>
+                                                    <p class="text-xs text-gray-400">JPEG, PNG</p>
+                                                </div>
+                                                <input type="file" class="hidden" accept="image/jpeg, image/png"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- ID Back -->
+                                    <div>
+                                        <h4 class="font-bold text-gray-700 mb-2">ID Back Side</h4>
+                                        <p class="text-gray-500 mb-4 text-xs">You may follow these sample type(s). Full
+                                            list below.</p>
+                                        <div class="flex items-center justify-center w-full">
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden">
+                                                <div
+                                                    class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
+                                                    <svg class="w-10 h-10 mb-3 text-orange-400" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                        </path>
+                                                    </svg>
+                                                    <p class="mb-2 text-sm text-gray-500 font-bold">Drag or Click to
+                                                        Upload</p>
+                                                    <p class="text-xs text-gray-400">JPEG, PNG</p>
+                                                </div>
+                                                <input type="file" class="hidden" accept="image/jpeg, image/png"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 mb-8">
+
+                            <!-- 4. Verify ID Information -->
+                            <div class="mb-10 border border-gray-200 bg-gray-50 rounded-xl p-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Verify ID Information</h3>
+
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Name on ID (Need be exactly the same)
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.legal_name|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Input exactly the same as photo uploaded">
+                                        <p class="text-xs text-red-500 mt-1">Required Field</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Identity Card No.
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.id_no|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="The official number on ID">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> National Tax Number
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.tax_no|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="National Tax Number">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 mb-8">
+
+                            <!-- 5. Upload Bank Document -->
+                            <div class="mb-10">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Upload Bank Document</h3>
+                                <p class="text-gray-500 mb-6 text-sm">Size between 330x330 and 5000x5000 px, and image
+                                    size below 10M.</p>
+
+                                <div class="w-full max-w-sm">
+                                    <h4 class="font-bold text-gray-700 mb-3">Upload Bank Document</h4>
+                                    <div class="flex items-center justify-center w-full">
+                                        <label
+                                            class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden">
+                                            <div
+                                                class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
+                                                <svg class="w-10 h-10 mb-3 text-orange-400" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                    </path>
+                                                </svg>
+                                                <p class="mb-2 text-sm text-gray-500 font-bold">Drag or Click to Upload
+                                                </p>
+                                                <p class="text-xs text-center text-gray-400 px-4 mt-2">You may follow
+                                                    these sample type(s). Full list below.</p>
+                                            </div>
+                                            <input type="file" class="hidden" accept="image/jpeg, image/png"
+                                                onchange="previewImageInBox(this)" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 mb-8">
+
+                            <!-- 6. Verify Bank Information -->
+                            <div class="mb-10 border border-gray-200 bg-gray-50 rounded-xl p-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Verify Bank Information</h3>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Account Name
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.legal_name|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Account Name">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Account Number
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.account_no|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Account Number">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> IBAN
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.iban|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="IBAN">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Bank Name
+                                        </label>
+                                        <select id="bank_name"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white">
+                                            <option value="" disabled {% if not seller_obj.bank_name %}selected{% endif %}>Select Bank</option>
+                                            <option value="hbl" {% if seller_obj.bank_name == 'hbl' %}selected{% endif %}>HBL</option>
+                                            <option value="meezan" {% if seller_obj.bank_name == 'meezan' %}selected{% endif %}>Meezan Bank</option>
+                                            <option value="alfalah" {% if seller_obj.bank_name == 'alfalah' %}selected{% endif %}>Bank Alfalah</option>
+                                            <option value="other" {% if seller_obj.bank_name == 'other' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Bank Code
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.bank_code|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Bank Code">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Bank Branch
+                                        </label>
+                                        <input type="text" value="{{ seller_obj.bank_branch|default:'' }}"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Bank Branch">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-start">
+                                <button onclick="saveIdBank()"
+                                    class="bg-[#f05c04] hover:bg-[#d85102] text-white font-bold py-[12px] px-12 rounded-md transition-colors shadow-sm focus:outline-none focus:ring-4 focus:ring-orange-200">
+                                    Submit Information
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ======================= -->
+                    <!-- TAB 4: PRODUCT          -->
+                    <!-- ======================= -->
+                    <div id="tab-product" class="w-full max-w-4xl animation-fadeIn hidden flex-col text-left">
+                        <form id="productForm" method="POST" enctype="multipart/form-data"
+                            class="w-full bg-white text-left text-gray-800">
+                            {% csrf_token %}
+
+                            <!-- 1. Basic Information -->
+                            <div class="mb-10">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Basic Information</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-1">
+                                            <span class="text-red-500">*</span> Product Name
+                                        </label>
+                                        <p class="text-xs text-gray-500 mb-2">Multiple language title will be showed
+                                            when buyers change their APPs' defalut language setting. Setting it up can
+                                            help improve product recall in Apps targeted at different languages.</p>
+                                        <input type="text" name="product_name" required
+                                            oninput="this.value = this.value.replace(/[{}\[\]]/g, '')"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                            placeholder="Please enter the product name">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-1">
+                                            <span class="text-red-500">*</span> Product Description
+                                        </label>
+                                        <textarea rows="4" name="product_desc" required
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] resize-none"
+                                            placeholder="Please describe your product details..."></textarea>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 gap-6 mt-4">
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-1">
+                                                <span class="text-red-500">*</span> Your Country
+                                            </label>
+                                            <select name="your_country"
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white text-gray-700">
+                                                <option value="" disabled selected>Select your country...</option>
+                                                {% include 'countries_options.html' %}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-1">
+                                                Brand Name (Select from list)
+                                            </label>
+                                            <select name="brand_name" onchange="updateBrandCountry(this)"
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white">
+                                                <option value="" disabled selected>Select a brand...</option>
+                                                <option value="no_brand">No Brand (Unbranded)</option>
+                                                {% include 'brands_options.html' %}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-1">
+                                                Or Enter Manually
+                                            </label>
+                                            <input type="text" name="brand_manual"
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]"
+                                                placeholder="Type your own brand name">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-1">
+                                                Brand Country
+                                            </label>
+                                            <input type="text" id="brandCountryInput" readonly
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-gray-50 text-gray-600 font-medium cursor-not-allowed"
+                                                placeholder="Auto-filled">
+                                        </div>
+                                    </div>
+                                    <script>
+                                        function updateBrandCountry(selectElement) {
+                                            const selectedOption = selectElement.options[selectElement.selectedIndex];
+                                            const country = selectedOption.getAttribute('data-country');
+                                            const input = document.getElementById('brandCountryInput');
+                                            if (country) {
+                                                input.value = country;
+                                            } else {
+                                                input.value = '';
+                                            }
+                                        }
+                                    </script>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200 mb-8">
+
+                            <!-- 2. Product Images and Video -->
+                            <div class="mb-10">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6"><span class="text-red-500">*</span>
+                                    Product Images & Video</h3>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <!-- Images -->
+                                    <div class="border border-gray-200 rounded-xl p-6 bg-gray-50">
+                                        <h4 class="font-bold text-gray-800 mb-2">Images</h4>
+                                        <p class="text-xs text-gray-500 mb-4">You can upload up to 6 images maximum.
+                                            Include one front picture.</p>
+
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                                <span class="text-xl font-bold text-orange-400">+</span>
+                                                <span class="text-[10px] text-gray-500 mt-1">Front Pic</span>
+                                                <input type="file" name="product_image" required class="hidden"
+                                                    accept="image/*" onchange="previewImageInBox(this)" />
+                                            </label>
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                                <span class="text-xl font-bold text-orange-400">+</span>
+                                                <input type="file" name="image2" class="hidden" accept="image/*"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                                <span class="text-xl font-bold text-orange-400">+</span>
+                                                <input type="file" name="image3" class="hidden" accept="image/*"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                                <span class="text-xl font-bold text-orange-400">+</span>
+                                                <input type="file" name="image4" class="hidden" accept="image/*"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                                <span class="text-xl font-bold text-orange-400">+</span>
+                                                <input type="file" name="image5" class="hidden" accept="image/*"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                            <label
+                                                class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                                <span class="text-xl font-bold text-orange-400">+</span>
+                                                <input type="file" name="image6" class="hidden" accept="image/*"
+                                                    onchange="previewImageInBox(this)" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Video -->
+                                    <div class="border border-gray-200 rounded-xl p-6 bg-gray-50">
+                                        <h4 class="font-bold text-gray-800 mb-2">Video (Optional)</h4>
+                                        <p class="text-xs text-gray-500 mb-4">Upload a video in MP4 format only.</p>
+
+                                        <label
+                                            class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-orange-50 transition-colors relative overflow-hidden">
+                                            <svg class="w-6 h-6 mb-1 text-orange-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                            <span class="text-xs text-gray-500 font-bold mt-1">Upload MP4</span>
+                                            <input type="file" name="product_video" class="hidden" accept="video/mp4" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 bg-white shadow-sm rounded-xl p-6 mb-6">
+                                <h4 class="font-bold text-gray-800 mb-4 text-lg"><span class="text-red-500">*</span>
+                                    Price & Stock</h4>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <!-- Price -->
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Price (Rs.)
+                                        </label>
+                                        <input type="number" name="price" required placeholder="0.00"
+                                            class="w-full px-4 py-3 font-bold text-[#f05c04] rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]">
+                                    </div>
+
+                                    <!-- Stock -->
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                                            <span class="text-red-500">*</span> Stock
+                                        </label>
+                                        <input type="number" name="stock" required placeholder="0"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]">
+                                    </div>
+
+                                    <!-- Discount/Free Items -->
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Free Items</label>
+                                        <input type="text" name="free_items" placeholder="0"
+                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]">
+                                    </div>
+
+                                    <!-- Warranty Section -->
+                                    <div
+                                        class="col-span-1 sm:col-span-2 md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t border-gray-100 pt-6">
+                                        <div>
+                                            <label class="block text-gray-700 text-sm font-bold mb-2">Warranty
+                                                Type</label>
+                                            <select name="warranty_type" onchange="toggleWarranty(this)"
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-white">
+                                                <option value="No Warranty" selected>No Warranty</option>
+                                                <option value="In Warranty">In Warranty</option>
+                                            </select>
+                                        </div>
+                                        <div id="warrantyPeriodDiv"
+                                            class="opacity-50 pointer-events-none transition-opacity duration-300">
+                                            <label class="block text-gray-700 text-sm font-bold mb-2">Warranty
+                                                Period</label>
+                                            <input type="text" name="warranty_policy" id="warrantyPolicyInput"
+                                                placeholder="e.g., 1 Year, 6 Months" disabled
+                                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#f05c04]">
+                                        </div>
+                                    </div>
+                                    <script>
+                                        function toggleWarranty(select) {
+                                            const periodDiv = document.getElementById('warrantyPeriodDiv');
+                                            const policyInput = document.getElementById('warrantyPolicyInput');
+                                            if (select.value === 'In Warranty') {
+                                                periodDiv.classList.remove('opacity-50', 'pointer-events-none');
+                                                policyInput.removeAttribute('disabled');
+                                                policyInput.required = true;
+                                            } else {
+                                                periodDiv.classList.add('opacity-50', 'pointer-events-none');
+                                                policyInput.setAttribute('disabled', 'disabled');
+                                                policyInput.required = false;
+                                                policyInput.value = '';
+                                            }
+                                        }
+                                    </script>
+                                </div>
+                            </div>
+                    </div>
+
+                    </form>
+                    <div id="common-submit-area" class="w-full flex justify-start mt-10"
+                        style="margin-left: 25%; margin-top: -0%;">
+                        <button type="submit" form="productForm"
+                            class="w-full md:w-auto bg-[#f05c04] hover:bg-[#d85102] text-white font-bold py-[14px] px-16 rounded-lg transition-colors shadow focus:outline-none focus:ring-4 focus:ring-orange-200 text-lg">
+                            Submit Product
+                        </button>
+                    </div>
+                    <!-- ======================= -->
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div> <!-- END MAIN PADDED CONTENT -->
+
+<!-- PRODUCTS CONTENT (Hidden by default) -->
+<div id="mainSectionProducts" class="hidden w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-8 max-w-screen-2xl">
+    <!-- Header with Bold Title -->
+    <div class="mb-2 pt-4">
+        <h3 class="text-4xl font-black text-gray-900 uppercase tracking-tight">Manage Products</h3>
+    </div>
+
+    <div class="flex-grow">
+        {% if seller_products %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-32">
+            <!-- Add Product as the first card if desired, or keep it separate. User said 'phaly jasa' -->
+            <div onclick="goToPublishProduct()"
+                class="bg-orange-50 rounded-3xl border-2 border-dashed border-[#f05c04] flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-orange-100 transition-all group min-h-[400px]">
+                <div
+                    class="w-16 h-16 bg-[#f05c04] rounded-full flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold text-[#f05c04]">Add New Product</span>
+            </div>
+            {% for p in seller_products %}
+            <div
+                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all group relative h-full flex flex-col">
+                <div class="aspect-video w-full overflow-hidden bg-gray-50 relative">
+                    {% if p.image %}
+                    <!-- 🔥 PRODUCT IMAGE HERE. YOU CAN CHANGE THE CLASSES IN THE <img> TAG BELOW -->
+                    <!-- Use 'w-full', 'w-[200px]', 'h-full', 'h-[250px]', 'object-contain', or 'object-cover' to adjust size -->
+                    <img src="/static/{{ p.image.name }}"
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        alt="{{ p.name }}">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-300">No Image</div>
+                    {% endif %}
+                    <div class="absolute top-4 right-4 z-10 transition-transform hover:scale-105">
+                        <button type="button"
+                            onclick="toggleProductStatus('{{ p.id }}', '{% if p.is_available %}true{% else %}false{% endif %}', this)"
+                            class="cursor-pointer px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider {% if p.is_available %}bg-green-100 text-green-600 hover:bg-red-100 hover:text-red-700{% else %}bg-red-100 text-red-600 hover:bg-green-100 hover:text-green-700{% endif %} focus:outline-none shadow text-center focus:ring-2 focus:ring-offset-1 focus:ring-orange-200">
+                            {% if p.is_available %}Active{% else %}Inactive{% endif %}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-6 flex-grow flex flex-col">
+                    <h4 class="font-bold text-lg text-gray-900 line-clamp-2 mb-2">{{ p.name }}</h4>
+                    <p class="text-gray-500 text-sm line-clamp-2 mb-4 flex-grow">{{ p.description|default:"No description provided." }}</p>
+                    <div class="flex items-center justify-between mt-auto">
+                        <p class="font-bold text-xl text-[#f05c04]">Rs. {{ p.price }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">In Stock</span>
+                            <span class="font-black text-gray-900 text-lg">{{ p.stock }} <small
+                                    class="text-xs text-gray-500 font-bold">units</small></span>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button data-pid="{{ p.id }}" data-name="{{ p.name|escapejs }}"
+                                data-desc="{{ p.description|escapejs }}" data-price="{{ p.price }}"
+                                data-stock="{{ p.stock }}"
+                                data-available="{% if p.is_available %}true{% else %}false{% endif %}"
+                                data-brand="{{ p.brand|escapejs }}" data-warranty="{{ p.warranty_policy|escapejs }}"
+                                onclick="openEditProductMode(this)"
+                                class="bg-[#FF9B00] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-orange-600 transition-all shadow-md shadow-orange-100">
+                                Edit Info
+                            </button>
+                            <button onclick="confirmDeleteProduct('{{ p.id }}')"
+                                class="bg-red-50 text-red-500 p-2.5 rounded-xl font-bold text-sm hover:bg-red-500 hover:text-white transition-all border border-red-100">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div
+    class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center min-h-[400px] flex flex-col items-center justify-center animation-fadeIn">
+    <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+    </div>
+    <h3 class="text-2xl font-black text-gray-800 mb-2">First Item Awaits!</h3>
+    <p class="text-gray-500 font-medium max-w-md mb-8">You haven't added any products yet. Get started by publishing
+        your first item.</p>
+    <button onclick="goToPublishProduct()"
+        class="bg-[#f05c04] text-white px-10 py-4 rounded-xl font-black text-xl shadow-xl shadow-orange-200 hover:scale-105 transition-all">Publish
+        New Product</button>
+</div>
+{% endif %}
+</div>
+
+<!-- COMPLAINTS CONTENT (Hidden by default) -->
+<div id="mainSectionComplains" class="hidden w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-8 max-w-screen-2xl">
+    <div class="mb-2 pt-4">
+        <h3 class="text-4xl font-black text-gray-900 uppercase tracking-tight">Store Complaints</h3>
+    </div>
+
+    <!-- Inbox Style Container -->
+    <div
+        class="bg-white rounded-[3rem] shadow-[0_30px_60px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden min-h-[700px] flex">
+
+        <!-- Sidebar List -->
+        <div class="w-[35%] border-r border-gray-100 bg-gray-50/50 flex flex-col">
+            <div class="p-8 border-b border-gray-100 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.02)] relative z-10">
+                <div class="relative">
+                    <input type="text" placeholder="Search complaints..."
+                        class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold placeholder-gray-400 focus:ring-4 focus:ring-[#FF9900]/20 focus:border-[#FF9900] outline-none transition-all shadow-inner">
+                    <svg class="w-5 h-5 absolute left-4 top-4 text-gray-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="overflow-y-auto flex-grow p-4 space-y-3 custom-scrollbar">
+                {% if store_complaints %}
+                {% for msg in store_complaints %}
+                <div class="p-5 rounded-2xl bg-white cursor-pointer transition-all duration-300 border border-transparent hover:border-[#FF9900] hover:shadow-[0_10px_30px_rgba(255,153,0,0.15)] group relative overflow-hidden"
+                    onclick="showSellerComplaint('{{ msg.id }}')">
+                    <div
+                        class="absolute top-0 left-0 w-1 h-full bg-[#FF9900] transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300">
+                    </div>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-[#14213d] flex items-center justify-center text-white font-black text-lg shadow-md">
+                                {{ msg.sender.username|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <h4
+                                    class="font-black text-gray-900 text-sm truncate pr-2 group-hover:text-[#FF9900] transition-colors">
+                                    {{ msg.sender.username }}</h4>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{
+                                    msg.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs font-black text-gray-800 truncate mb-2 leading-relaxed">{{ msg.subject }}</p>
+                    <p class="text-[11px] text-gray-500 truncate font-medium">{{ msg.body }}</p>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="p-10 flex flex-col items-center justify-center text-center h-full">
+                    <div
+                        class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4 shadow-inner">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                            </path>
+                        </svg>
+                    </div>
+                    <p class="text-sm font-black text-gray-400 uppercase tracking-widest">Inbox Empty</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Message View -->
+        <div class="w-[65%] bg-white flex flex-col items-center justify-center text-gray-300 relative"
+            id="seller-complaint-view-empty">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-white"></div>
+            <div class="relative z-10 flex flex-col items-center">
+                <div
+                    class="w-32 h-32 bg-gray-50 rounded-[2.5rem] flex items-center justify-center text-gray-200 mb-6 shadow-inner border border-gray-100">
+                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <p class="font-black uppercase tracking-[0.3em] text-sm text-gray-400">Select a complaint to view</p>
+            </div>
+        </div>
+
+        {% for msg in store_complaints %}
+        <div class="w-[65%] bg-white flex-col hidden seller-complaint-detail h-full" id="seller-complaint-{{ msg.id }}">
+            <div class="p-10 border-b border-gray-100 bg-white relative">
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-50 to-transparent rounded-bl-[4rem]">
+                </div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span
+                            class="bg-red-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-md">Complaint</span>
+                        <span class="text-xs font-black text-gray-400 bg-gray-100 px-4 py-1.5 rounded-lg">{{
+                            msg.created_at|date:"M d, Y - h:i A" }}</span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-8 tracking-tighter leading-[1.1]">{{
+                        msg.subject }}</h2>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Reported
+                                    By User</p>
+                                <p class="text-sm font-black text-gray-900">{{ msg.sender.username }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-10 flex-grow overflow-y-auto bg-gray-50/30">
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Complaint Description
+                </p>
+                <div
+                    class="bg-white p-8 rounded-3xl border border-gray-100 text-gray-700 leading-relaxed font-medium text-sm shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
+                    {{ msg.body|linebreaks }}
+                </div>
+            </div>
+
+            <div class="p-8 border-t border-gray-100 bg-white flex gap-4 items-center">
+                <div class="flex-grow relative">
+                    <input type="text" placeholder="Type a response message..."
+                        class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-5 pr-12 py-4 text-sm font-bold placeholder-gray-400 focus:ring-4 focus:ring-[#FF9900]/20 focus:border-[#FF9900] outline-none transition-all shadow-inner">
+                    <button
+                        class="absolute right-3 top-3 w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-xl flex items-center justify-center text-gray-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+                <button
+                    class="bg-[#14213d] hover:bg-[#FF9900] hover:shadow-[0_15px_30px_rgba(255,153,0,0.3)] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 group">
+                    Send Reply
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <script>
+        function showSellerComplaint(id) {
+            document.getElementById('seller-complaint-view-empty').classList.add('hidden');
+            document.querySelectorAll('.seller-complaint-detail').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+            const selected = document.getElementById('seller-complaint-' + id);
+            if (selected) {
+                selected.classList.remove('hidden');
+                selected.classList.add('flex');
+            }
+        }
+    </script>
+</div>
+
+<!-- CHATS CONTENT (Hidden by default) -->
+<div id="mainSectionChats" class="hidden w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl">
+    <div class="bg-white rounded-[3rem] shadow-[0_30px_60px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden min-h-[800px] flex flex-col">
+        {% include 'seller_chats.html' %}
+    </div>
+</div>
+
+
+<script>
+    function goToPublishProduct() {
+        const form = document.getElementById('productForm');
+        if (form) {
+            form.reset();
+            let actionInput = form.querySelector('[name="action"]');
+            if (actionInput) actionInput.value = "add_product";
+
+            let pidInput = form.querySelector('[name="pid"]');
+            if (pidInput) pidInput.remove();
+
+            const header = document.querySelector('#tab-product h3');
+            if (header) header.innerText = "Upload New Product";
+
+            const submitBtn = document.querySelector('button[form="productForm"]');
+            if (submitBtn) {
+                submitBtn.innerText = "Submit Product";
+                if (submitBtn.classList.contains('bg-[#FF9B00]')) {
+                    submitBtn.classList.replace('bg-[#FF9B00]', 'bg-[#f05c04]');
+                }
+            }
+        }
+
+        switchMainNav('home');
+        switchTab('product');
+        document.getElementById('mainSectionHome').scrollIntoView({ behavior: "smooth" });
+    }
+
+    // --- Product Active/Inactive Toggle Logic (Instant, No Reload!) ---
+    let currentTogglePid = null;
+    let currentNewStatus = null;
+    let currentToggleBtnEl = null;
+
+    function toggleProductStatus(pid, currentIsAvailableStr, btnEl) {
+        const currentIsAvailable = (currentIsAvailableStr === 'true');
+        currentTogglePid = pid;
+        currentNewStatus = !currentIsAvailable;
+        currentToggleBtnEl = btnEl;
+
+        const title = currentIsAvailable ? "Deactivate Product?" : "Activate Product?";
+        const txt = currentIsAvailable
+            ? "Are you sure you want to deactivate this product? It will be hidden from buyers."
+            : "Are you sure you want to activate this product? It will be visible to buyers.";
+
+        document.getElementById('activeModalTitle').innerText = title;
+        document.getElementById('activeModalText').innerText = txt;
+
+        document.getElementById('activeConfirmModal').classList.remove('hidden');
+        document.getElementById('activeConfirmModal').classList.add('flex');
+    }
+
+    function closeActiveModal() {
+        document.getElementById('activeConfirmModal').classList.add('hidden');
+        document.getElementById('activeConfirmModal').classList.remove('flex');
+        currentTogglePid = null;
+        currentToggleBtnEl = null;
+    }
+
+    async function actuallyToggleProduct() {
+        if (!currentTogglePid) return;
+
+        const confirmBtn = document.getElementById('btnDoActive');
+        confirmBtn.innerText = "Updating...";
+        confirmBtn.disabled = true;
+
+        const btnEl = currentToggleBtnEl;
+        const originalHtml = btnEl.innerHTML;
+        btnEl.innerText = "...";
+
+        const formData = new FormData();
+        formData.append('pid', currentTogglePid);
+        formData.append('is_available', currentNewStatus ? 'true' : 'false');
+
+        try {
+            const response = await fetch('{% url "update_product" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (response.ok && data.status === 'success') {
+                // Update DOM elements instantly
+                btnEl.innerText = currentNewStatus ? "Active" : "Inactive";
+                btnEl.className = `cursor-pointer px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${currentNewStatus ? 'bg-green-100 text-green-600 hover:bg-red-100 hover:text-red-700' : 'bg-red-100 text-red-600 hover:bg-green-100 hover:text-green-700'} focus:outline-none shadow text-center focus:ring-2 focus:ring-offset-1 focus:ring-orange-200`;
+
+                // Update the onclick attribute with the new string status
+                btnEl.setAttribute('onclick', `toggleProductStatus('${currentTogglePid}', '${currentNewStatus ? 'true' : 'false'}', this)`);
+
+            } else {
+                alert("Error: " + (data.message || response.statusText));
+                btnEl.innerHTML = originalHtml;
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to update status. Please try again.");
+            btnEl.innerHTML = originalHtml;
+        } finally {
+            confirmBtn.innerText = "Yes, Change It";
+            confirmBtn.disabled = false;
+            closeActiveModal();
+        }
+    }
+
+    function switchMainNav(tab) {
+        let homeTab = document.getElementById('navTabHome');
+        let productsTab = document.getElementById('navTabProducts');
+        let chatsTab = document.getElementById('navTabChats');
+        let complainsTab = document.getElementById('navTabComplains');
+
+        let homeSection = document.getElementById('mainSectionHome');
+        let productsSection = document.getElementById('mainSectionProducts');
+        let chatsSection = document.getElementById('mainSectionChats');
+        let complainsSection = document.getElementById('mainSectionComplains');
+
+        // Reset all buttons
+        [homeTab, productsTab, chatsTab, complainsTab].forEach(btn => {
+            if (btn) {
+                btn.classList.remove('scale-105', 'shadow-md', 'border-2', 'border-black');
+                btn.classList.add('scale-100', 'shadow-sm');
+            }
+        });
+
+        // Hide all sections
+        [homeSection, productsSection, chatsSection, complainsSection].forEach(sec => {
+            if (sec) {
+                sec.classList.add('hidden');
+                sec.classList.remove('block');
+            }
+        });
+
+        // Activate selected
+        if (tab === 'home') {
+            homeTab.classList.add('scale-105', 'shadow-md', 'border-2', 'border-black');
+            homeTab.classList.remove('scale-100', 'shadow-sm');
+            homeSection.classList.remove('hidden');
+            homeSection.classList.add('block');
+        } else if (tab === 'products') {
+            productsTab.classList.add('scale-105', 'shadow-md', 'border-2', 'border-black');
+            productsTab.classList.remove('scale-100', 'shadow-sm');
+            productsSection.classList.remove('hidden');
+            productsSection.classList.add('block');
+        } else if (tab === 'chats') {
+            if (chatsTab) {
+                chatsTab.classList.add('scale-105', 'shadow-md', 'border-2', 'border-black');
+                chatsTab.classList.remove('scale-100', 'shadow-sm');
+            }
+            if (chatsSection) {
+                chatsSection.classList.remove('hidden');
+                chatsSection.classList.add('block');
+            }
+        } else if (tab === 'complains') {
+            if (complainsTab) {
+                complainsTab.classList.add('scale-105', 'shadow-md', 'border-2', 'border-black');
+                complainsTab.classList.remove('scale-100', 'shadow-sm');
+            }
+            if (complainsSection) {
+                complainsSection.classList.remove('hidden');
+                complainsSection.classList.add('block');
+            }
+        }
+    }
+
+    // --- Product Edit Logic ---
+    function openEditProductModal(btn) {
+        const pid = btn.getAttribute('data-pid');
+        const name = btn.getAttribute('data-name');
+        const desc = btn.getAttribute('data-desc');
+        const price = btn.getAttribute('data-price');
+        const stock = btn.getAttribute('data-stock');
+        const available = btn.getAttribute('data-available');
+
+        document.getElementById('edit-pid').value = pid;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-desc').value = desc;
+        document.getElementById('edit-price').value = price;
+        document.getElementById('edit-stock').value = stock;
+        document.getElementById('edit-available').checked = (available === 'true');
+
+        document.getElementById('editProductModal').classList.remove('hidden');
+        document.getElementById('editProductModal').classList.add('flex');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editProductModal').classList.add('hidden');
+        document.getElementById('editProductModal').classList.remove('flex');
+    }
+
+    document.getElementById('editProductForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnUpdateProduct');
+        const oldText = btn.innerText;
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        const formData = new FormData(this);
+        // Handle checkbox
+        formData.set('is_available', document.getElementById('edit-available').checked ? 'true' : 'false');
+
+        try {
+            const response = await fetch('/update-product/', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                location.reload(); // Reload to show updated data
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Update failed:", error);
+            alert("Failed to update product.");
+        } finally {
+            btn.innerText = oldText;
+            btn.disabled = false;
+        }
+    });
+
+    // --- Delete Product Logic ---
+    let currentDeletePid = null;
+    function confirmDeleteProduct(pid) {
+        currentDeletePid = pid;
+        document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        document.getElementById('deleteConfirmModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteConfirmModal').classList.add('hidden');
+        document.getElementById('deleteConfirmModal').classList.remove('flex');
+        currentDeletePid = null;
+    }
+
+    async function actuallyDeleteProduct() {
+        if (!currentDeletePid) return;
+
+        const btn = document.getElementById('btnDoDelete');
+        btn.innerText = "Deleting...";
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('pid', currentDeletePid);
+
+        try {
+            const response = await fetch('/delete-product/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                location.reload();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Failed to delete product.");
+        } finally {
+            btn.innerText = "Yes, Delete It";
+            btn.disabled = false;
+            closeDeleteModal();
+        }
+    }
+
+    // --- Integrated Edit Info Mode (No Modal) ---
+    function openEditProductMode(btn) {
+        const pid = btn.getAttribute('data-pid');
+        const name = btn.getAttribute('data-name');
+        const desc = btn.getAttribute('data-desc');
+        const price = btn.getAttribute('data-price');
+        const stock = btn.getAttribute('data-stock');
+        const available = btn.getAttribute('data-available');
+        const brand = btn.getAttribute('data-brand') || '';
+
+        // 1. Switch Tabs
+        switchMainNav('home');
+        switchTab('product');
+
+        // 2. Change Form to Edit Mode
+        const form = document.getElementById('productForm');
+        // Add Action hidden input if it doesn't exist
+        let actionInput = form.querySelector('[name="action"]');
+        if (!actionInput) {
+            actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            form.appendChild(actionInput);
+        }
+        actionInput.value = "update_product";
+
+        // Add PID hidden input if it doesn't exist
+        let pidInput = form.querySelector('[name="pid"]');
+        if (!pidInput) {
+            pidInput = document.createElement('input');
+            pidInput.type = 'hidden';
+            pidInput.name = 'pid';
+            form.appendChild(pidInput);
+        }
+        pidInput.value = pid;
+        
+        // Remove required attribute from image if editing
+        const mainImgInput = form.querySelector('[name="product_image"]');
+        if (mainImgInput) mainImgInput.removeAttribute('required');
+
+        // 3. Populate Fields
+        form.querySelector('[name="product_name"]').value = name;
+        form.querySelector('[name="product_desc"]').value = desc;
+        form.querySelector('[name="price"]').value = price;
+        form.querySelector('[name="stock"]').value = stock;
+
+        // Warranty Handling
+        const warrantyVal = btn.getAttribute('data-warranty');
+        const warrantySelect = form.querySelector('[name="warranty_type"]');
+        const warrantyInput = form.querySelector('[name="warranty_policy"]');
+        if (warrantySelect) {
+            if (warrantyVal && warrantyVal !== 'None' && warrantyVal !== 'No Warranty' && warrantyVal.trim() !== '') {
+                warrantySelect.value = 'In Warranty';
+                if (typeof toggleWarranty === 'function') toggleWarranty(warrantySelect);
+                if (warrantyInput) warrantyInput.value = warrantyVal;
+            } else {
+                warrantySelect.value = 'No Warranty';
+                if (typeof toggleWarranty === 'function') toggleWarranty(warrantySelect);
+            }
+        }
+
+        // Populate Brand and trigger Country population
+        const brandSelect = form.querySelector('[name="brand_name"]');
+        const brandManual = form.querySelector('[name="brand_manual"]');
+
+        let optionExists = false;
+        for (let i = 0; i < brandSelect.options.length; i++) {
+            if (brandSelect.options[i].value === brand) {
+                optionExists = true;
+                break;
+            }
+        }
+
+        if (brand && optionExists) {
+            brandSelect.value = brand;
+            if (brandManual) brandManual.value = '';
+        } else if (brand && brand !== 'no_brand' && brand !== 'No Brand') {
+            brandSelect.value = 'no_brand';
+            if (brandManual) brandManual.value = brand;
+        } else {
+            brandSelect.value = 'no_brand';
+            if (brandManual) brandManual.value = '';
+        }
+
+        if (typeof updateBrandCountry === 'function') {
+            updateBrandCountry(brandSelect);
+        }
+
+        // 4. Change Header and Button Text
+        document.querySelector('#tab-product h3').innerText = "Update Product Info";
+        const submitBtn = document.querySelector('button[form="productForm"]');
+        if (submitBtn) {
+            submitBtn.innerText = "Save Changes";
+            if (submitBtn.classList.contains('bg-[#f05c04]')) {
+                submitBtn.classList.replace('bg-[#f05c04]', 'bg-[#FF9B00]');
+            }
+        }
+
+        // Scroll to form
+        document.getElementById('mainSectionHome').scrollIntoView({ behavior: "smooth" });
+    }
+</script>
+
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div id="deleteConfirmModal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm animation-fadeIn">
+    <div
+        class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 transform scale-100 transition-transform border border-gray-100">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                </path>
+            </svg>
+        </div>
+        <h3 class="text-xl font-black text-center text-gray-900 mb-2">Are you sure?</h3>
+        <p class="text-center text-gray-500 mb-8 font-medium italic">Do you really want to delete this item? This action
+            cannot be undone.</p>
+        <div class="flex gap-4">
+            <button type="button" onclick="closeDeleteModal()"
+                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+                No, Keep It
+            </button>
+            <button id="btnDoDelete" type="button" onclick="actuallyDeleteProduct()"
+                class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-100">
+                Yes, Delete It
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIVE/INACTIVE CONFIRMATION MODAL -->
+<div id="activeConfirmModal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm animation-fadeIn">
+    <div
+        class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 transform scale-100 transition-transform border border-gray-100">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <h3 id="activeModalTitle" class="text-xl font-black text-center text-gray-900 mb-2">Change Status?</h3>
+        <p id="activeModalText" class="text-center text-gray-500 mb-8 font-medium">Are you sure you want to change the
+            status of this product?</p>
+        <div class="flex gap-4">
+            <button type="button" onclick="closeActiveModal()"
+                class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+                Cancel
+            </button>
+            <button id="btnDoActive" type="button" onclick="actuallyToggleProduct()"
+                class="flex-1 bg-[#f05c04] hover:bg-[#d85102] text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-orange-100">
+                Yes, Change It
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Popup Modal -->
+<div id="productSuccessModal"
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm animation-fadeIn">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 transform scale-100 transition-transform">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5 drop-shadow-md">
+            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <h3 class="text-2xl font-black text-center text-gray-800 mb-2">Successfully Added!</h3>
+        <p class="text-center text-gray-500 mb-8 font-medium italic text-orange-600">wait 5 hour for admin approval</p>
+        <button type="button" onclick="document.getElementById('productSuccessModal').classList.add('hidden');"
+            class="w-full bg-[#f05c04] hover:bg-[#d85102] text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg shadow-orange-200 text-lg">
+            Done
+        </button>
+    </div>
+</div>
+</div>
+
+<script>
+    // Tab Switching Logic mapping the UI navigation visually bridging content containers
+    const tabs = ['email', 'address', 'idbank', 'product'];
+
+    function switchTab(activeTabId) {
+        tabs.forEach(tab => {
+            // Manage Content visibility
+            const content = document.getElementById('tab-' + tab);
+            if (content) {
+                if (tab === activeTabId) {
+                    content.classList.remove('hidden');
+                    if (tab === 'idbank' || tab === 'product') {
+                        content.classList.add('flex');
+                    }
+                } else {
+                    content.classList.add('hidden');
+                    if (tab === 'idbank' || tab === 'product') {
+                        content.classList.remove('flex');
+                    }
+                }
+            }
+
+            // Manage Tracker Visuals
+            const circle = document.getElementById('circle-' + tab);
+            const numLabel = document.getElementById('num-' + tab);
+            const iconLabel = document.getElementById('icon-' + tab);
+
+            if (circle) {
+                if (tab === activeTabId) {
+                    // Active State
+                    circle.className = "w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#f05c04] font-bold shadow-md transition-all duration-300 scale-110";
+                } else {
+                    // Inactive state
+                    circle.className = "w-9 h-9 rounded-full border border-white bg-transparent flex items-center justify-center text-white transition-all duration-300 cursor-pointer hover:bg-white/10";
+                }
+            }
+            // Show/Hide Submit Product Button only on Product Tab
+            const commonSubmit = document.getElementById('common-submit-area');
+            if (commonSubmit) {
+                commonSubmit.style.display = (tab === 'product' && tab === activeTabId) ? 'flex' : 'none';
+            }
+        });
+    }
+
+    // Toggle Return Address visibility
+    function toggleReturnAddress() {
+        const check = document.getElementById('sameAddressCheck');
+        const section = document.getElementById('returnAddressSection');
+        if (check.checked) {
+            section.style.height = '0px';
+            section.style.opacity = '0';
+            section.style.marginTop = '0px';
+            setTimeout(() => { section.style.display = 'none'; }, 300);
+        } else {
+            section.style.display = 'block';
+            setTimeout(() => {
+                section.style.height = section.scrollHeight + 'px';
+                section.style.opacity = '1';
+                section.style.marginTop = '1.25rem';
+                setTimeout(() => { section.style.height = 'auto'; }, 300);
+            }, 10);
+        }
+    }
+
+    // Initialize with Email open matching requested workflow entrypoint
+
+
+    // Auto-fill location function using Geolocation & OpenStreetMap API
+    function autoFillLocation() {
+        if ("geolocation" in navigator) {
+            let btn = document.getElementById('btnDetectLoc');
+            let oldText = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-5 h-5 animate-spin text-[#f05c04]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Detecting Location...`;
+
+            navigator.geolocation.getCurrentPosition(async function (position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                try {
+                    let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                    let data = await res.json();
+
+                    if (data && data.display_name) {
+                        // 1. Fill Textarea
+                        document.getElementById('wh_AddressDetails').value = data.display_name;
+
+                        // 2. Try to sync Country -> Province -> City select dropdowns automatically
+                        const addressObj = data.address || {};
+                        const cName = addressObj.country;
+                        const stateName = addressObj.state || addressObj.province || addressObj.region;
+                        const cityName = addressObj.city || addressObj.town || addressObj.county || addressObj.village;
+
+                        function setDropdownByText(id, needle) {
+                            if (!needle) return false;
+                            const el = document.getElementById(id);
+                            if (!el) return false;
+                            let found = false;
+                            for (let i = 0; i < el.options.length; i++) {
+                                let txt = el.options[i].text.toLowerCase();
+                                let target = needle.toLowerCase();
+                                if (txt.includes(target) || target.includes(txt)) {
+                                    el.selectedIndex = i;
+                                    el.dispatchEvent(new Event('change'));
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            return found;
+                        }
+
+                        // Set Country
+                        ['wh_', 'rt_', 'ba_'].forEach(prefix => {
+                            if (cName) {
+                                setDropdownByText(prefix + 'Country', cName);
+                                // Set interval to allow async cascade logic to render the provinces/cities before setting
+                                setTimeout(() => {
+                                    if (stateName) setDropdownByText(prefix + 'Province', stateName);
+                                    setTimeout(() => {
+                                        if (cityName) setDropdownByText(prefix + 'City', cityName);
+                                    }, 300);
+                                }, 300);
+                            }
+                        });
+
+                        // Attempt to populate the address details fields too
+                        ['wh_AddressDetails', 'rt_AddressDetails', 'ba_AddressDetails'].forEach(id => {
+                            let el = document.getElementById(id);
+                            if (el && !el.value) {
+                                el.value = data.display_name;
+                            }
+                        });
+
+                        btn.innerHTML = "✅ Auto-filled Successfully!";
+                        setTimeout(() => btn.innerHTML = oldText, 3000);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    btn.innerHTML = "❌ Detection Failed.";
+                    setTimeout(() => btn.innerHTML = oldText, 3000);
+                }
+            });
+        }
+    }
+
+    // Setup AJAX Product Submission
+    const theProductForm = document.getElementById('productForm');
+    if (theProductForm) {
+        theProductForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            let actionType = 'add_product';
+            const actionInput = this.querySelector('input[name="action"]');
+            if (actionInput && actionInput.value) {
+                actionType = actionInput.value;
+            }
+            // Ensure action is appended
+            formData.set('action', actionType);
+
+            let subUrl = '{% url "seller_dashboard_home" %}';
+            if (actionType === 'update_product') {
+                subUrl = '{% url "update_product" %}';
+                const availbox = this.querySelector('input[name="is_available"]');
+                if (availbox && availbox.checked) {
+                    formData.set('is_available', 'true');
+                } else {
+                    formData.set('is_available', 'false');
+                }
+            }
+
+            let submitBtn = this.querySelector('button[type="submit"]') || document.querySelector('button[form="productForm"]');
+            let originalText = "";
+            if (submitBtn) {
+                originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = "Processing...";
+            }
+
+            fetch(subUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(async response => {
+                const isJson = response.headers.get('content-type')?.includes('application/json');
+                const data = isJson ? await response.json() : null;
+
+                if (!response.ok) {
+                    const error = (data && data.message) || response.statusText;
+                    return Promise.reject(error);
+                }
+                return data;
+            }).then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                if (data && data.status === 'success') {
+                    if (actionType === 'update_product') {
+                        location.reload();
+                    } else {
+                        document.getElementById('productSuccessModal').classList.remove('hidden');
+                        this.reset();
+                    }
+                } else if (data) {
+                    alert('Error: ' + data.message);
+                }
+            }).catch(err => {
+                console.error(err);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                alert('Submission failed or token incorrect. Please refresh and try again. Technical details: ' + err);
+            });
+        });
+    }
+</script>
+
+<style>
+    .animation-fadeIn {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% include 'regions_data.html' %}
+<!-- Include dynamic regions parser -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        ['wh_', 'rt_', 'ba_'].forEach(p => {
+            if (typeof renderLocationDropdowns === 'function') {
+                renderLocationDropdowns(p);
+            }
+        });
+    });
+</script>
+
+<!-- ═══════════════════ BANNER EDITOR MODAL ═══════════════════ -->
+<!-- CDN for modal (loaded only once) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js" type="module"></script>
+
+<style>
+    /* ── BANNER EDITOR MODAL STYLES ─────────────────────────────────── */
+    :root {
+        --be-primary: #fca311;
+        --be-dark: #070707;
+        --be-glass: rgba(255, 255, 255, 0.07);
+        --be-border: rgba(255, 255, 255, 0.1);
+        --be-green: #2ecc71;
+        --be-danger: #e74c3c;
+    }
+
+    #beModal * {
+        box-sizing: border-box;
+        font-family: 'Outfit', 'Segoe UI', sans-serif;
+    }
+
+    #beModal {
+        font-family: 'Outfit', 'Segoe UI', sans-serif;
+    }
+
+    .be-toolbar {
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        background: rgba(6, 6, 8, 0.97);
+        border-bottom: 1px solid var(--be-border);
+        flex-shrink: 0;
+        gap: 12px;
+    }
+
+    .be-btn {
+        background: var(--be-glass);
+        border: 1px solid var(--be-border);
+        color: #ccc;
+        padding: 0 14px;
+        height: 42px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: pointer;
+        font-size: 13.5px;
+        font-weight: 600;
+        transition: all 0.25s;
+        white-space: nowrap;
+    }
+
+    .be-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: var(--be-primary);
+        color: var(--be-primary);
+        transform: translateY(-1px);
+    }
+
+    .be-btn.be-active {
+        background: var(--be-primary);
+        color: #000;
+        border-color: var(--be-primary);
+        box-shadow: 0 0 18px rgba(252, 163, 17, 0.35);
+    }
+
+    .be-btn-save {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: #fff !important;
+        border: none;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+    }
+
+    .be-btn-save:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(46, 204, 113, 0.45);
+    }
+
+    .be-btn-close {
+        background: var(--be-danger);
+        border: none;
+        color: #fff !important;
+        width: 42px;
+        padding: 0;
+        border-radius: 12px;
+        justify-content: center;
+    }
+
+    .be-btn-close:hover {
+        transform: scale(1.08);
+    }
+
+    .be-viewport {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, #141414 0%, #070707 100%);
+        overflow: hidden;
+    }
+
+    #beImage {
+        display: block;
+        max-width: 92%;
+        max-height: 86%;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    #beCanvasWrapper {
+        display: none;
+        position: relative;
+    }
+
+    .be-float-panel {
+        position: absolute;
+        background: rgba(14, 14, 18, 0.97);
+        backdrop-filter: blur(18px);
+        border: 1px solid var(--be-border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.85);
+        z-index: 200;
+        display: none;
+        flex-direction: column;
+        gap: 11px;
+        animation: bePopIn 0.22s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bePopIn {
+        from {
+            transform: scale(0.84) translateY(8px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    #beDrawPanel {
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 152px;
+    }
+
+    #beTextPanel {
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 152px;
+    }
+
+    #beEmojiBox {
+        right: 18px;
+        bottom: 16px;
+    }
+
+    .be-panel-label {
+        font-size: 9.5px;
+        opacity: 0.4;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        text-align: center;
+        color: #fff;
+    }
+
+    .be-dots-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        justify-content: center;
+    }
+
+    .be-dot {
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+
+    .be-dot:hover {
+        transform: scale(1.12);
+    }
+
+    .be-dot.be-dot-active {
+        border-color: #fff;
+        transform: scale(1.2);
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+    }
+
+    .be-color-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .be-wheel {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid var(--be-border);
+        padding: 0;
+        cursor: pointer;
+        background: none;
+        outline: none;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .be-wheel::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    .be-wheel::-webkit-color-swatch {
+        border: none;
+        border-radius: 50%;
+    }
+
+    .be-hex {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--be-border);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 11.5px;
+        font-family: monospace;
+        padding: 5px 7px;
+        outline: none;
+        transition: 0.2s;
+        text-transform: uppercase;
+    }
+
+    .be-hex:focus {
+        border-color: var(--be-primary);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .be-add-text-btn {
+        background: var(--be-primary);
+        border: none;
+        color: #000;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 8px;
+        cursor: pointer;
+        font-size: 12.5px;
+        transition: 0.2s;
+        margin-top: 2px;
+    }
+
+    .be-add-text-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(252, 163, 17, 0.35);
+    }
+
+    .be-size-slider {
+        width: 100%;
+        accent-color: var(--be-primary);
+    }
+
+    .be-title-badge {
+        color: var(--be-primary);
+        font-weight: 900;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        text-align: center;
+    }
+</style>
+
+<!-- MODAL DOM -->
+<div id="beModal"
+    style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.78);backdrop-filter:blur(14px);align-items:center;justify-content:center;">
+
+    <div
+        style="width:94vw;max-width:1300px;height:90vh;background:#0a0a0f;border-radius:22px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 50px 120px rgba(0,0,0,0.95);border:1px solid rgba(255,255,255,0.06);">
+
+        <!-- TOOLBAR -->
+        <div class="be-toolbar">
+            <!-- Left: crop + editor tools -->
+            <div style="display:flex;gap:9px;" id="beEditorTools">
+                <button class="be-btn be-active" id="beCropBtn" onclick="beDoneCrop()">✂️ <span>Done
+                        Crop</span></button>
+                <button class="be-btn" id="beTextBtn" onclick="beToggleText()">Aa <span>Text</span></button>
+                <button class="be-btn" id="beDrawBtn" onclick="beToggleDraw()">✏️ <span>Draw</span></button>
+                <button class="be-btn" onclick="beToggleEmoji()">😀 <span>Emoji</span></button>
+            </div>
+            <!-- Center: label -->
+            <div class="be-title-badge">🖼️ Banner Editor &nbsp;·&nbsp; 1500 × 288</div>
+            <!-- Right: save + close -->
+            <div style="display:flex;gap:9px;">
+                <button class="be-btn be-btn-save" onclick="beSaveBanner()">💾 Save Banner</button>
+                <button class="be-btn be-btn-close" onclick="beClose()">✕</button>
+            </div>
+        </div>
+
+        <!-- VIEWPORT -->
+        <div class="be-viewport" id="beViewport">
+            <img id="beImage" alt="">
+            <div id="beCanvasWrapper">
+                <canvas id="beCanvas"></canvas>
+            </div>
+
+            <!-- Draw Panel -->
+            <div id="beDrawPanel" class="be-float-panel">
+                <div class="be-panel-label">✏️ Pencil</div>
+                <div class="be-dots-row">
+                    <div class="be-dot be-dot-active" style="background:#fca311;"
+                        onclick="beSetDrawColor('#fca311',this)"></div>
+                    <div class="be-dot" style="background:#e74c3c;" onclick="beSetDrawColor('#e74c3c',this)"></div>
+                    <div class="be-dot" style="background:#fff;" onclick="beSetDrawColor('#ffffff',this)"></div>
+                    <div class="be-dot" style="background:#2ecc71;" onclick="beSetDrawColor('#2ecc71',this)"></div>
+                    <div class="be-dot" style="background:#3498db;" onclick="beSetDrawColor('#3498db',this)"></div>
+                    <div class="be-dot" style="background:#9b59b6;" onclick="beSetDrawColor('#9b59b6',this)"></div>
+                    <div class="be-dot" style="background:#000;border:1px solid #444;"
+                        onclick="beSetDrawColor('#000000',this)"></div>
+                </div>
+                <div class="be-color-row">
+                    <input type="color" class="be-wheel" id="beDrawWheel" value="#fca311"
+                        oninput="beDrawWheelChange(this.value)">
+                    <input type="text" class="be-hex" id="beDrawHex" value="#FCA311" maxlength="7" placeholder="#HEX"
+                        oninput="beDrawHexInput(this.value)">
+                </div>
+                <div class="be-panel-label">SIZE</div>
+                <input type="range" class="be-size-slider" min="1" max="40" value="5"
+                    oninput="beDrawSizeChange(this.value)">
+            </div>
+
+            <!-- Text Panel -->
+            <div id="beTextPanel" class="be-float-panel">
+                <div class="be-panel-label">✍️ Text Color</div>
+                <div class="be-dots-row">
+                    <div class="be-dot be-dot-active" style="background:#fff;" onclick="beSetTextColor('#ffffff',this)">
+                    </div>
+                    <div class="be-dot" style="background:#fca311;" onclick="beSetTextColor('#fca311',this)"></div>
+                    <div class="be-dot" style="background:#e74c3c;" onclick="beSetTextColor('#e74c3c',this)"></div>
+                    <div class="be-dot" style="background:#2ecc71;" onclick="beSetTextColor('#2ecc71',this)"></div>
+                    <div class="be-dot" style="background:#3498db;" onclick="beSetTextColor('#3498db',this)"></div>
+                    <div class="be-dot" style="background:#9b59b6;" onclick="beSetTextColor('#9b59b6',this)"></div>
+                    <div class="be-dot" style="background:#000;border:1px solid #444;"
+                        onclick="beSetTextColor('#000000',this)"></div>
+                </div>
+                <div class="be-color-row">
+                    <input type="color" class="be-wheel" id="beTextWheel" value="#ffffff"
+                        oninput="beTextWheelChange(this.value)">
+                    <input type="text" class="be-hex" id="beTextHex" value="#FFFFFF" maxlength="7" placeholder="#HEX"
+                        oninput="beTextHexInput(this.value)">
+                </div>
+                <button class="be-add-text-btn" onclick="beAddText()">+ Add Text</button>
+            </div>
+
+            <!-- Emoji Box -->
+            <div id="beEmojiBox" class="be-float-panel">
+                <emoji-picker id="beEmojiPicker"></emoji-picker>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ═══════════════════ BANNER EDITOR JS ═══════════════════
+    var beCropper = null;
+    var beFabric = null;
+    var beTextColor = '#ffffff';
+
+    function openBannerEditor() {
+        document.getElementById('bannerFileInput').click();
+    }
+
+    function beOnFileSelect(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (e) { beShowModal(e.target.result); };
+        reader.readAsDataURL(file);
+    }
+
+    function beShowModal(src) {
+        var modal = document.getElementById('beModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // reset fabric canvas
+        document.getElementById('beCanvasWrapper').style.display = 'none';
+        beCloseAllPanels();
+        document.getElementById('beCropBtn').classList.add('be-active');
+        document.getElementById('beCropBtn').innerHTML = '✂️ <span>Done Crop</span>';
+
+        var img = document.getElementById('beImage');
+        img.onload = function () {
+            img.style.opacity = '1';
+            if (beCropper) beCropper.destroy();
+            beCropper = new Cropper(img, {
+                aspectRatio: 1500 / 288,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.9,
+                responsive: true,
+                guides: true,
+                center: true,
+                background: false,
+                checkCrossOrigin: false
+            });
+        };
+        img.src = src;
+    }
+
+    function beDoneCrop() {
+        if (!beCropper) return;
+        var cropped = beCropper.getCroppedCanvas({ width: 1500, height: 288, imageSmoothingQuality: 'high' });
+
+        var img = document.getElementById('beImage');
+        img.style.opacity = '0';
+        setTimeout(function () { img.style.display = 'none'; }, 300);
+
+        var vp = document.getElementById('beViewport');
+        var maxW = vp.clientWidth * 0.92;
+        var maxH = vp.clientHeight * 0.85;
+        var w = 1500, h = 288, r = w / h;
+        if (w > maxW) { w = maxW; h = w / r; }
+        if (h > maxH) { h = maxH; w = h * r; }
+
+        if (beFabric) beFabric.dispose();
+        beFabric = new fabric.Canvas('beCanvas', { width: w, height: h, backgroundColor: 'transparent' });
+        beFabric.freeDrawingBrush = new fabric.PencilBrush(beFabric);
+        beFabric.freeDrawingBrush.color = '#fca311';
+        beFabric.freeDrawingBrush.width = 5;
+
+        var fabImg = new fabric.Image(cropped, {
+            left: 0, top: 0,
+            scaleX: w / cropped.width,
+            scaleY: h / cropped.height,
+            selectable: false, evented: false
+        });
+        beFabric.add(fabImg);
+        beFabric.sendToBack(fabImg);
+        beFabric.renderAll();
+
+        document.getElementById('beCanvasWrapper').style.display = 'block';
+        beCropper.destroy(); beCropper = null;
+
+        document.getElementById('beCropBtn').innerHTML = '✂️ <span>Crop</span>';
+        document.getElementById('beCropBtn').classList.remove('be-active');
+    }
+
+    function beSaveBanner() {
+        if (!beFabric) { alert('Pehle crop karein!'); return; }
+        var dataURL = beFabric.toDataURL({ format: 'png', quality: 1 });
+        var bannerImg = document.getElementById('currentBannerImg');
+        if (bannerImg) {
+            bannerImg.src = dataURL;
+            bannerImg.style.display = 'block';
+            // also update parent background if no img used
+            document.getElementById('bannerArea').style.background = 'none';
+        }
+        beClose();
+    }
+
+    function beClose() {
+        document.getElementById('beModal').style.display = 'none';
+        document.body.style.overflow = '';
+        var img = document.getElementById('beImage');
+        img.style.opacity = '0';
+        img.style.display = 'block';
+        img.src = '';
+        if (beCropper) { beCropper.destroy(); beCropper = null; }
+        if (beFabric) { beFabric.dispose(); beFabric = null; }
+        document.getElementById('beCanvasWrapper').style.display = 'none';
+        document.getElementById('bannerFileInput').value = '';
+        beCloseAllPanels();
+    }
+
+    function beCloseAllPanels() {
+        document.getElementById('beDrawPanel').style.display = 'none';
+        document.getElementById('beTextPanel').style.display = 'none';
+        document.getElementById('beEmojiBox').style.display = 'none';
+        document.getElementById('beDrawBtn').classList.remove('be-active');
+        document.getElementById('beTextBtn').classList.remove('be-active');
+        if (beFabric) beFabric.isDrawingMode = false;
+    }
+
+    // ─── DRAW ───
+    function beToggleDraw() {
+        if (!beFabric) return;
+        beFabric.isDrawingMode = !beFabric.isDrawingMode;
+        var p = document.getElementById('beDrawPanel');
+        var b = document.getElementById('beDrawBtn');
+        if (beFabric.isDrawingMode) {
+            beCloseAllPanels();
+            p.style.display = 'flex'; b.classList.add('be-active');
+            beFabric.isDrawingMode = true;
+        } else {
+            p.style.display = 'none'; b.classList.remove('be-active');
+        }
+    }
+    function beSetDrawColor(c, el) {
+        if (beFabric) beFabric.freeDrawingBrush.color = c;
+        document.querySelectorAll('#beDrawPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+        el.classList.add('be-dot-active');
+        document.getElementById('beDrawWheel').value = c;
+        document.getElementById('beDrawHex').value = c.toUpperCase();
+    }
+    function beDrawWheelChange(c) {
+        if (beFabric) beFabric.freeDrawingBrush.color = c;
+        document.getElementById('beDrawHex').value = c.toUpperCase();
+        document.querySelectorAll('#beDrawPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+    }
+    function beDrawHexInput(v) {
+        v = v.trim(); if (!v.startsWith('#')) v = '#' + v;
+        if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)) {
+            if (beFabric) beFabric.freeDrawingBrush.color = v;
+            document.getElementById('beDrawWheel').value = v;
+            document.querySelectorAll('#beDrawPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+        }
+    }
+    function beDrawSizeChange(s) { if (beFabric) beFabric.freeDrawingBrush.width = parseInt(s); }
+
+    // ─── TEXT ───
+    function beToggleText() {
+        var p = document.getElementById('beTextPanel');
+        var b = document.getElementById('beTextBtn');
+        var open = p.style.display === 'flex';
+        beCloseAllPanels();
+        if (!open) { p.style.display = 'flex'; b.classList.add('be-active'); }
+    }
+    function beAddText() {
+        if (!beFabric) return;
+        var t = new fabric.IText('Your Text', {
+            left: beFabric.width / 2, top: beFabric.height / 2,
+            originX: 'center', originY: 'center',
+            fill: beTextColor, fontSize: 36, fontFamily: 'Outfit, sans-serif', fontWeight: '900',
+            stroke: beTextColor === '#ffffff' ? '#000' : 'transparent',
+            strokeWidth: beTextColor === '#ffffff' ? 2 : 0,
+            paintFirst: 'stroke'
+        });
+        beFabric.add(t); beFabric.setActiveObject(t); t.enterEditing();
+    }
+    function beSetTextColor(c, el) {
+        beTextColor = c;
+        document.querySelectorAll('#beTextPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+        el.classList.add('be-dot-active');
+        document.getElementById('beTextWheel').value = c;
+        document.getElementById('beTextHex').value = c.toUpperCase();
+        if (beFabric) {
+            var obj = beFabric.getActiveObject();
+            if (obj && obj.type === 'i-text') { obj.set('fill', c); beFabric.renderAll(); }
+        }
+    }
+    function beTextWheelChange(c) {
+        beTextColor = c;
+        document.getElementById('beTextHex').value = c.toUpperCase();
+        document.querySelectorAll('#beTextPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+        if (beFabric) {
+            var obj = beFabric.getActiveObject();
+            if (obj && obj.type === 'i-text') { obj.set('fill', c); beFabric.renderAll(); }
+        }
+    }
+    function beTextHexInput(v) {
+        v = v.trim(); if (!v.startsWith('#')) v = '#' + v;
+        if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)) {
+            beTextColor = v;
+            document.getElementById('beTextWheel').value = v;
+            document.querySelectorAll('#beTextPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+            if (beFabric) {
+                var obj = beFabric.getActiveObject();
+                if (obj && obj.type === 'i-text') { obj.set('fill', v); beFabric.renderAll(); }
+            }
+        }
+    }
+
+    // ─── EMOJI ───
+    function beToggleEmoji() {
+        var b = document.getElementById('beEmojiBox');
+        var open = (b.style.display === 'block' || b.style.display === 'flex');
+        beCloseAllPanels();
+        if (!open) b.style.display = 'block';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var picker = document.getElementById('beEmojiPicker');
+        if (picker) {
+            picker.addEventListener('emoji-click', function (e) {
+                if (!beFabric) return;
+                var em = new fabric.Text(e.detail.unicode, {
+                    left: beFabric.width / 2, top: beFabric.height / 2, fontSize: 70
+                });
+                beFabric.add(em); beFabric.setActiveObject(em);
+                document.getElementById('beEmojiBox').style.display = 'none';
+            });
+        }
+    });
+
+    // keyboard delete
+    document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && !e.target.matches('input,textarea')) {
+            if (beFabric) {
+                var obj = beFabric.getActiveObject();
+                if (obj && !obj.isEditing) { beFabric.remove(obj); }
+            }
+        }
+    });
+    // close modal on backdrop click
+    document.getElementById('beModal').addEventListener('click', function (e) {
+        if (e.target === this) beClose();
+    });
+</script>
+
+<!-- BANNER FULLSCREEN VIEWER (Dashboard) -->
+<div id="dashBannerViewer"
+    style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.92);backdrop-filter:blur(18px);align-items:center;justify-content:center;cursor:zoom-out;"
+    onclick="dashCloseBanner()">
+    <img id="dashBannerImg" src="" alt="Store Banner"
+        style="max-width:96vw;max-height:92vh;object-fit:contain;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,0.8);pointer-events:none;">
+    <div
+        style="position:absolute;top:20px;right:24px;color:rgba(255,255,255,0.55);font-size:13px;font-weight:600;pointer-events:none;">
+        ESC or click to close
+    </div>
+    <div
+        style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.35);font-size:11px;font-weight:600;letter-spacing:1.5px;pointer-events:none;">
+        YOUR STORE BANNER
+    </div>
+</div>
+
+<script>
+    function dashboardViewBanner() {
+        var img = document.getElementById('currentBannerImg');
+        if (!img || !img.src || img.style.display === 'none' || img.src === window.location.href) {
+            // No banner yet — open editor instead
+            openBannerEditor();
+            return;
+        }
+        document.getElementById('dashBannerImg').src = img.src;
+        document.getElementById('dashBannerViewer').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function dashCloseBanner() {
+        document.getElementById('dashBannerViewer').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') dashCloseBanner();
+    });
+
+    // Universal Image Preview Function
+    function previewImageInBox(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var label = input.closest('label');
+                if (label) {
+                    var img = label.querySelector('.uploaded-preview-img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.className = 'uploaded-preview-img absolute inset-0 w-full h-full object-contain z-20 pointer-events-none';
+                        label.appendChild(img);
+                    }
+                    img.src = e.target.result;
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
+{% endblock %}

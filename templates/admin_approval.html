@@ -1,0 +1,1675 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    /* PREMIUM DESIGN TOKENS */
+    :root {
+        --premium-orange: #fca311;
+        --premium-dark: #14213d;
+        --premium-accent: #f05c04;
+    }
+
+    .animation-fadeIn {
+        animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Form Styling */
+    .login-input {
+        width: 100%;
+        padding: 14px 20px;
+        border: 2px solid #f1f1f1;
+        border-radius: 12px;
+        font-size: 16px;
+        background: #fdfdfd;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .login-input:focus {
+        border-color: var(--premium-orange);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(252, 163, 17, 0.1);
+    }
+
+    .btn-premium {
+        background: var(--premium-orange);
+        color: white;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s;
+        box-shadow: 0 10px 20px rgba(252, 163, 17, 0.2);
+    }
+
+    .btn-premium:hover {
+        background: #e5940d;
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(252, 163, 17, 0.3);
+    }
+
+    .login-container {
+        max-width: 450px;
+        margin: 10% auto;
+        padding: 50px 40px;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08);
+        border: 1px solid #f0f0f0;
+    }
+</style>
+
+<div class="min-h-screen bg-gray-50/50">
+    {% if not is_logged_in %}
+    <!-- AUTHENTICATION VIEW -->
+    <div class="flex items-center justify-center pt-20 px-4">
+        <div class="login-container animation-fadeIn">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-black text-gray-900 tracking-tighter uppercase">Admin <span
+                        class="text-[#fca311]">System</span></h1>
+                <p class="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-1">Authorized Access Only
+                </p>
+            </div>
+
+            {% if error %}
+            <div
+                class="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm font-bold flex items-center gap-3 border border-red-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="login">
+                <div class="mb-6">
+                    <label
+                        class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Username</label>
+                    <input type="text" name="admin_name" class="login-input" placeholder="SHOP NEXT" required>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Access
+                        Key</label>
+                    <input type="password" name="admin_password" class="login-input" placeholder="••••" required>
+                </div>
+
+                <button type="submit" class="btn-premium w-full py-4 rounded-xl text-center">Unlock Console</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <!-- CONSOLE VIEW (DASHBOARD) -->
+    <div class="w-full pb-20">
+
+        <!-- HEADER OVERLAY (LIKE SELLER) -->
+        <div class="w-full relative mb-16">
+            <!-- Sleek Gradient Banner -->
+
+            <!-- Hidden file input -->
+            <input type="file" id="bannerFileInput" hidden accept="image/*" onchange="beOnFileSelect(this)">
+
+            <div class="w-full h-48 md:h-72 bg-gray-900 shadow-inner relative overflow-hidden" id="bannerArea"
+                onclick="openBannerEditor()" style="cursor:pointer;">
+
+                <img src="{% static 'profile.img/banner.png' %}" class="w-full h-full object-cover"
+                    id="currentBannerImg">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+
+                <!-- Hover hint overlay -->
+                <div style="position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity 0.3s;"
+                    id="bannerEditLabel">
+                    <div
+                        style="background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.25);backdrop-filter:blur(12px);padding:12px 28px;border-radius:50px;color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;">
+                        📷 <span>Click to edit banner</span>
+                    </div>
+                </div>
+
+                <!-- Silent Logout Trigger -->
+                <form method="POST" id="logoutForm" class="absolute top-6 right-8 z-30"
+                    onclick="event.stopPropagation()">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="logout">
+                    <button type="submit"
+                        class="bg-white/10 hover:bg-white/20 text-white font-black px-6 py-3 rounded-2xl backdrop-blur-xl transition-all border border-white/20 shadow-xl flex items-center gap-2 group">
+                        <svg class="w-5 h-5 group-hover:-translate-x-1" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                            </path>
+                        </svg>
+                        Exit
+                    </button>
+                </form>
+            </div>
+
+            <script>
+                (function () {
+                    var ba = document.getElementById('bannerArea');
+                    var bl = document.getElementById('bannerEditLabel');
+                    if (ba && bl) {
+                        ba.addEventListener('mouseenter', function () { bl.style.opacity = '1'; });
+                        ba.addEventListener('mouseleave', function () { bl.style.opacity = '0'; });
+                    }
+                })();
+            </script>
+
+            <!-- Profile Identity -->
+            <div class="px-6 md:px-12 relative max-w-7xl mx-auto">
+                <div class="absolute -top-16 md:-top-28 left-6 md:left-12 flex items-end gap-6 w-full z-10">
+                    <div
+                        class="w-32 h-32 md:w-56 md:h-56 rounded-[2.5rem] border-[6px] md:border-[10px] border-white shadow-2xl bg-white overflow-hidden flex items-center justify-center flex-shrink-0 relative group">
+                        <img src="{% static 'profile.img/pic.png' %}" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-[#fca311] py-1 md:py-2 text-center">
+                            <p
+                                class="text-[8px] md:text-[10px] text-white font-black uppercase tracking-widest leading-none">
+                                Console</p>
+                        </div>
+                    </div>
+                    <div
+                        class="pb-6 md:pb-12 drop-shadow-2xl bg-white/95 px-8 md:px-12 py-5 md:py-8 rounded-[2rem] md:rounded-[3rem] -ml-4 mb-4 border border-gray-100 shadow-2xl flex flex-col justify-end">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
+                            <p class="text-[9px] md:text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">
+                                System Authentication Active</p>
+                        </div>
+                        <h2 class="text-2xl md:text-6xl text-gray-900 font-black italic tracking-tighter leading-none"
+                            style="font-family: 'Segoe UI', -apple-system, sans-serif;">SHOP NEXT <span
+                                class="text-[#fca311]">ADMIN</span></h2>
+                    </div>
+                </div>
+                <div class="h-24 md:h-40 w-full"></div>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="max-w-7xl mx-auto px-6 md:px-12 mb-8">
+            <div class="flex gap-4 border-b border-gray-200/50 pb-2 overflow-x-auto hide-scrollbar">
+                <button onclick="switchAdminTab('approvals')" id="tab-approvals"
+                    class="px-6 py-3 font-black text-[12px] md:text-sm uppercase tracking-widest border-b-4 border-[#fca311] text-gray-900 transition-all whitespace-nowrap">Manage
+                    Approvals</button>
+                <button onclick="switchAdminTab('live')" id="tab-live"
+                    class="px-6 py-3 font-bold text-[12px] md:text-sm uppercase tracking-widest border-b-4 border-transparent text-gray-400 hover:text-gray-900 transition-all whitespace-nowrap">Live
+                    Products</button>
+                <button onclick="switchAdminTab('users')" id="tab-users"
+                    class="px-6 py-3 font-bold text-[12px] md:text-sm uppercase tracking-widest border-b-4 border-transparent text-gray-400 hover:text-gray-900 transition-all whitespace-nowrap">Manage
+                    Users</button>
+                <button onclick="switchAdminTab('sellers')" id="tab-sellers"
+                    class="px-6 py-3 font-bold text-[12px] md:text-sm uppercase tracking-widest border-b-4 border-transparent text-gray-400 hover:text-gray-900 transition-all whitespace-nowrap">Manage
+                    Sellers</button>
+                <button onclick="switchAdminTab('complaints')" id="tab-complaints"
+                    class="px-6 py-3 font-bold text-[12px] md:text-sm uppercase tracking-widest border-b-4 border-transparent text-gray-400 hover:text-gray-900 transition-all whitespace-nowrap">Complain</button>
+            </div>
+        </div>
+
+        <!-- DASHBOARD CONTENT: APPROVALS -->
+        <div id="section-approvals" class="max-w-7xl mx-auto px-6 md:px-12 animation-fadeIn">
+
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div>
+                    <h3
+                        class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase leading-none mb-3">
+                        Manage Approvals</h3>
+                    <p class="text-gray-500 font-bold text-lg md:text-xl">Review and authorize seller products for live
+                        hosting</p>
+                </div>
+                <div class="flex items-center">
+                    <div
+                        class="bg-[#14213d] text-white px-8 py-5 rounded-[2.5rem] shadow-2xl flex items-center gap-6 border border-white/10 group">
+                        <span
+                            class="text-4xl md:text-5xl font-black text-[#fca311] group-hover:scale-110 transition-transform">
+                            {{pending_products.count }}</span>
+                        <div class="h-10 w-[1px] bg-white/20"></div>
+                        <p
+                            class="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] leading-tight text-white/80">
+                            Pending<br>Auth</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT LIST -->
+            {% if pending_products %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {% for p in pending_products %}
+                <div id="product-card-{{ p.id }}"
+                    class="bg-white rounded-[3.5rem] overflow-hidden shadow-sm border border-gray-100 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] hover:-translate-y-4 transition-all duration-700 group flex flex-col relative">
+
+                    <!-- Media Area -->
+                    <div class="aspect-square w-full overflow-hidden bg-gray-50/50 relative p-10">
+                        {% if p.image %}
+                        <img src="/static/{{ p.image.name }}"
+                            class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-1000"
+                            alt="{{ p.name }}">
+                        {% else %}
+                        <div class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-4">
+                            <svg class="w-20 h-20 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <span class="font-black text-xs tracking-widest uppercase opacity-40">No Image
+                                Provided</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="absolute top-10 left-10">
+                            <span
+                                class="bg-white/80 backdrop-blur-md text-gray-900 text-[10px] font-black px-5 py-2.5 rounded-2xl uppercase tracking-widest shadow-xl border border-white/50">Submission</span>
+                        </div>
+                    </div>
+
+                    <!-- Content Details -->
+                    <div
+                        class="p-10 flex-grow flex flex-col mt-[-40px] bg-white rounded-t-[4rem] relative z-10 shadow-[0_-20px_40px_rgba(0,0,0,0.02)]">
+                        <div class="mb-10">
+                            <div class="flex justify-between items-start mb-5">
+                                <span
+                                    class="bg-gray-100 text-gray-400 text-[9px] font-black px-4 py-2 rounded-xl uppercase tracking-widest">{{
+                                    p.category|default:"Catalog" }}</span>
+                                <span
+                                    class="bg-orange-50 text-[#fca311] text-[9px] font-black px-4 py-2 rounded-xl uppercase tracking-widest border border-orange-100/50">Stock:
+                                    {{ p.stock|default:"0" }}</span>
+                            </div>
+                            <h4
+                                class="font-black text-3xl md:text-3xl text-gray-900 leading-[1.1] tracking-tighter mb-4">
+                                {{ p.name }}</h4>
+                            {% if p.brand %}<p
+                                class="text-[10px] font-black text-gray-300 mb-6 tracking-[0.3em] uppercase leading-none">
+                                {{ p.brand }}</p>{% endif %}
+
+                            <div class="mb-4 text-xs border-b border-gray-50 pb-4">
+                                <span class="font-bold text-gray-400">Store:</span> <span
+                                    class="font-black text-[#fca311]">{{ p.seller.store_name|default:"General" }}</span>
+                                <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded ml-2 font-mono">Code: {{
+                                    p.seller.store_code|default:"N/A" }}</span>
+                            </div>
+
+                            <p class="text-gray-500 text-sm font-medium leading-relaxed line-clamp-3 italic opacity-80">
+                                "{{ p.description|default:"No description provided." }}"</p>
+                        </div>
+
+                        <!-- Policy Breakdown -->
+                        <div class="space-y-3 mb-10">
+                            {% if p.free_items %}
+                            <div
+                                class="bg-green-50/50 rounded-2xl p-4 flex items-center gap-4 border border-green-100/30">
+                                <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-xl">
+                                    🎁</div>
+                                <div>
+                                    <p
+                                        class="text-[9px] font-black text-green-700 uppercase tracking-widest mb-0.5 leading-none">
+                                        Gift/Bonus</p>
+                                    <p class="text-xs font-black text-green-900">{{ p.free_items }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if p.warranty_policy %}
+                            <div
+                                class="bg-blue-50/50 rounded-2xl p-4 flex items-center gap-4 border border-blue-100/30">
+                                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">
+                                    🛡️</div>
+                                <div>
+                                    <p
+                                        class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-0.5 leading-none">
+                                        Security</p>
+                                    <p class="text-xs font-black text-blue-900">{{ p.warranty_policy }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-auto pt-10 border-t border-gray-100">
+                            <div class="flex items-center justify-between mb-10 text-left">
+                                <div class="text-left">
+                                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">MSRP
+                                        VALUE</p>
+                                    <p class="font-black text-3xl text-[#fca311] tracking-tighter leading-none"><span
+                                            class="text-lg mr-0.5">Rs.</span>{{ p.price }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">
+                                        Source Store</p>
+                                    <p class="font-black text-gray-900 text-lg leading-none">{{
+                                        p.seller.store_name|default:"General" }}</p>
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                onclick="showProductInfo('{{ p.name|escapejs }}', '{{ p.description|escapejs }}', '{{ p.brand|escapejs }}', '{{ p.category|escapejs }}', '{{ p.price }}', '{{ p.stock }}', '{{ p.free_items|escapejs }}', '{{ p.warranty_policy|escapejs }}', '{{ p.return_policy|escapejs }}', '{{ p.seller.store_name|escapejs }}', '{{ p.seller.store_code|escapejs }}', '{{ p.seller.phone|escapejs }}', '{{ p.seller.email|escapejs }}', '{{ p.seller.city|escapejs }}')"
+                                class="w-full bg-blue-50/50 hover:bg-blue-100 text-blue-700 font-black py-4 rounded-[2rem] mb-4 transition-all duration-300 uppercase tracking-widest text-[10px] border border-blue-200 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Full Submission Info
+                            </button>
+                            <button onclick="approveProduct('{{ p.id }}', this)"
+                                class="w-full bg-[#14213d] hover:bg-[#fca311] text-white font-black py-6 rounded-[2.5rem] transition-all duration-500 shadow-2xl shadow-blue-900/10 uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-4 group active:scale-95">
+                                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Validate & Live
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- EMPTY STATE -->
+            <div
+                class="text-center py-40 bg-white rounded-[4rem] border-2 border-dashed border-gray-100 shadow-sm px-10 animation-fadeIn">
+                <div
+                    class="w-32 h-32 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
+                    <svg class="w-16 h-16 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-4xl font-black text-gray-300 uppercase tracking-tighter mb-4">No Pending Actions</h3>
+                <p class="text-gray-400 font-bold text-lg max-w-sm mx-auto leading-relaxed">The approval queue is
+                    currently clear. No products require manual intervention.</p>
+            </div>
+            {% endif %}
+        </div>
+        </div>
+        <!-- DASHBOARD CONTENT: LIVE PRODUCTS -->
+        <div id="section-live" class="max-w-7xl mx-auto px-6 md:px-12 animation-fadeIn hidden">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div>
+                    <h3
+                        class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase leading-none mb-3">
+                        Live Products</h3>
+                    <p class="text-gray-500 font-bold text-lg md:text-xl">Manage products currently available on store
+                    </p>
+                </div>
+                <div class="flex items-center">
+                    <div
+                        class="bg-green-100 text-green-900 px-8 py-5 rounded-[2.5rem] shadow-sm flex items-center gap-6 border border-green-200">
+                        <span class="text-4xl md:text-5xl font-black">{{ live_products.count }}</span>
+                        <div class="h-10 w-[1px] bg-green-300"></div>
+                        <p
+                            class="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] leading-tight text-green-700">
+                            Live<br>Catalog</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if live_products %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {% for p in live_products %}
+                <div
+                    class="bg-white rounded-[3.5rem] overflow-hidden shadow-sm border border-gray-100 flex flex-col relative group hover:shadow-2xl hover:-translate-y-2 transition-all">
+                    <div class="aspect-square w-full overflow-hidden bg-gray-50/50 p-10 relative">
+                        {% if p.image %}
+                        <img src="/static/{{ p.image.name }}"
+                            class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700"
+                            alt="{{ p.name }}">
+                        {% else %}
+                        <div class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                            <span class="font-black text-xs uppercase opacity-40">No Image</span>
+                        </div>
+                        {% endif %}
+                        <div class="absolute top-10 left-10">
+                            {% if p.is_available %}
+                            <span
+                                class="bg-green-500 text-white shadow-lg text-[10px] font-black px-5 py-2.5 rounded-2xl uppercase tracking-widest border border-green-400">Active</span>
+                            {% else %}
+                            <span
+                                class="bg-red-500 text-white shadow-lg text-[10px] font-black px-5 py-2.5 rounded-2xl uppercase tracking-widest border border-red-400">Deactivated</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div
+                        class="p-10 flex-grow flex flex-col mt-[-40px] bg-white rounded-t-[4rem] relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+                        <div class="mb-5 flex-grow">
+                            <h4 class="font-black text-2xl text-gray-900 leading-[1.1] mb-2">{{ p.name }}</h4>
+                            <p class="text-[10px] font-black text-[#fca311] tracking-widest uppercase mb-1">
+                                Store: {{ p.seller.store_name|default:"General" }}
+                                <span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded ml-2">Code: {{
+                                    p.seller.store_code|default:"N/A" }}</span>
+                            </p>
+                            <p class="text-xl font-bold text-gray-500 mb-3">Rs. {{ p.price }}</p>
+
+                        </div>
+                        <div class="mt-auto border-t border-gray-100 pt-6">
+                            <div class="mb-3">
+                                {% if p.is_available %}
+                                <button onclick="productAction('{{ p.id }}', 'deactivate')"
+                                    class="w-full bg-orange-50 hover:bg-orange-600 hover:text-white text-orange-700 font-black py-4 rounded-2xl transition-all uppercase text-[9px] tracking-widest border border-orange-200 hover:border-transparent">Deactivate
+                                    (Admin Lock)</button>
+                                {% else %}
+                                <button onclick="productAction('{{ p.id }}', 'activate')"
+                                    class="w-full bg-green-50 hover:bg-green-600 hover:text-white text-green-700 font-black py-4 rounded-2xl transition-all uppercase text-[9px] tracking-widest border border-green-200 hover:border-transparent">Activate
+                                    (Unlock)</button>
+                                {% endif %}
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button"
+                                    onclick="showProductInfo('{{ p.name|escapejs }}', '{{ p.description|escapejs }}', '{{ p.brand|escapejs }}', '{{ p.category|escapejs }}', '{{ p.price }}', '{{ p.stock }}', '{{ p.free_items|escapejs }}', '{{ p.warranty_policy|escapejs }}', '{{ p.return_policy|escapejs }}', '{{ p.seller.store_name|escapejs }}', '{{ p.seller.store_code|escapejs }}', '{{ p.seller.phone|escapejs }}', '{{ p.seller.email|escapejs }}', '{{ p.seller.city|escapejs }}')"
+                                    class="w-full bg-[#fca311] hover:bg-[#e5940d] text-white font-black py-4 rounded-2xl transition-colors uppercase text-[9px] tracking-widest border border-[#fca311] flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Info
+                                </button>
+                                <button onclick="productAction('{{ p.id }}', 'delete')"
+                                    class="w-full bg-red-50 hover:bg-red-600 hover:text-white text-red-700 font-black py-4 rounded-2xl transition-all uppercase text-[9px] tracking-widest border border-red-200 hover:border-transparent">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-40 bg-white rounded-[4rem] border-2 border-dashed border-gray-100 px-10">
+                <h3 class="text-2xl font-black text-gray-300 uppercase tracking-tighter mb-4">No Live Products</h3>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- DASHBOARD CONTENT: USERS -->
+        <div id="section-users" class="max-w-7xl mx-auto px-6 md:px-12 animation-fadeIn hidden">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div>
+                    <h3 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase leading-none mb-3">
+                        Manage Users</h3>
+                    <p class="text-gray-500 font-bold text-lg md:text-xl">View all users registered via Google</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="bg-blue-100 text-blue-900 px-8 py-5 rounded-[2.5rem] shadow-sm flex items-center gap-6 border border-blue-200">
+                        <span class="text-4xl md:text-5xl font-black">{{ all_users.count }}</span>
+                        <div class="h-10 w-[1px] bg-blue-300"></div>
+                        <p class="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] leading-tight text-blue-700">
+                            Total<br>Users</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">User</th>
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Email</th>
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Auth Method</th>
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in all_users %}
+                            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                <td class="p-6">
+                                    <div class="flex items-center gap-4">
+                                        {% if u.socialaccount_set.all %}
+                                        <img src="{{ u.socialaccount_set.all.0.get_avatar_url }}" class="w-10 h-10 rounded-full">
+                                        {% else %}
+                                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 font-bold">
+                                            {{ u.username|first|upper }}
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <p class="font-black text-gray-900">{{ u.get_full_name|default:u.username }}</p>
+                                            <p class="text-[10px] text-gray-400 font-bold uppercase">@{{ u.username }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-6 text-sm font-bold text-gray-600">{{ u.email }}</td>
+                                <td class="p-6">
+                                    {% if u.socialaccount_set.all %}
+                                    <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Google Auth</span>
+                                    {% else %}
+                                    <span class="bg-gray-50 text-gray-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Standard</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-6 text-xs font-bold text-gray-400">{{ u.date_joined|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD CONTENT: SELLERS -->
+        <div id="section-sellers" class="max-w-7xl mx-auto px-6 md:px-12 animation-fadeIn hidden">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div>
+                    <h3
+                        class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase leading-none mb-3">
+                        Manage Sellers</h3>
+                    <p class="text-gray-500 font-bold text-lg md:text-xl">View all registered store accounts</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="relative">
+                        <input type="text" id="sellerSearchInput" onkeyup="filterSellers()"
+                            placeholder="Search sellers (name, email, code)..."
+                            class="bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-bold placeholder-gray-400 focus:ring-2 focus:ring-[#fca311] outline-none transition-all w-72 pl-10 shadow-inner">
+                        <svg class="w-5 h-5 absolute left-3.5 top-3.5 text-gray-400" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <div
+                        class="bg-gray-100 text-gray-900 px-8 py-5 rounded-[2.5rem] shadow-sm flex items-center gap-6 border border-gray-200">
+                        <span class="text-4xl md:text-5xl font-black">{{ all_sellers|length }}</span>
+                        <div class="h-10 w-[1px] bg-gray-300"></div>
+                        <p
+                            class="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] leading-tight text-gray-500">
+                            Active<br>Stores</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if all_sellers %}
+            <div class="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="sellersTable">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Store
+                                </th>
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Owner
+                                </th>
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Contact
+                                </th>
+                                <th
+                                    class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400 border-l border-gray-100">
+                                    Status</th>
+                                <th class="p-6 text-[10px] uppercase tracking-widest font-black text-gray-400">Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for seller in all_sellers %}
+                            <tr class="seller-row border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                <td class="p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-12 h-12 rounded-2xl bg-[#fca311]/10 flex items-center justify-center text-[#fca311] font-black text-xl">
+                                            {{ seller.store_name|make_list|first|upper }}
+                                        </div>
+                                        <div>
+                                            <p class="font-black text-gray-900 text-lg">{{ seller.store_name }}</p>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span
+                                                    class="bg-blue-50 text-blue-600 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest">Access
+                                                    Key</span>
+                                                <p class="text-[11px] text-gray-500 font-mono font-bold tracking-wider">
+                                                    {{ seller.store_code }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-6">
+                                    <p class="font-bold text-gray-700">{{ seller.legal_name }}</p>
+                                    <p class="text-xs text-gray-400">{{ seller.username }}</p>
+                                </td>
+                                <td class="p-6">
+                                    <p class="font-bold text-gray-700">{{ seller.phone }}</p>
+                                    <p class="text-xs text-gray-400">{{ seller.email }}</p>
+                                </td>
+                                <td class="p-6 border-l border-gray-100">
+                                    <span
+                                        class="bg-green-50 text-green-600 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">{{
+                                        seller.status }}</span>
+                                </td>
+                                <td class="p-6">
+                                    <div class="flex gap-2">
+                                        <button onclick="sellerAction('{{ seller.store_code }}', 'activate')"
+                                            class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-green-200 transition-colors">Activate</button>
+                                        <button onclick="sellerAction('{{ seller.store_code }}', 'deactivate')"
+                                            class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-orange-200 transition-colors">Deactivate</button>
+                                        <button onclick="sellerAction('{{ seller.store_code }}', 'delete')"
+                                            class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <script>
+                function filterSellers() {
+                    const input = document.getElementById('sellerSearchInput');
+                    const filter = input.value.toLowerCase();
+                    const table = document.getElementById('sellersTable');
+                    const trs = table.getElementsByClassName('seller-row');
+
+                    for (let i = 0; i < trs.length; i++) {
+                        // Gets the text of the entire row (store name, code, email, phone, etc.)
+                        const rowText = trs[i].textContent || trs[i].innerText;
+                        if (rowText.toLowerCase().indexOf(filter) > -1) {
+                            trs[i].style.display = "";
+                        } else {
+                            trs[i].style.display = "none";
+                        }
+                    }
+                }
+            </script>
+
+            {% else %}
+            <div class="text-center py-40 bg-white rounded-[4rem] border-2 border-dashed border-gray-100 px-10">
+                <h3 class="text-2xl font-black text-gray-300 uppercase tracking-tighter mb-4">No Sellers Found</h3>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- DASHBOARD CONTENT: COMPLAINTS -->
+        <div id="section-complaints" class="max-w-7xl mx-auto px-6 md:px-12 animation-fadeIn hidden">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                <div>
+                    <h3
+                        class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter uppercase leading-none mb-3">
+                        User Complain</h3>
+                    <p class="text-gray-500 font-bold text-lg md:text-xl">Read and resolve incoming messages</p>
+                </div>
+                <div class="flex items-center">
+                    <div
+                        class="bg-red-50 text-red-900 px-8 py-5 rounded-[2.5rem] shadow-sm flex items-center gap-6 border border-red-100">
+                        <span class="text-4xl md:text-5xl font-black">{{ all_complaints.count|default:"0" }}</span>
+                        <div class="h-10 w-[1px] bg-red-200"></div>
+                        <p
+                            class="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] leading-tight text-red-700">
+                            Open<br>Tickets</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inbox Style Container -->
+            <div
+                class="bg-white rounded-[3rem] shadow-[0_30px_60px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden min-h-[700px] flex">
+
+                <!-- Sidebar List -->
+                <div class="w-[35%] border-r border-gray-100 bg-gray-50/50 flex flex-col">
+                    <div
+                        class="p-8 border-b border-gray-100 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.02)] relative z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Search complaints..."
+                                class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold placeholder-gray-400 focus:ring-4 focus:ring-[#fca311]/20 focus:border-[#fca311] outline-none transition-all shadow-inner">
+                            <svg class="w-5 h-5 absolute left-4 top-4 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto flex-grow p-4 space-y-3 hide-scrollbar">
+                        {% if all_complaints %}
+                        {% for msg in all_complaints %}
+                        <div class="p-5 rounded-2xl bg-white cursor-pointer transition-all duration-300 border border-transparent hover:border-[#fca311] hover:shadow-[0_10px_30px_rgba(252,163,17,0.15)] group relative overflow-hidden"
+                            onclick="showComplaint('{{ msg.id }}')">
+                            <div
+                                class="absolute top-0 left-0 w-1 h-full bg-[#fca311] transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300">
+                            </div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-[#14213d] flex items-center justify-center text-white font-black text-lg shadow-md">
+                                        {{ msg.sender.username|make_list|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h4
+                                            class="font-black text-gray-900 text-sm truncate pr-2 group-hover:text-[#fca311] transition-colors">
+                                            {{ msg.sender.username }}</h4>
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{
+                                            msg.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs font-black text-gray-800 truncate mb-2 leading-relaxed">{{ msg.subject }}
+                            </p>
+                            <p class="text-[11px] text-gray-500 truncate font-medium">{{ msg.body }}</p>
+                            <div class="mt-4 flex gap-2">
+                                <span
+                                    class="bg-red-50 text-red-600 border border-red-100 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-widest flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                        </path>
+                                    </svg>
+                                    Report
+                                </span>
+                                <span
+                                    class="bg-gray-100 text-gray-600 border border-gray-200 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-widest">{{
+                                    msg.store_name|default:"Unknown Store" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="p-10 flex flex-col items-center justify-center text-center h-full">
+                            <div
+                                class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 mb-4 shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                                    </path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-black text-gray-400 uppercase tracking-widest">Inbox Empty</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Message View -->
+                <div class="w-[65%] bg-white flex flex-col items-center justify-center text-gray-300 relative"
+                    id="complaint-view-empty">
+                    <div class="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-white"></div>
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div
+                            class="w-32 h-32 bg-gray-50 rounded-[2.5rem] flex items-center justify-center text-gray-200 mb-6 shadow-inner border border-gray-100">
+                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <p class="font-black uppercase tracking-[0.3em] text-sm text-gray-400">Select a complaint to
+                            view</p>
+                    </div>
+                </div>
+
+                {% for msg in all_complaints %}
+                <div class="w-[65%] bg-white flex-col hidden complaint-detail h-full" id="complaint-{{ msg.id }}">
+                    <div class="p-10 border-b border-gray-100 bg-white relative">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-red-50 to-transparent rounded-bl-[4rem]">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span
+                                    class="bg-red-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-md">Priority
+                                    Issue</span>
+                                <span class="text-xs font-black text-gray-400 bg-gray-100 px-4 py-1.5 rounded-lg">{{
+                                    msg.created_at|date:"M d, Y - h:i A" }}</span>
+                            </div>
+                            <h2
+                                class="text-3xl md:text-4xl font-black text-gray-900 mb-8 tracking-tighter leading-[1.1]">
+                                {{ msg.subject }}</h2>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 flex items-center gap-4">
+                                    <div
+                                        class="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                                            Reported By</p>
+                                        <p class="text-sm font-black text-gray-900">{{ msg.sender.username }}</p>
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-red-50 p-5 rounded-2xl border border-red-100 flex items-center gap-4 shadow-sm relative overflow-hidden">
+                                    <div
+                                        class="absolute -right-4 -top-4 w-16 h-16 bg-red-100 rounded-full opacity-50 blur-xl">
+                                    </div>
+                                    <div
+                                        class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-500 relative z-10">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div class="relative z-10">
+                                        <p class="text-[9px] font-black text-red-400 uppercase tracking-widest mb-1">
+                                            Target Store</p>
+                                        <p class="text-sm font-black text-red-900 flex flex-col leading-tight">
+                                            <span>{{ msg.store_name|default:msg.reported_user|default:"N/A" }}</span>
+                                            <span class="text-[10px] font-mono text-red-600 opacity-80 mt-1">CODE: {{
+                                                msg.store_code|default:"N/A" }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-10 flex-grow overflow-y-auto bg-gray-50/30">
+                        <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Complaint
+                            Description</p>
+                        <div
+                            class="bg-white p-8 rounded-3xl border border-gray-100 text-gray-700 leading-relaxed font-medium text-sm shadow-[0_10px_30px_rgba(0,0,0,0.02)]">
+                            {{ msg.body|linebreaks }}
+                        </div>
+                    </div>
+
+                    <div class="p-8 border-t border-gray-100 bg-white flex gap-4 items-center">
+                        <div class="flex-grow relative">
+                            <input type="text" placeholder="Type a resolution message..."
+                                class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-5 pr-12 py-4 text-sm font-bold placeholder-gray-400 focus:ring-4 focus:ring-[#fca311]/20 focus:border-[#fca311] outline-none transition-all shadow-inner">
+                            <button
+                                class="absolute right-3 top-3 w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-xl flex items-center justify-center text-gray-600 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                        <button
+                            class="bg-[#14213d] hover:bg-[#fca311] hover:shadow-[0_15px_30px_rgba(252,163,17,0.3)] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 group">
+                            Send Reply
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+
+            <script>
+                function showComplaint(id) {
+                    document.getElementById('complaint-view-empty').classList.add('hidden');
+                    document.querySelectorAll('.complaint-detail').forEach(el => {
+                        el.classList.add('hidden');
+                        el.classList.remove('flex');
+                    });
+                    const selected = document.getElementById('complaint-' + id);
+                    if (selected) {
+                        selected.classList.remove('hidden');
+                        selected.classList.add('flex');
+                    }
+                }
+            </script>
+        </div>
+
+        <script>
+            function switchAdminTab(tab) {
+                // Hide all sections
+                ['approvals', 'users', 'sellers', 'complaints'].forEach(t => {
+                    const section = document.getElementById('section-' + t);
+                    if (section) section.classList.add('hidden');
+                    
+                    const btn = document.getElementById('tab-' + t);
+                    if (btn) {
+                        btn.classList.remove('border-[#fca311]', 'text-gray-900', 'font-black');
+                        btn.classList.add('border-transparent', 'text-gray-400', 'font-bold');
+                    }
+                });
+
+                // Show selected
+                const activeSection = document.getElementById('section-' + tab);
+                if (activeSection) activeSection.classList.remove('hidden');
+                
+                const activeBtn = document.getElementById('tab-' + tab);
+                if (activeBtn) {
+                    activeBtn.classList.remove('border-transparent', 'text-gray-400', 'font-bold');
+                    activeBtn.classList.add('border-[#fca311]', 'text-gray-900', 'font-black');
+                }
+            }
+
+            function switchProductSubTab(subTab) {
+                // Hide both sub-sections
+                document.getElementById('sub-section-approvals').classList.add('hidden');
+                document.getElementById('sub-section-live').classList.add('hidden');
+                
+                // Hide both stats
+                document.getElementById('stat-approvals').classList.add('hidden');
+                document.getElementById('stat-live').classList.add('hidden');
+                
+                // Reset buttons
+                const btnApp = document.getElementById('btn-sub-approvals');
+                const btnLive = document.getElementById('btn-sub-live');
+                
+                btnApp.classList.remove('bg-[#fca311]');
+                btnApp.classList.add('bg-[#14213d]');
+                btnLive.classList.remove('bg-[#fca311]');
+                btnLive.classList.add('bg-[#14213d]');
+                
+                // Show selected
+                document.getElementById('sub-section-' + subTab).classList.remove('hidden');
+                document.getElementById('stat-' + subTab).classList.remove('hidden');
+                
+                const activeBtn = document.getElementById('btn-sub-' + subTab);
+                activeBtn.classList.remove('bg-[#14213d]');
+                activeBtn.classList.add('bg-[#fca311]');
+            }
+        </script>
+    </div>
+    {% endif %}
+</div>
+
+<!-- INFO MODAL (Hidden by default) -->
+<div id="productInfoModal"
+    class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-[3rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative transform scale-95 transition-transform duration-300"
+        id="modalContainer">
+        <!-- Close Button -->
+        <button onclick="closeInfoModal()"
+            class="absolute top-6 right-6 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors z-[100] cursor-pointer">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <div class="bg-[#fca311] p-8 text-white relative overflow-hidden flex-shrink-0">
+            <h3 class="text-3xl font-black mb-1 relative z-10" id="modalTitle">Product Details</h3>
+            <p class="text-white/80 font-bold uppercase tracking-widest text-xs relative z-10">Full Submission Record
+            </p>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+        </div>
+
+        <div class="overflow-y-auto p-8 bg-gray-50 flex-grow custom-scrollbar">
+            <div class="space-y-6" id="modalContent">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+
+        <div class="p-6 bg-white border-t border-gray-100 flex-shrink-0 text-center">
+            <button onclick="copyAllInfo()"
+                class="px-8 py-3 bg-gray-900 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl hover:bg-[#fca311] transition-all">Copy
+                All Info</button>
+        </div>
+    </div>
+</div>
+
+<!-- AJAX SCRIPTS -->
+<script>
+    function showProductInfo(name, desc, brand, category, price, stock, free, warranty, retPol, sName, sCode, sPhone, sEmail, sCity) {
+        document.getElementById('modalTitle').innerText = name;
+
+        let html = `
+            <div class="bg-[#fca311] p-5 rounded-2xl mb-4 border border-[#fca311] shadow-xl">
+                <p class="text-[9px] uppercase tracking-[0.3em] text-white font-black mb-4">Seller Source Data</p>
+                <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
+                    <div>
+                        <span class="block text-white text-[10px] uppercase font-bold tracking-widest mb-0.5">Store Name</span>
+                        <span class="text-white font-black">${sName || "System Registered"}</span>
+                    </div>
+                    <div>
+                        <span class="block text-white text-[10px] uppercase font-bold tracking-widest mb-0.5">Store Code</span>
+                        <span class="text-white font-mono bg-[#e5940d] px-2 py-0.5 rounded text-xs inline-block">${sCode || "N/A"}</span>
+                    </div>
+                    <div>
+                        <span class="block text-white text-[10px] uppercase font-bold tracking-widest mb-0.5">Contact Method</span>
+                        <span class="text-white">${sPhone || "No Phone"} <br> ${sEmail || "No Email"}</span>
+                    </div>
+                    <div>
+                        <span class="block text-white text-[10px] uppercase font-bold tracking-widest mb-0.5">Location</span>
+                        <span class="text-white inline-flex items-center gap-1">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            ${sCity || "Unknown City"}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4 mt-6">
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Brand</p>
+                    <p class="font-black text-gray-800">${brand || "N/A"}</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Category</p>
+                    <p class="font-black text-gray-800">${category || "N/A"}</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Price</p>
+                    <p class="font-black text-[#fca311] text-lg">Rs. ${price}</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Stock</p>
+                    <p class="font-black text-gray-800">${stock || "0"}</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-2">Description</p>
+                <p class="text-sm text-gray-600 leading-relaxed font-medium">${desc || "No description provided."}</p>
+            </div>
+            
+            <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-50 mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-blue-400 font-bold mb-2">Free Items / Gifts</p>
+                <p class="text-sm text-blue-900 font-bold">${free || "None"}</p>
+            </div>
+            
+            <div class="bg-green-50/50 p-5 rounded-2xl border border-green-50 mb-4">
+                <p class="text-[9px] uppercase tracking-widest text-green-400 font-bold mb-2">Warranty Policy</p>
+                <p class="text-sm text-green-900 font-medium">${warranty || "No warranty provided."}</p>
+            </div>
+            
+            <div class="bg-purple-50/50 p-5 rounded-2xl border border-purple-50">
+                <p class="text-[9px] uppercase tracking-widest text-purple-400 font-bold mb-2">Return Policy</p>
+                <p class="text-sm text-purple-900 font-medium">${retPol || "No return policy specified."}</p>
+            </div>
+        `;
+
+        document.getElementById('modalContent').innerHTML = html;
+        const modal = document.getElementById('productInfoModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            document.getElementById('modalContainer').classList.remove('scale-95');
+        }, 10);
+    }
+
+    function closeInfoModal() {
+        const modal = document.getElementById('productInfoModal');
+        modal.classList.add('opacity-0');
+        document.getElementById('modalContainer').classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function copyAllInfo() {
+        const content = document.getElementById('modalContent').innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            alert('All info copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    }
+
+    async function productAction(pid, action) {
+        if (action === 'delete') {
+            if (!confirm('Are you sure you want to permanently delete this product?')) return;
+        }
+        try {
+            const formData = new FormData();
+            formData.append('pid', pid);
+            formData.append('action', action);
+
+            const response = await fetch('{% url "manage_product_action" %}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (e) {
+            alert("Action failed.");
+        }
+    }
+
+    async function sellerAction(storeCode, action) {
+        if (action === 'delete') {
+            if (!confirm('Are you sure you want to permanently delete this seller?')) return;
+        }
+        try {
+            const formData = new FormData();
+            formData.append('store_code', storeCode);
+            formData.append('action', action);
+
+            const response = await fetch('{% url "manage_seller_action" %}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert("Error: " + result.message);
+            }
+        } catch (e) {
+            alert("Action failed.");
+        }
+    }
+
+    async function approveProduct(pid, btn) {
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>授权中...`;
+
+        try {
+            const formData = new FormData();
+            formData.append('pid', pid);
+            const response = await fetch('{% url "approve_product" %}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                const card = document.getElementById('product-card-' + pid);
+                card.style.transform = 'translateY(100px) scale(0.9)';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.classList.add('hidden');
+                    if (document.querySelectorAll('[id^="product-card-"]:not(.hidden)').length === 0) {
+                        location.reload();
+                    }
+                }, 700);
+            } else {
+                alert("Auth Failure: " + result.message);
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        } catch (error) {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
+    }
+</script>
+
+<!-- ═══════════════════ BANNER EDITOR MODAL (ADMIN) ═══════════════════ -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js" type="module"></script>
+
+<style>
+    :root {
+        --be-primary: #fca311;
+        --be-border: rgba(255, 255, 255, 0.1);
+        --be-danger: #e74c3c;
+    }
+
+    #beModal * {
+        box-sizing: border-box;
+        font-family: 'Outfit', 'Segoe UI', sans-serif;
+    }
+
+    .be-toolbar {
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        background: rgba(6, 6, 8, 0.97);
+        border-bottom: 1px solid var(--be-border);
+        flex-shrink: 0;
+        gap: 12px;
+    }
+
+    .be-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--be-border);
+        color: #ccc;
+        padding: 0 14px;
+        height: 42px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: pointer;
+        font-size: 13.5px;
+        font-weight: 600;
+        transition: all 0.25s;
+        white-space: nowrap;
+    }
+
+    .be-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: var(--be-primary);
+        color: var(--be-primary);
+        transform: translateY(-1px);
+    }
+
+    .be-btn.be-active {
+        background: var(--be-primary);
+        color: #000;
+        border-color: var(--be-primary);
+        box-shadow: 0 0 18px rgba(252, 163, 17, 0.35);
+    }
+
+    .be-btn-save {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: #fff !important;
+        border: none;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+    }
+
+    .be-btn-save:hover {
+        transform: translateY(-2px) scale(1.03);
+    }
+
+    .be-btn-close {
+        background: var(--be-danger);
+        border: none;
+        color: #fff !important;
+        width: 42px;
+        padding: 0;
+        border-radius: 12px;
+        justify-content: center;
+    }
+
+    .be-viewport {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, #141414 0%, #070707 100%);
+        overflow: hidden;
+    }
+
+    #beImage {
+        display: block;
+        max-width: 92%;
+        max-height: 86%;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    #beCanvasWrapper {
+        display: none;
+        position: relative;
+    }
+
+    .be-float-panel {
+        position: absolute;
+        background: rgba(14, 14, 18, 0.97);
+        backdrop-filter: blur(18px);
+        border: 1px solid var(--be-border);
+        border-radius: 18px;
+        padding: 15px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.85);
+        z-index: 200;
+        display: none;
+        flex-direction: column;
+        gap: 11px;
+        animation: bePopIn 0.22s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bePopIn {
+        from {
+            transform: scale(0.84) translateY(8px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    #beDrawPanel {
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 152px;
+    }
+
+    #beTextPanel {
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 152px;
+    }
+
+    #beEmojiBox {
+        right: 18px;
+        bottom: 16px;
+    }
+
+    .be-panel-label {
+        font-size: 9.5px;
+        opacity: 0.4;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        text-align: center;
+        color: #fff;
+    }
+
+    .be-dots-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        justify-content: center;
+    }
+
+    .be-dot {
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+
+    .be-dot:hover {
+        transform: scale(1.12);
+    }
+
+    .be-dot.be-dot-active {
+        border-color: #fff;
+        transform: scale(1.2);
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+    }
+
+    .be-color-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .be-wheel {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid var(--be-border);
+        padding: 0;
+        cursor: pointer;
+        background: none;
+        outline: none;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .be-wheel::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    .be-wheel::-webkit-color-swatch {
+        border: none;
+        border-radius: 50%;
+    }
+
+    .be-hex {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--be-border);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 11.5px;
+        font-family: monospace;
+        padding: 5px 7px;
+        outline: none;
+        transition: 0.2s;
+        text-transform: uppercase;
+    }
+
+    .be-hex:focus {
+        border-color: var(--be-primary);
+    }
+
+    .be-add-text-btn {
+        background: var(--be-primary);
+        border: none;
+        color: #000;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 8px;
+        cursor: pointer;
+        font-size: 12.5px;
+        transition: 0.2s;
+        margin-top: 2px;
+    }
+
+    .be-size-slider {
+        width: 100%;
+        accent-color: var(--be-primary);
+    }
+
+    .be-title-badge {
+        color: var(--be-primary);
+        font-weight: 900;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        text-align: center;
+    }
+</style>
+
+<div id="beModal"
+    style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.78);backdrop-filter:blur(14px);align-items:center;justify-content:center;">
+    <div
+        style="width:94vw;max-width:1300px;height:90vh;background:#0a0a0f;border-radius:22px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 50px 120px rgba(0,0,0,0.95);border:1px solid rgba(255,255,255,0.06);">
+        <div class="be-toolbar">
+            <div style="display:flex;gap:9px;">
+                <button class="be-btn be-active" id="beCropBtn" onclick="beDoneCrop()">✂️ <span>Done
+                        Crop</span></button>
+                <button class="be-btn" id="beTextBtn" onclick="beToggleText()">Aa <span>Text</span></button>
+                <button class="be-btn" id="beDrawBtn" onclick="beToggleDraw()">✏️ <span>Draw</span></button>
+                <button class="be-btn" onclick="beToggleEmoji()">😀 <span>Emoji</span></button>
+            </div>
+            <div class="be-title-badge">🖼️ Banner Editor &nbsp;·&nbsp; 1500 × 288</div>
+            <div style="display:flex;gap:9px;">
+                <button class="be-btn be-btn-save" onclick="beSaveBanner()">💾 Save Banner</button>
+                <button class="be-btn be-btn-close" onclick="beClose()">✕</button>
+            </div>
+        </div>
+        <div class="be-viewport" id="beViewport">
+            <img id="beImage" alt="">
+            <div id="beCanvasWrapper"><canvas id="beCanvas"></canvas></div>
+            <div id="beDrawPanel" class="be-float-panel">
+                <div class="be-panel-label">✏️ Pencil</div>
+                <div class="be-dots-row">
+                    <div class="be-dot be-dot-active" style="background:#fca311;"
+                        onclick="beSetDrawColor('#fca311',this)"></div>
+                    <div class="be-dot" style="background:#e74c3c;" onclick="beSetDrawColor('#e74c3c',this)"></div>
+                    <div class="be-dot" style="background:#fff;" onclick="beSetDrawColor('#ffffff',this)"></div>
+                    <div class="be-dot" style="background:#2ecc71;" onclick="beSetDrawColor('#2ecc71',this)"></div>
+                    <div class="be-dot" style="background:#3498db;" onclick="beSetDrawColor('#3498db',this)"></div>
+                    <div class="be-dot" style="background:#9b59b6;" onclick="beSetDrawColor('#9b59b6',this)"></div>
+                    <div class="be-dot" style="background:#000;border:1px solid #444;"
+                        onclick="beSetDrawColor('#000000',this)"></div>
+                </div>
+                <div class="be-color-row">
+                    <input type="color" class="be-wheel" id="beDrawWheel" value="#fca311"
+                        oninput="beDrawWheelChange(this.value)">
+                    <input type="text" class="be-hex" id="beDrawHex" value="#FCA311" maxlength="7" placeholder="#HEX"
+                        oninput="beDrawHexInput(this.value)">
+                </div>
+                <div class="be-panel-label">SIZE</div>
+                <input type="range" class="be-size-slider" min="1" max="40" value="5"
+                    oninput="beDrawSizeChange(this.value)">
+            </div>
+            <div id="beTextPanel" class="be-float-panel">
+                <div class="be-panel-label">✍️ Text Color</div>
+                <div class="be-dots-row">
+                    <div class="be-dot be-dot-active" style="background:#fff;" onclick="beSetTextColor('#ffffff',this)">
+                    </div>
+                    <div class="be-dot" style="background:#fca311;" onclick="beSetTextColor('#fca311',this)"></div>
+                    <div class="be-dot" style="background:#e74c3c;" onclick="beSetTextColor('#e74c3c',this)"></div>
+                    <div class="be-dot" style="background:#2ecc71;" onclick="beSetTextColor('#2ecc71',this)"></div>
+                    <div class="be-dot" style="background:#3498db;" onclick="beSetTextColor('#3498db',this)"></div>
+                    <div class="be-dot" style="background:#000;border:1px solid #444;"
+                        onclick="beSetTextColor('#000000',this)"></div>
+                </div>
+                <div class="be-color-row">
+                    <input type="color" class="be-wheel" id="beTextWheel" value="#ffffff"
+                        oninput="beTextWheelChange(this.value)">
+                    <input type="text" class="be-hex" id="beTextHex" value="#FFFFFF" maxlength="7" placeholder="#HEX"
+                        oninput="beTextHexInput(this.value)">
+                </div>
+                <button class="be-add-text-btn" onclick="beAddText()">+ Add Text</button>
+            </div>
+            <div id="beEmojiBox" class="be-float-panel"><emoji-picker id="beEmojiPicker"></emoji-picker></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchAdminTab(tabId) {
+        // Hide all sections
+        const sections = ['approvals', 'live', 'users', 'sellers', 'complaints'];
+        sections.forEach(s => {
+            const el = document.getElementById('section-' + s);
+            if (el) el.classList.add('hidden');
+            
+            const tab = document.getElementById('tab-' + s);
+            if (tab) {
+                tab.classList.remove('font-black', 'text-gray-900', 'border-[#fca311]');
+                tab.classList.add('font-bold', 'text-gray-400', 'border-transparent');
+            }
+        });
+
+        // Show active section
+        const activeSection = document.getElementById('section-' + tabId);
+        if (activeSection) activeSection.classList.remove('hidden');
+
+        // Active tab style
+        const activeTab = document.getElementById('tab-' + tabId);
+        if (activeTab) {
+            activeTab.classList.add('font-black', 'text-gray-900', 'border-[#fca311]');
+            activeTab.classList.remove('font-bold', 'text-gray-400', 'border-transparent');
+        }
+    }
+
+    var beCropper = null, beFabric = null, beTextColor = '#ffffff';
+    function openBannerEditor() { document.getElementById('bannerFileInput').click(); }
+    function beOnFileSelect(input) {
+        var f = input.files[0]; if (!f) return;
+        var r = new FileReader();
+        r.onload = function (e) { beShowModal(e.target.result); };
+        r.readAsDataURL(f);
+    }
+    function beShowModal(src) {
+        document.getElementById('beModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        document.getElementById('beCanvasWrapper').style.display = 'none';
+        beCloseAllPanels();
+        document.getElementById('beCropBtn').classList.add('be-active');
+        document.getElementById('beCropBtn').innerHTML = '✂️ <span>Done Crop</span>';
+        var img = document.getElementById('beImage');
+        img.onload = function () {
+            img.style.opacity = '1';
+            if (beCropper) beCropper.destroy();
+            beCropper = new Cropper(img, { aspectRatio: 1500 / 288, viewMode: 1, dragMode: 'move', autoCropArea: 0.9, responsive: true, guides: true, center: true, background: false, checkCrossOrigin: false });
+        };
+        img.src = src;
+    }
+    function beDoneCrop() {
+        if (!beCropper) return;
+        var cropped = beCropper.getCroppedCanvas({ width: 1500, height: 288, imageSmoothingQuality: 'high' });
+        var img = document.getElementById('beImage');
+        img.style.opacity = '0';
+        setTimeout(function () { img.style.display = 'none'; }, 300);
+        var vp = document.getElementById('beViewport');
+        var maxW = vp.clientWidth * 0.92, maxH = vp.clientHeight * 0.85;
+        var w = 1500, h = 288, r = w / h;
+        if (w > maxW) { w = maxW; h = w / r; } if (h > maxH) { h = maxH; w = h * r; }
+        if (beFabric) beFabric.dispose();
+        beFabric = new fabric.Canvas('beCanvas', { width: w, height: h, backgroundColor: 'transparent' });
+        beFabric.freeDrawingBrush = new fabric.PencilBrush(beFabric);
+        beFabric.freeDrawingBrush.color = '#fca311'; beFabric.freeDrawingBrush.width = 5;
+        var fi = new fabric.Image(cropped, { left: 0, top: 0, scaleX: w / cropped.width, scaleY: h / cropped.height, selectable: false, evented: false });
+        beFabric.add(fi); beFabric.sendToBack(fi); beFabric.renderAll();
+        document.getElementById('beCanvasWrapper').style.display = 'block';
+        beCropper.destroy(); beCropper = null;
+        document.getElementById('beCropBtn').innerHTML = '✂️ <span>Crop</span>';
+        document.getElementById('beCropBtn').classList.remove('be-active');
+    }
+    function beSaveBanner() {
+        if (!beFabric) { alert('Pehle crop karein!'); return; }
+        var d = beFabric.toDataURL({ format: 'png', quality: 1 });
+        var bi = document.getElementById('currentBannerImg');
+        if (bi) { bi.src = d; bi.style.display = 'block'; }
+        document.getElementById('bannerArea').style.background = 'none';
+        beClose();
+    }
+    function beClose() {
+        document.getElementById('beModal').style.display = 'none';
+        document.body.style.overflow = '';
+        var img = document.getElementById('beImage');
+        img.style.opacity = '0'; img.style.display = 'block'; img.src = '';
+        if (beCropper) { beCropper.destroy(); beCropper = null; }
+        if (beFabric) { beFabric.dispose(); beFabric = null; }
+        document.getElementById('beCanvasWrapper').style.display = 'none';
+        document.getElementById('bannerFileInput').value = '';
+        beCloseAllPanels();
+    }
+    function beCloseAllPanels() {
+        document.getElementById('beDrawPanel').style.display = 'none';
+        document.getElementById('beTextPanel').style.display = 'none';
+        document.getElementById('beEmojiBox').style.display = 'none';
+        document.getElementById('beDrawBtn').classList.remove('be-active');
+        document.getElementById('beTextBtn').classList.remove('be-active');
+        if (beFabric) beFabric.isDrawingMode = false;
+    }
+    function beToggleDraw() {
+        if (!beFabric) return;
+        beFabric.isDrawingMode = !beFabric.isDrawingMode;
+        var p = document.getElementById('beDrawPanel'), b = document.getElementById('beDrawBtn');
+        if (beFabric.isDrawingMode) { beCloseAllPanels(); p.style.display = 'flex'; b.classList.add('be-active'); beFabric.isDrawingMode = true; }
+        else { p.style.display = 'none'; b.classList.remove('be-active'); }
+    }
+    function beSetDrawColor(c, el) {
+        if (beFabric) beFabric.freeDrawingBrush.color = c;
+        document.querySelectorAll('#beDrawPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+        el.classList.add('be-dot-active');
+        document.getElementById('beDrawWheel').value = c;
+        document.getElementById('beDrawHex').value = c.toUpperCase();
+    }
+    function beDrawWheelChange(c) { if (beFabric) beFabric.freeDrawingBrush.color = c; document.getElementById('beDrawHex').value = c.toUpperCase(); document.querySelectorAll('#beDrawPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); }); }
+    function beDrawHexInput(v) { v = v.trim(); if (!v.startsWith('#')) v = '#' + v; if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)) { if (beFabric) beFabric.freeDrawingBrush.color = v; document.getElementById('beDrawWheel').value = v; document.querySelectorAll('#beDrawPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); }); } }
+    function beDrawSizeChange(s) { if (beFabric) beFabric.freeDrawingBrush.width = parseInt(s); }
+    function beToggleText() {
+        var p = document.getElementById('beTextPanel'), b = document.getElementById('beTextBtn');
+        var open = p.style.display === 'flex'; beCloseAllPanels();
+        if (!open) { p.style.display = 'flex'; b.classList.add('be-active'); }
+    }
+    function beAddText() {
+        if (!beFabric) return;
+        var t = new fabric.IText('Your Text', { left: beFabric.width / 2, top: beFabric.height / 2, originX: 'center', originY: 'center', fill: beTextColor, fontSize: 36, fontFamily: 'Outfit,sans-serif', fontWeight: '900', stroke: beTextColor === '#ffffff' ? '#000' : 'transparent', strokeWidth: beTextColor === '#ffffff' ? 2 : 0, paintFirst: 'stroke' });
+        beFabric.add(t); beFabric.setActiveObject(t); t.enterEditing();
+    }
+    function beSetTextColor(c, el) {
+        beTextColor = c;
+        document.querySelectorAll('#beTextPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); });
+        el.classList.add('be-dot-active');
+        document.getElementById('beTextWheel').value = c;
+        document.getElementById('beTextHex').value = c.toUpperCase();
+        if (beFabric) { var o = beFabric.getActiveObject(); if (o && o.type === 'i-text') { o.set('fill', c); beFabric.renderAll(); } }
+    }
+    function beTextWheelChange(c) { beTextColor = c; document.getElementById('beTextHex').value = c.toUpperCase(); document.querySelectorAll('#beTextPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); }); if (beFabric) { var o = beFabric.getActiveObject(); if (o && o.type === 'i-text') { o.set('fill', c); beFabric.renderAll(); } } }
+    function beTextHexInput(v) { v = v.trim(); if (!v.startsWith('#')) v = '#' + v; if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)) { beTextColor = v; document.getElementById('beTextWheel').value = v; document.querySelectorAll('#beTextPanel .be-dot').forEach(function (d) { d.classList.remove('be-dot-active'); }); if (beFabric) { var o = beFabric.getActiveObject(); if (o && o.type === 'i-text') { o.set('fill', v); beFabric.renderAll(); } } } }
+    function beToggleEmoji() {
+        var b = document.getElementById('beEmojiBox');
+        var open = (b.style.display === 'block' || b.style.display === 'flex');
+        beCloseAllPanels(); if (!open) b.style.display = 'block';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var p = document.getElementById('beEmojiPicker');
+        if (p) { p.addEventListener('emoji-click', function (e) { if (!beFabric) return; var em = new fabric.Text(e.detail.unicode, { left: beFabric.width / 2, top: beFabric.height / 2, fontSize: 70 }); beFabric.add(em); beFabric.setActiveObject(em); document.getElementById('beEmojiBox').style.display = 'none'; }); }
+    });
+    document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && !e.target.matches('input,textarea')) {
+            if (beFabric) { var o = beFabric.getActiveObject(); if (o && !o.isEditing) beFabric.remove(o); }
+        }
+    });
+    document.getElementById('beModal').addEventListener('click', function (e) { if (e.target === this) beClose(); });
+</script>
+
+{% endblock %}

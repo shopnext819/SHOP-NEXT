@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* ===== Main Hero Container ===== */
+    .seller-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 80px);
+        /* Makes it full screen minus nav bar */
+        background: transparent;
+        padding: 40px 50px;
+        box-sizing: border-box;
+        margin-top: 5%;
+        /* Nudged down by 5 percent */
+    }
+
+    /* ===== Left Side (Video Box) ===== */
+    .video-box {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-right: 40px;
+    }
+
+    .video-box video {
+        width: 100%;
+        height: auto;
+        transform: scale(1.13) translateY(-8%);
+        /* Stacked another -5% (Total -8% Upwards) */
+        border-radius: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        background: #000;
+        /* Fallback color before video loads */
+    }
+
+    /* ===== Right Side (Text & Button) ===== */
+    .text-content {
+        flex: 1;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transform: translateY(-15%);
+        /* Stacked another -5% (Total -15% Upwards) */
+    }
+
+    .text-content h1 {
+        font-family: 'Inter', sans-serif;
+        font-size: 50px;
+        font-weight: 800;
+        color: #111;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    .text-content span.highlight {
+        color: #f59e0b;
+        /* Orange/Yellow from Shop Next theme */
+    }
+
+    .text-content p {
+        font-size: 18px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        max-width: 500px;
+    }
+
+    /* ===== Get Started Button ===== */
+    .btn-get-started {
+        display: inline-block;
+        padding: 16px 45px;
+        background: #000;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 30px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-align: center;
+        width: max-content;
+    }
+
+    .btn-get-started:hover {
+        background: #f59e0b;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        transform: translateY(-3px);
+    }
+
+    /* ===== Responsive for Mobiles ===== */
+    @media (max-width: 900px) {
+        .seller-container {
+            flex-direction: column;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .video-box,
+        .text-content {
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-box {
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .text-content h1 {
+            font-size: 38px;
+        }
+
+        .text-content p {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-get-started {
+            margin: 0 auto;
+        }
+    }
+</style>
+
+<div class="seller-container">
+
+    <!-- LEFT SIDE: MP4 VIDEO BOX -->
+    <div class="video-box">
+        <!-- Added 'muted' so it ALWAYS autoplays instantly on page load -->
+        <video id="promoVid" autoplay loop muted playsinline onended="this.currentTime=0; this.play();">
+            <source src="{% static 'videos center/center.mp4' %}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Smart Audio Enabler: Autoplays visually immediately, then tries to turn on sound -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var v = document.getElementById('promoVid');
+
+            // Attempt to unmute immediately after video starts natively
+            setTimeout(() => {
+                v.muted = false;
+            }, 800);
+
+            // If browser security blocks the above timeout, it will instantly unmute the second user clicks anywhere
+            document.body.addEventListener('click', function () {
+                if (v.muted) {
+                    v.muted = false;
+                }
+            }, { once: true });
+        });
+    </script>
+
+    <!-- RIGHT SIDE: TEXT AND BUTTON -->
+    <div class="text-content">
+        <h1>Become a Seller on <span class="highlight">Shop Next</span></h1>
+        <p>Reach millions of customers globally! Set up your shop, list your products, and start growing your business
+            with our powerful seller tools.</p>
+
+        <a href="{% url 'seller_login' %}" class="btn-get-started">Get Started</a>
+    </div>
+
+</div>
+
+{% endblock %}

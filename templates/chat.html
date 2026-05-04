@@ -1,0 +1,352 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ other_display_name }} | SHOP NEXT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Chat Bubbles */
+        .msg-bubble {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .msg-me {
+            background: linear-gradient(135deg, #14213d 0%, #0a1224 100%);
+            color: white;
+            border-radius: 1.5rem 1.5rem 0 1.5rem;
+        }
+        .msg-other {
+            background: white;
+            color: #1f2937;
+            border: 1px solid #f1f5f9;
+            border-radius: 1.5rem 1.5rem 1.5rem 0;
+        }
+        
+        .loader-logo-mini {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #FF9900;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="w-full h-full max-w-4xl sm:h-[90vh] sm:rounded-[2.5rem] glass-panel flex flex-col overflow-hidden relative">
+        
+        <!-- Header -->
+        <div class="bg-white/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-gray-200 z-20">
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='{% url 'home' %}'" class="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </button>
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#FF9900] to-yellow-400 flex items-center justify-center text-white font-black text-lg shadow-md uppercase">
+                        {{ other_display_name|make_list|first }}
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-900 text-lg leading-tight">{{ other_display_name }}</h2>
+                    <span class="text-xs font-bold text-green-500 uppercase tracking-wider">Online</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-gray-400">
+                <button class="p-2 rounded-full hover:bg-gray-100 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg></button>
+            </div>
+        </div>
+
+        <!-- Product Context Card -->
+        {% if product %}
+        <div class="px-6 py-3 bg-white/60 border-b border-gray-200 z-10 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-white/80 transition" onclick="window.location.href='{% url 'product_detail' product.id %}'">
+            <div class="w-14 h-14 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-white">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ product.name|urlencode }}&background=FF9900&color=fff" alt="{{ product.name }}" class="w-full h-full object-cover">
+                {% endif %}
+            </div>
+            <div class="flex-grow min-w-0">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-0.5">Regarding Product</p>
+                <h3 class="text-sm font-bold text-gray-900 truncate">{{ product.name }}</h3>
+                <p class="text-sm font-black text-[#FF9900]">Rs. {{ product.price }}</p>
+            </div>
+            <div class="text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Messages Area -->
+        <div class="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar flex flex-col" id="messages-container">
+            <!-- Messages will be injected here via JS -->
+            <div class="text-center py-4">
+                <span class="bg-gray-200/50 text-gray-500 text-xs font-bold px-3 py-1.5 rounded-full">Conversation Started</span>
+            </div>
+        </div>
+
+        <!-- Image Preview Tray -->
+        <div id="image-preview-container" class="hidden px-6 py-3 bg-white/80 backdrop-blur-sm border-t border-gray-100 overflow-x-auto custom-scrollbar flex gap-3">
+            <div id="preview-list" class="flex gap-3 items-center"></div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-white/80 backdrop-blur-md border-t border-gray-200 z-20">
+            <div class="flex items-center gap-2 max-w-3xl mx-auto bg-gray-100/80 p-1.5 rounded-full border border-gray-200 shadow-inner focus-within:ring-4 focus-within:ring-[#FF9900]/20 focus-within:border-[#FF9900] transition-all">
+                
+                <input type="file" id="image-upload-input" class="hidden" accept="image/*" onchange="handleFileSelect(event)">
+                
+                <button onclick="document.getElementById('image-upload-input').click()" class="w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center text-gray-400 hover:bg-white hover:text-gray-600 hover:shadow-sm transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                </button>
+                
+                <input type="text" id="chat-input-field" placeholder="Type a message..." 
+                    class="flex-grow bg-transparent border-none outline-none text-sm font-medium placeholder-gray-400 px-2 text-gray-800"
+                    onkeypress="handleChatEnter(event)">
+                
+                <button id="send-msg-btn" onclick="sendMessage()" class="w-10 h-10 flex-shrink-0 bg-[#FF9900] hover:bg-[#e68a00] text-white rounded-full flex items-center justify-center shadow-md transform hover:scale-105 active:scale-95 transition-all">
+                    <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="lightbox-modal" class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center backdrop-blur-lg opacity-0 transition-opacity duration-300" onclick="closeLightbox()">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors z-50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div class="w-[90vw] h-[90vh] flex items-center justify-center" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-300">
+        </div>
+    </div>
+
+    <script>
+        const me = "{{ me }}";
+        const other = "{{ other }}";
+        const productId = "{{ product_id }}";
+        
+        const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + `/ws/chat/${other}/${productId}/`;
+        const chatSocket = new WebSocket(wsUrl);
+
+        let pendingImages = [];
+        let isUploading = false;
+
+        const container = document.getElementById('messages-container');
+
+        chatSocket.onopen = function(e) {
+            console.log("Chat Connected");
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === "chat_history") {
+                // Keep the "Conversation Started" banner, remove old messages if any
+                const children = Array.from(container.children);
+                children.forEach(child => {
+                    if(!child.classList.contains('text-center')) child.remove();
+                });
+                
+                data.messages.forEach(m => insertRealMessage(m));
+            } else if (data.message || data.image) {
+                insertRealMessage(data);
+                if (data.sender !== me) {
+                    chatSocket.send(JSON.stringify({ seen: true, id: data.id }));
+                }
+            }
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        function insertRealMessage(m) {
+            const isMe = (m.sender === me);
+            
+            let imagesHtml = '';
+            if (m.image) {
+                imagesHtml = `
+                    <div class="w-48 h-48 sm:w-64 sm:h-64 rounded-xl overflow-hidden cursor-pointer bg-gray-100 shadow-sm" onclick="openLightbox(this)">
+                        <img src="${m.image}" class="w-full h-full object-cover hover:opacity-90 transition-opacity">
+                    </div>
+                `;
+            }
+
+            let messageHtml = '';
+            if (isMe) {
+                messageHtml = `
+                    <div class="flex justify-end animate-slide-up w-full">
+                        <div class="flex flex-col items-end max-w-[75%] sm:max-w-[60%]">
+                            ${imagesHtml ? `<div class="mb-2 p-1 bg-white rounded-2xl shadow-sm border border-gray-100">${imagesHtml}</div>` : ''}
+                            ${m.message ? `<div class="msg-bubble msg-me px-5 py-3 text-[15px] leading-relaxed break-words shadow-md">${m.message}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageHtml = `
+                    <div class="flex justify-start items-end gap-2 animate-slide-up w-full">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF9900] to-yellow-400 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs shadow-sm uppercase mb-1">
+                            ${m.sender.charAt(0)}
+                        </div>
+                        <div class="flex flex-col items-start max-w-[75%] sm:max-w-[60%]">
+                            ${imagesHtml ? `<div class="mb-2 p-1 bg-white rounded-2xl shadow-sm border border-gray-100">${imagesHtml}</div>` : ''}
+                            ${m.message ? `<div class="msg-bubble msg-other px-5 py-3 text-[15px] leading-relaxed break-words">${m.message}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.insertAdjacentHTML('beforeend', messageHtml);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Image Handling
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    pendingImages.push({ src: event.target.result });
+                    renderPreviews();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderPreviews() {
+            const previewContainer = document.getElementById('image-preview-container');
+            const list = document.getElementById('preview-list');
+            list.innerHTML = '';
+            
+            if (pendingImages.length === 0) {
+                previewContainer.classList.add('hidden');
+                return;
+            }
+            
+            previewContainer.classList.remove('hidden');
+            
+            pendingImages.forEach((item, index) => {
+                const html = `
+                    <div class="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-200 shadow-sm flex-shrink-0 group">
+                        <img src="${item.src}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer" onclick="removeImage(${index})">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </div>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function removeImage(index) {
+            pendingImages.splice(index, 1);
+            renderPreviews();
+            if(pendingImages.length === 0) {
+                document.getElementById('image-upload-input').value = '';
+            }
+        }
+
+        function handleChatEnter(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input-field');
+            const text = input.value.trim();
+            
+            if (text || pendingImages.length > 0) {
+                // Send images
+                pendingImages.forEach(img => {
+                    chatSocket.send(JSON.stringify({ image: img.src }));
+                });
+                
+                // Send text
+                if (text) {
+                    chatSocket.send(JSON.stringify({ message: text }));
+                }
+                
+                input.value = '';
+                pendingImages = [];
+                renderPreviews();
+            }
+        }
+
+        function openLightbox(containerEl) {
+            const img = containerEl.querySelector('img');
+            const modal = document.getElementById('lightbox-modal');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = img.src;
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                lightboxImg.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox-modal');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            modal.classList.add('opacity-0');
+            lightboxImg.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>

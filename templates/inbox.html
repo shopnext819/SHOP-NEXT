@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .inbox-wrapper {
+        font-family: Arial, sans-serif;
+        background-color: #fff9e6; /* Light yellow background */
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .inbox-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #ffffff; /* White container */
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        border: 1px solid #ffeeba; /* Yellow border */
+    }
+
+    .inbox-header {
+        background-color: #ffc107; /* Main yellow */
+        color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .inbox-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .search-box input {
+        padding: 8px 15px;
+        border-radius: 20px;
+        border: none;
+        outline: none;
+        width: 250px;
+    }
+
+    .chat-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 30px;
+        border-bottom: 1px solid #f1f1f1;
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.3s;
+    }
+
+    .chat-item:hover {
+        background-color: #fffdf2;
+    }
+
+    .chat-item.unread {
+        background-color: #fff8e1;
+        font-weight: bold;
+    }
+
+    .chat-avatar {
+        width: 50px;
+        height: 50px;
+        background-color: #ffc107;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin-right: 20px;
+    }
+
+    .chat-info {
+        flex-grow: 1;
+    }
+
+    .chat-header-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+
+    .chat-name {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .chat-time {
+        font-size: 12px;
+        color: #888;
+    }
+
+    .chat-preview {
+        font-size: 14px;
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 600px;
+    }
+
+    .empty-state {
+        padding: 50px;
+        text-align: center;
+        color: #888;
+    }
+</style>
+
+<div class="inbox-wrapper">
+    <div class="inbox-container">
+        <div class="inbox-header">
+            <h1>Inbox</h1>
+            <div class="search-box">
+                <input type="text" id="searchInput" onkeyup="filterChats()" placeholder="Search messages...">
+            </div>
+        </div>
+
+        <ul class="chat-list" id="chatList">
+            {% for c in chats %}
+            <li>
+                <a href="/chat/{{ c.user }}/{{ c.product }}/" class="chat-item {% if c.unread %}unread{% endif %}">
+                    <div class="chat-avatar">
+                        {{ c.display_name|make_list|first|upper }}
+                    </div>
+                    <div class="chat-info">
+                        <div class="chat-header-row">
+                            <div class="chat-name">{{ c.display_name }}</div>
+                            <div class="chat-time">{{ c.time }}</div>
+                        </div>
+                        <div class="chat-preview">
+                            <strong>[Product: {{ c.product }}]</strong> {{ c.last }}
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {% empty %}
+            <div class="empty-state">
+                <p>No messages found in your inbox.</p>
+            </div>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+function filterChats() {
+    var input = document.getElementById('searchInput');
+    var filter = input.value.toUpperCase();
+    var ul = document.getElementById("chatList");
+    var li = ul.getElementsByTagName('li');
+
+    for (var i = 0; i < li.length; i++) {
+        var a = li[i].getElementsByTagName("a")[0];
+        if (a) {
+            var txtValue = a.textContent || a.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

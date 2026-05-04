@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body { background-color: #ffffff; } /* Full white background */
+    
+    .file-upload-box {
+        border: 2px dashed #f05c04;
+        background-color: #fff9f5;
+        transition: all 0.2s ease-in-out;
+    }
+    .file-upload-box:hover {
+        background-color: #ffe8d6;
+        border-color: #d04b02;
+    }
+</style>
+
+<div class="min-h-screen bg-white font-sans pt-12 pb-24">
+    <div class="max-w-4xl mx-auto px-6">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight">Store Settings</h1>
+                <p class="text-gray-500 mt-2">Update your store's identity, branding, and details securely.</p>
+            </div>
+            <a href="{% url 'seller_dashboard_home' %}" title="Back to Dashboard" class="flex items-center justify-center text-gray-500 hover:text-[#f05c04] bg-gray-100 hover:bg-orange-50 transition-colors w-12 h-12 rounded-full shadow-sm border border-gray-200 hover:border-orange-200">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+            </a>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-12">
+            <form action="{% url 'store_settings' %}" method="POST" enctype="multipart/form-data" class="space-y-10">
+                {% csrf_token %}
+                
+                <!-- Images Section -->
+                <div class="space-y-6">
+                    <h2 class="text-xl font-bold text-gray-800 border-b border-gray-100 pb-3">Branding & Images</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Banner Upload (now opens editor modal) -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-3">Store Banner</label>
+                            <!-- Hidden input receives the cropped file for form submission -->
+                            <input type="file" id="banner-upload" name="banner" accept="image/*" class="hidden" onchange="beOnFileSelect(this)">
+
+                            <!-- If banner already exists from DB, pre-load it -->
+                            {% if banner_data %}
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    document.getElementById('bannerThumb').src = '{{ banner_data }}';
+                                    document.getElementById('bannerBoxPreview').style.display = 'block';
+                                    document.getElementById('bannerBoxIcon').style.display  = 'none';
+                                    document.getElementById('bannerBoxText').style.display  = 'none';
+                                });
+                            </script>
+                            {% endif %}
+
+                            <!-- Preview box: click = fullscreen view, hover = "See your banner" -->
+                            <div class="relative file-upload-box rounded-2xl overflow-hidden h-48 cursor-pointer"
+                                 id="bannerUploadBox" onclick="bannerOpenFullscreen()" style="border:2px dashed #f05c04;background:#fff9f5;">
+
+                                <!-- Thumbnail (shown after banner selected or if banner_data exists) -->
+                                <div id="bannerBoxPreview" style="display:none;position:absolute;inset:0;">
+                                    <img id="bannerThumb" src="" style="width:100%;height:100%;object-fit:cover;">
+                                    <!-- Hover overlay -->
+                                    <div id="bannerViewHint"
+                                        style="position:absolute;inset:0;background:rgba(0,0,0,0);transition:background 0.3s;display:flex;align-items:center;justify-content:center;">
+                                        <span id="bannerViewLabel"
+                                            style="color:#fff;font-weight:700;font-size:14px;background:rgba(0,0,0,0.6);padding:8px 20px;border-radius:30px;border:1px solid rgba(255,255,255,0.3);backdrop-filter:blur(8px);opacity:0;transition:opacity 0.3s;display:flex;align-items:center;gap:8px;">
+                                            👁️ See your banner
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Empty state (shown before banner selected) -->
+                                <div id="bannerEmptyState" class="flex flex-col items-center justify-center h-full">
+                                    <svg class="w-10 h-10 text-[#f05c04] mb-3" id="bannerBoxIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="text-sm font-bold text-gray-500" id="bannerBoxText">No banner yet</p>
+                                    <p class="text-xs text-gray-400 mt-1">Upload to get started</p>
+                                </div>
+
+                                <p id="banner-preview" class="absolute bottom-2 left-0 right-0 text-center text-xs text-green-600 font-bold hidden">Banner Ready ✓</p>
+                            </div>
+
+                            <!-- Change Banner button (separate from view) -->
+                            <button type="button" onclick="document.getElementById('banner-upload').click()"
+                                style="margin-top:10px;width:100%;padding:10px;border-radius:12px;border:1.5px solid #f05c04;background:#fff9f5;color:#f05c04;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:7px;"
+                                onmouseover="this.style.background='#ffe8d6'" onmouseout="this.style.background='#fff9f5'">
+                                🖼️ Change Banner (opens editor)
+                            </button>
+                        </div>
+
+                        <!-- FULLSCREEN BANNER VIEWER -->
+                        <div id="bannerFullscreen"
+                            style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;cursor:zoom-out;"
+                            onclick="bannerCloseFullscreen()">
+                            <img id="bannerFullImg" src="" alt="Banner"
+                                style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,0.8);pointer-events:none;">
+                            <div style="position:absolute;top:20px;right:24px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;pointer-events:none;">
+                                ESC or click to close
+                            </div>
+                            <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.4);font-size:11px;font-weight:500;pointer-events:none;letter-spacing:1px;">
+                                YOUR STORE BANNER &nbsp;·&nbsp; 1500 × 288
+                            </div>
+                        </div>
+
+                        <script>
+                        // Hover effect on banner box
+                        (function() {
+                            var box  = document.getElementById('bannerUploadBox');
+                            var hint = document.getElementById('bannerViewHint');
+                            var lbl  = document.getElementById('bannerViewLabel');
+                            if (box && hint && lbl) {
+                                box.addEventListener('mouseenter', function() {
+                                    if (document.getElementById('bannerBoxPreview').style.display !== 'none') {
+                                        hint.style.background = 'rgba(0,0,0,0.4)';
+                                        lbl.style.opacity = '1';
+                                    }
+                                });
+                                box.addEventListener('mouseleave', function() {
+                                    hint.style.background = 'rgba(0,0,0,0)';
+                                    lbl.style.opacity = '0';
+                                });
+                            }
+                        })();
+
+                        function bannerOpenFullscreen() {
+                            var thumb = document.getElementById('bannerThumb').src;
+                            if (!thumb || thumb === window.location.href) return; // no banner
+                            document.getElementById('bannerFullImg').src = thumb;
+                            document.getElementById('bannerFullscreen').style.display = 'flex';
+                            document.body.style.overflow = 'hidden';
+                        }
+                        function bannerCloseFullscreen() {
+                            document.getElementById('bannerFullscreen').style.display = 'none';
+                            document.body.style.overflow = '';
+                        }
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Escape') bannerCloseFullscreen();
+                        });
+                        </script>
+
+
+                        <!-- Profile Upload -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-3">Store Profile Picture</label>
+                            <div class="relative file-upload-box rounded-2xl p-8 text-center cursor-pointer overflow-hidden group h-48 flex flex-col items-center justify-center" onclick="document.getElementById('profile-upload').click()">
+                                <svg class="w-10 h-10 text-[#f05c04] mb-3 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-sm font-bold text-gray-700">Click to upload new profile</p>
+                                <p class="text-xs text-gray-500 mt-1">Recommended: 500x500 / PNG, JPG</p>
+                                <input type="file" id="profile-upload" name="profile" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full hidden" onchange="previewFile(this, 'profile-preview')">
+                                <p id="profile-preview" class="text-xs text-green-600 font-bold mt-3 hidden">File Selected ✓</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Info Section -->
+                <div class="space-y-6 pt-4">
+                    <h2 class="text-xl font-bold text-gray-800 border-b border-gray-100 pb-3">Basic Information</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Store Name</label>
+                            <input type="text" name="store_name" value="{{ current_name }}" required
+                                class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-gray-50 focus:bg-white transition-all text-gray-900 font-medium"
+                                placeholder="e.g. Trendy Collections">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Store Code (Security/Password)</label>
+                            <input type="text" name="store_code" value="{{ current_code }}" required
+                                class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-gray-50 focus:bg-white transition-all text-gray-900 font-medium"
+                                placeholder="Enter secure store code">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Store Description (Optional)</label>
+                        <textarea name="store_desc" rows="4" 
+                            class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#f05c04] bg-gray-50 focus:bg-white transition-all text-gray-900 font-medium resize-none"
+                            placeholder="Tell customers a little bit about what your store sells...">{{ current_desc }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Action -->
+                <div class="pt-6 flex justify-end">
+                    <button type="submit" 
+                        class="bg-[#f05c04] hover:bg-[#d04b02] text-white text-lg font-bold py-4 px-12 rounded-2xl shadow-[0_8px_20px_rgba(240,92,4,0.3)] hover:shadow-[0_12px_25px_rgba(240,92,4,0.4)] transition-all transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-orange-200">
+                        Save Store Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewFile(input, previewId) {
+        let p = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            p.textContent = "File Selected: " + input.files[0].name + " ✓";
+            p.classList.remove("hidden");
+        } else {
+            p.classList.add("hidden");
+        }
+    }
+</script>
+
+<!-- ═══════════════════ BANNER EDITOR MODAL ═══════════════════ -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js" type="module"></script>
+
+<style>
+:root { --be-primary:#fca311; --be-border:rgba(255,255,255,0.1); --be-danger:#e74c3c; }
+#beModal * { box-sizing:border-box; font-family:'Outfit','Segoe UI',sans-serif; }
+.be-toolbar { height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(6,6,8,0.97); border-bottom:1px solid var(--be-border); flex-shrink:0; gap:12px; }
+.be-btn { background:rgba(255,255,255,0.07); border:1px solid var(--be-border); color:#ccc; padding:0 14px; height:42px; border-radius:12px; display:inline-flex; align-items:center; gap:7px; cursor:pointer; font-size:13.5px; font-weight:600; transition:all 0.25s; white-space:nowrap; }
+.be-btn:hover { background:rgba(255,255,255,0.14); border-color:var(--be-primary); color:var(--be-primary); transform:translateY(-1px); }
+.be-btn.be-active { background:var(--be-primary); color:#000; border-color:var(--be-primary); box-shadow:0 0 18px rgba(252,163,17,0.35); }
+.be-btn-save  { background:linear-gradient(135deg,#2ecc71,#27ae60); color:#fff !important; border:none; box-shadow:0 6px 20px rgba(46,204,113,0.3); }
+.be-btn-save:hover { transform:translateY(-2px) scale(1.03); }
+.be-btn-close { background:var(--be-danger); border:none; color:#fff !important; width:42px; padding:0; border-radius:12px; justify-content:center; }
+.be-viewport { flex:1; position:relative; display:flex; align-items:center; justify-content:center; background:radial-gradient(ellipse at center,#141414 0%,#070707 100%); overflow:hidden; }
+#beImage { display:block; max-width:92%; max-height:86%; opacity:0; transition:opacity 0.3s; }
+#beCanvasWrapper { display:none; position:relative; }
+.be-float-panel { position:absolute; background:rgba(14,14,18,0.97); backdrop-filter:blur(18px); border:1px solid var(--be-border); border-radius:18px; padding:15px; box-shadow:0 15px 50px rgba(0,0,0,0.85); z-index:200; display:none; flex-direction:column; gap:11px; animation:bePopIn 0.22s cubic-bezier(0.68,-0.55,0.265,1.55); }
+@keyframes bePopIn { from{transform:scale(0.84) translateY(8px);opacity:0;} to{transform:scale(1) translateY(0);opacity:1;} }
+#beDrawPanel { left:18px; top:50%; transform:translateY(-50%); min-width:152px; }
+#beTextPanel { right:18px; top:50%; transform:translateY(-50%); min-width:152px; }
+#beEmojiBox { right:18px; bottom:16px; }
+.be-panel-label { font-size:9.5px; opacity:0.4; letter-spacing:1.5px; text-transform:uppercase; text-align:center; color:#fff; }
+.be-dots-row { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; }
+.be-dot { width:27px; height:27px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:0.2s; flex-shrink:0; }
+.be-dot:hover { transform:scale(1.12); }
+.be-dot.be-dot-active { border-color:#fff; transform:scale(1.2); box-shadow:0 0 8px rgba(255,255,255,0.35); }
+.be-color-row { display:flex; align-items:center; gap:7px; }
+.be-wheel { width:30px; height:30px; border-radius:50%; border:2px solid var(--be-border); padding:0; cursor:pointer; background:none; outline:none; flex-shrink:0; overflow:hidden; }
+.be-wheel::-webkit-color-swatch-wrapper { padding:0; }
+.be-wheel::-webkit-color-swatch { border:none; border-radius:50%; }
+.be-hex { flex:1; background:rgba(255,255,255,0.07); border:1px solid var(--be-border); border-radius:8px; color:#fff; font-size:11.5px; font-family:monospace; padding:5px 7px; outline:none; transition:0.2s; text-transform:uppercase; }
+.be-hex:focus { border-color:var(--be-primary); }
+.be-add-text-btn { background:var(--be-primary); border:none; color:#000; font-weight:700; border-radius:10px; padding:8px; cursor:pointer; font-size:12.5px; transition:0.2s; margin-top:2px; }
+.be-size-slider { width:100%; accent-color:var(--be-primary); }
+.be-title-badge { color:var(--be-primary); font-weight:900; font-size:13px; letter-spacing:0.5px; text-align:center; }
+</style>
+
+<div id="beModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.78);backdrop-filter:blur(14px);align-items:center;justify-content:center;">
+    <div style="width:94vw;max-width:1300px;height:90vh;background:#0a0a0f;border-radius:22px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 50px 120px rgba(0,0,0,0.95);border:1px solid rgba(255,255,255,0.06);">
+        <div class="be-toolbar">
+            <div style="display:flex;gap:9px;">
+                <button class="be-btn be-active" id="beCropBtn" onclick="beDoneCrop()">✂️ <span>Done Crop</span></button>
+                <button class="be-btn" id="beTextBtn" onclick="beToggleText()">Aa <span>Text</span></button>
+                <button class="be-btn" id="beDrawBtn" onclick="beToggleDraw()">✏️ <span>Draw</span></button>
+                <button class="be-btn" onclick="beToggleEmoji()">😀 <span>Emoji</span></button>
+            </div>
+            <div class="be-title-badge">🖼️ Banner Editor &nbsp;·&nbsp; 1500 × 288</div>
+            <div style="display:flex;gap:9px;">
+                <button class="be-btn be-btn-save" onclick="beSaveBanner()">💾 Use This Banner</button>
+                <button class="be-btn be-btn-close" onclick="beClose()">✕</button>
+            </div>
+        </div>
+        <div class="be-viewport" id="beViewport">
+            <img id="beImage" alt="">
+            <div id="beCanvasWrapper"><canvas id="beCanvas"></canvas></div>
+            <div id="beDrawPanel" class="be-float-panel">
+                <div class="be-panel-label">✏️ Pencil</div>
+                <div class="be-dots-row">
+                    <div class="be-dot be-dot-active" style="background:#fca311;" onclick="beSetDrawColor('#fca311',this)"></div>
+                    <div class="be-dot" style="background:#e74c3c;" onclick="beSetDrawColor('#e74c3c',this)"></div>
+                    <div class="be-dot" style="background:#fff;" onclick="beSetDrawColor('#ffffff',this)"></div>
+                    <div class="be-dot" style="background:#2ecc71;" onclick="beSetDrawColor('#2ecc71',this)"></div>
+                    <div class="be-dot" style="background:#3498db;" onclick="beSetDrawColor('#3498db',this)"></div>
+                    <div class="be-dot" style="background:#9b59b6;" onclick="beSetDrawColor('#9b59b6',this)"></div>
+                    <div class="be-dot" style="background:#000;border:1px solid #444;" onclick="beSetDrawColor('#000000',this)"></div>
+                </div>
+                <div class="be-color-row">
+                    <input type="color" class="be-wheel" id="beDrawWheel" value="#fca311" oninput="beDrawWheelChange(this.value)">
+                    <input type="text" class="be-hex" id="beDrawHex" value="#FCA311" maxlength="7" placeholder="#HEX" oninput="beDrawHexInput(this.value)">
+                </div>
+                <div class="be-panel-label">SIZE</div>
+                <input type="range" class="be-size-slider" min="1" max="40" value="5" oninput="beDrawSizeChange(this.value)">
+            </div>
+            <div id="beTextPanel" class="be-float-panel">
+                <div class="be-panel-label">✍️ Text Color</div>
+                <div class="be-dots-row">
+                    <div class="be-dot be-dot-active" style="background:#fff;" onclick="beSetTextColor('#ffffff',this)"></div>
+                    <div class="be-dot" style="background:#fca311;" onclick="beSetTextColor('#fca311',this)"></div>
+                    <div class="be-dot" style="background:#e74c3c;" onclick="beSetTextColor('#e74c3c',this)"></div>
+                    <div class="be-dot" style="background:#2ecc71;" onclick="beSetTextColor('#2ecc71',this)"></div>
+                    <div class="be-dot" style="background:#3498db;" onclick="beSetTextColor('#3498db',this)"></div>
+                    <div class="be-dot" style="background:#000;border:1px solid #444;" onclick="beSetTextColor('#000000',this)"></div>
+                </div>
+                <div class="be-color-row">
+                    <input type="color" class="be-wheel" id="beTextWheel" value="#ffffff" oninput="beTextWheelChange(this.value)">
+                    <input type="text" class="be-hex" id="beTextHex" value="#FFFFFF" maxlength="7" placeholder="#HEX" oninput="beTextHexInput(this.value)">
+                </div>
+                <button class="be-add-text-btn" onclick="beAddText()">+ Add Text</button>
+            </div>
+            <div id="beEmojiBox" class="be-float-panel"><emoji-picker id="beEmojiPicker"></emoji-picker></div>
+        </div>
+    </div>
+</div>
+
+<script>
+var beCropper=null,beFabric=null,beTextColor='#ffffff';
+
+function beOnFileSelect(input) {
+    var f = input.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(e) { beShowModal(e.target.result); };
+    reader.readAsDataURL(f);
+    // reset so same file can retrigger
+    input.value = '';
+}
+
+function beShowModal(src){
+    document.getElementById('beModal').style.display='flex';
+    document.body.style.overflow='hidden';
+    document.getElementById('beCanvasWrapper').style.display='none';
+    beCloseAllPanels();
+    document.getElementById('beCropBtn').classList.add('be-active');
+    document.getElementById('beCropBtn').innerHTML='✂️ <span>Done Crop</span>';
+    var img=document.getElementById('beImage');
+    img.onload=function(){
+        img.style.opacity='1';
+        if(beCropper)beCropper.destroy();
+        beCropper=new Cropper(img,{aspectRatio:1500/288,viewMode:1,dragMode:'move',autoCropArea:0.9,responsive:true,guides:true,center:true,background:false,checkCrossOrigin:false});
+    };
+    img.src=src;
+}
+
+function beDoneCrop(){
+    if(!beCropper)return;
+    var cropped=beCropper.getCroppedCanvas({width:1500,height:288,imageSmoothingQuality:'high'});
+    var img=document.getElementById('beImage');
+    img.style.opacity='0';
+    setTimeout(function(){img.style.display='none';},300);
+    var vp=document.getElementById('beViewport');
+    var maxW=vp.clientWidth*0.92,maxH=vp.clientHeight*0.85;
+    var w=1500,h=288,r=w/h;
+    if(w>maxW){w=maxW;h=w/r;} if(h>maxH){h=maxH;w=h*r;}
+    if(beFabric)beFabric.dispose();
+    beFabric=new fabric.Canvas('beCanvas',{width:w,height:h,backgroundColor:'transparent'});
+    beFabric.freeDrawingBrush=new fabric.PencilBrush(beFabric);
+    beFabric.freeDrawingBrush.color='#fca311';beFabric.freeDrawingBrush.width=5;
+    var fi=new fabric.Image(cropped,{left:0,top:0,scaleX:w/cropped.width,scaleY:h/cropped.height,selectable:false,evented:false});
+    beFabric.add(fi);beFabric.sendToBack(fi);beFabric.renderAll();
+    document.getElementById('beCanvasWrapper').style.display='block';
+    beCropper.destroy();beCropper=null;
+    document.getElementById('beCropBtn').innerHTML='✂️ <span>Crop</span>';
+    document.getElementById('beCropBtn').classList.remove('be-active');
+}
+
+function beSaveBanner(){
+    if(!beFabric){alert('Pehle crop karein!');return;}
+    var dataURL=beFabric.toDataURL({format:'png',quality:1});
+
+    // Convert dataURL -> File -> inject into form input
+    var arr=dataURL.split(','), mime=arr[0].match(/:(.*?);/)[1];
+    var bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);
+    while(n--){u8arr[n]=bstr.charCodeAt(n);}
+    var file=new File([u8arr],'banner.png',{type:mime});
+    var dt=new DataTransfer();
+    dt.items.add(file);
+    var input=document.getElementById('banner-upload');
+    input.files=dt.files;
+
+    // Show thumbnail preview in upload box
+    document.getElementById('bannerThumb').src=dataURL;
+    document.getElementById('bannerBoxPreview').style.display='block';
+    document.getElementById('bannerBoxIcon').style.display='none';
+    document.getElementById('bannerBoxText').style.display='none';
+    document.getElementById('banner-preview').classList.remove('hidden');
+    document.getElementById('banner-preview').textContent='Banner Ready ✓';
+
+    beClose();
+}
+
+function beClose(){
+    document.getElementById('beModal').style.display='none';
+    document.body.style.overflow='';
+    var img=document.getElementById('beImage');
+    img.style.opacity='0';img.style.display='block';img.src='';
+    if(beCropper){beCropper.destroy();beCropper=null;}
+    if(beFabric){beFabric.dispose();beFabric=null;}
+    document.getElementById('beCanvasWrapper').style.display='none';
+    beCloseAllPanels();
+}
+function beCloseAllPanels(){
+    document.getElementById('beDrawPanel').style.display='none';
+    document.getElementById('beTextPanel').style.display='none';
+    document.getElementById('beEmojiBox').style.display='none';
+    document.getElementById('beDrawBtn').classList.remove('be-active');
+    document.getElementById('beTextBtn').classList.remove('be-active');
+    if(beFabric)beFabric.isDrawingMode=false;
+}
+function beToggleDraw(){
+    if(!beFabric)return;
+    beFabric.isDrawingMode=!beFabric.isDrawingMode;
+    var p=document.getElementById('beDrawPanel'),b=document.getElementById('beDrawBtn');
+    if(beFabric.isDrawingMode){beCloseAllPanels();p.style.display='flex';b.classList.add('be-active');beFabric.isDrawingMode=true;}
+    else{p.style.display='none';b.classList.remove('be-active');}
+}
+function beSetDrawColor(c,el){if(beFabric)beFabric.freeDrawingBrush.color=c;document.querySelectorAll('#beDrawPanel .be-dot').forEach(function(d){d.classList.remove('be-dot-active');});el.classList.add('be-dot-active');document.getElementById('beDrawWheel').value=c;document.getElementById('beDrawHex').value=c.toUpperCase();}
+function beDrawWheelChange(c){if(beFabric)beFabric.freeDrawingBrush.color=c;document.getElementById('beDrawHex').value=c.toUpperCase();document.querySelectorAll('#beDrawPanel .be-dot').forEach(function(d){d.classList.remove('be-dot-active');});}
+function beDrawHexInput(v){v=v.trim();if(!v.startsWith('#'))v='#'+v;if(/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)){if(beFabric)beFabric.freeDrawingBrush.color=v;document.getElementById('beDrawWheel').value=v;document.querySelectorAll('#beDrawPanel .be-dot').forEach(function(d){d.classList.remove('be-dot-active');}); }}
+function beDrawSizeChange(s){if(beFabric)beFabric.freeDrawingBrush.width=parseInt(s);}
+function beToggleText(){var p=document.getElementById('beTextPanel'),b=document.getElementById('beTextBtn'),open=p.style.display==='flex';beCloseAllPanels();if(!open){p.style.display='flex';b.classList.add('be-active');}}
+function beAddText(){if(!beFabric)return;var t=new fabric.IText('Your Text',{left:beFabric.width/2,top:beFabric.height/2,originX:'center',originY:'center',fill:beTextColor,fontSize:36,fontFamily:'Outfit,sans-serif',fontWeight:'900',stroke:beTextColor==='#ffffff'?'#000':'transparent',strokeWidth:beTextColor==='#ffffff'?2:0,paintFirst:'stroke'});beFabric.add(t);beFabric.setActiveObject(t);t.enterEditing();}
+function beSetTextColor(c,el){beTextColor=c;document.querySelectorAll('#beTextPanel .be-dot').forEach(function(d){d.classList.remove('be-dot-active');});el.classList.add('be-dot-active');document.getElementById('beTextWheel').value=c;document.getElementById('beTextHex').value=c.toUpperCase();if(beFabric){var o=beFabric.getActiveObject();if(o&&o.type==='i-text'){o.set('fill',c);beFabric.renderAll();}}}
+function beTextWheelChange(c){beTextColor=c;document.getElementById('beTextHex').value=c.toUpperCase();document.querySelectorAll('#beTextPanel .be-dot').forEach(function(d){d.classList.remove('be-dot-active');});if(beFabric){var o=beFabric.getActiveObject();if(o&&o.type==='i-text'){o.set('fill',c);beFabric.renderAll();}}}
+function beTextHexInput(v){v=v.trim();if(!v.startsWith('#'))v='#'+v;if(/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)){beTextColor=v;document.getElementById('beTextWheel').value=v;document.querySelectorAll('#beTextPanel .be-dot').forEach(function(d){d.classList.remove('be-dot-active');});if(beFabric){var o=beFabric.getActiveObject();if(o&&o.type==='i-text'){o.set('fill',v);beFabric.renderAll();}}}}
+function beToggleEmoji(){var b=document.getElementById('beEmojiBox'),open=(b.style.display==='block'||b.style.display==='flex');beCloseAllPanels();if(!open)b.style.display='block';}
+document.addEventListener('DOMContentLoaded',function(){var p=document.getElementById('beEmojiPicker');if(p){p.addEventListener('emoji-click',function(e){if(!beFabric)return;var em=new fabric.Text(e.detail.unicode,{left:beFabric.width/2,top:beFabric.height/2,fontSize:70});beFabric.add(em);beFabric.setActiveObject(em);document.getElementById('beEmojiBox').style.display='none';});}});
+document.addEventListener('keydown',function(e){if((e.key==='Delete'||e.key==='Backspace')&&!e.target.matches('input,textarea')){if(beFabric){var o=beFabric.getActiveObject();if(o&&!o.isEditing)beFabric.remove(o);}}});
+document.getElementById('beModal').addEventListener('click',function(e){if(e.target===this)beClose();});
+</script>
+
+{% endblock %}

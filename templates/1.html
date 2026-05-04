@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor 1 | Shop Next</title>
+
+    <!-- Libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js" type="module"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #fca311;
+            --bg-dark: #070707;
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --accent-green: #2ecc71;
+            --accent-blue: #3498db;
+            --danger: #e74c3c;
+            --border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ecf0f1;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .toolbar {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .tools-group { display: flex; gap: 12px; align-items: center; }
+
+        .tool-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            color: #dcdde1;
+            padding: 0 15px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+        }
+        .tool-btn i { font-style: normal; }
+        .tool-btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .tool-btn.active {
+            background: var(--primary);
+            color: black;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(252, 163, 17, 0.3);
+        }
+
+        .editor-viewport {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #070707 100%);
+        }
+
+        .edit-surface {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #image {
+            display: block;
+            max-width: 90vw;
+            max-height: 75vh;
+            opacity: 0;
+        }
+
+        canvas { display: block; }
+
+        /* ─── BOTTOM BAR ──────────────────────────────────── */
+        .bottom-bar {
+            padding: 12px 25px;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .caption-input {
+            flex: 1;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            padding: 14px 22px;
+            border-radius: 35px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Outfit', sans-serif;
+        }
+        .caption-input:focus {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(252, 163, 17, 0.2);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--accent-green), #27ae60);
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
+        }
+        .send-btn:hover {
+            transform: scale(1.15) rotate(-5deg);
+            box-shadow: 0 12px 35px rgba(46, 204, 113, 0.5);
+        }
+
+        /* ─── FLOATING PANELS ─────────────────────────────── */
+        .floating-panel {
+            position: absolute;
+            background: rgba(18, 18, 18, 0.97);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            z-index: 1100;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: popIn 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.85) translateY(8px); opacity: 0; }
+            to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Draw panel — left side */
+        #drawPanel {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            min-width: 155px;
+        }
+
+        /* Text panel — right side */
+        #textPanel {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            min-width: 155px;
+        }
+
+        /* Emoji — bottom-right */
+        #emojiBox {
+            right: 20px;
+            bottom: 90px;
+        }
+
+        .panel-label {
+            font-size: 10px;
+            opacity: 0.4;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .color-dots-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .color-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .color-dot:hover { transform: scale(1.12); }
+        .color-dot.active { border-color: white; transform: scale(1.2); box-shadow: 0 0 8px rgba(255,255,255,0.4); }
+
+        .color-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-wheel {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            padding: 0; cursor: pointer;
+            background: none; outline: none;
+            flex-shrink: 0; overflow: hidden;
+        }
+        .color-wheel::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-wheel::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        .hex-input {
+            flex: 1;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            font-family: monospace;
+            padding: 6px 8px;
+            outline: none;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+        .hex-input:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.12);
+        }
+
+        /* ─── UPLOAD OVERLAY ──────────────────────────────── */
+        .upload-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.88);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+        }
+        .upload-card {
+            background: rgba(30,30,30,0.6);
+            border: 1px solid var(--border);
+            padding: 50px 60px;
+            border-radius: 40px;
+            text-align: center;
+            max-width: 440px;
+            transition: 0.4s;
+        }
+        .upload-card:hover {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.04);
+            transform: translateY(-5px);
+        }
+        .upload-card h2 { font-size: 26px; margin-bottom: 8px; }
+        .upload-card p  { opacity: 0.55; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- TOP TOOLBAR -->
+    <div class="toolbar">
+        <div class="tools-group">
+            <button class="tool-btn" onclick="window.history.back()">⬅️ <i>Back</i></button>
+            <button class="tool-btn" onclick="location.reload()">🖼️ <i>New</i></button>
+        </div>
+
+        <div class="tools-group" id="editor-tools" style="display:none;">
+            <button class="tool-btn" id="cropBtn" onclick="toggleCrop()">✂️ <i>Crop</i></button>
+            <button class="tool-btn" id="textBtn" onclick="toggleTextPanel()">Aa <i>Text</i></button>
+            <button class="tool-btn" id="drawBtn" onclick="toggleDraw()">✏️ <i>Draw</i></button>
+            <button class="tool-btn" onclick="toggleEmoji()">😀 <i>Emoji</i></button>
+            <button class="tool-btn" onclick="location.reload()" style="color:var(--danger);">🗑️</button>
+        </div>
+
+        <button class="tool-btn" style="background:var(--danger);border:none;width:48px;" onclick="window.history.back()">❌</button>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="editor-viewport" id="editorViewport">
+        <input type="file" id="fileInput" hidden accept="image/*">
+
+        <!-- Upload Overlay -->
+        <div class="upload-overlay" id="uploadOverlay" onclick="triggerUpload()">
+            <div class="upload-card">
+                <div style="font-size:60px;margin-bottom:18px;">📤</div>
+                <h2>Upload Photo</h2>
+                <p>Tap to choose an image from your device</p>
+            </div>
+        </div>
+
+        <!-- Canvas Surface -->
+        <div class="edit-surface">
+            <img id="image" alt="">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <!-- ─── DRAW PANEL ─── -->
+        <div id="drawPanel" class="floating-panel">
+            <div class="panel-label">✏️ Pencil</div>
+            <div class="color-dots-row">
+                <div class="color-dot active" style="background:#fca311;" onclick="setDrawColor('#fca311',this)"></div>
+                <div class="color-dot" style="background:#e74c3c;" onclick="setDrawColor('#e74c3c',this)"></div>
+                <div class="color-dot" style="background:#ffffff;" onclick="setDrawColor('#ffffff',this)"></div>
+                <div class="color-dot" style="background:#2ecc71;" onclick="setDrawColor('#2ecc71',this)"></div>
+                <div class="color-dot" style="background:#3498db;" onclick="setDrawColor('#3498db',this)"></div>
+                <div class="color-dot" style="background:#9b59b6;" onclick="setDrawColor('#9b59b6',this)"></div>
+                <div class="color-dot" style="background:#f39c12;" onclick="setDrawColor('#f39c12',this)"></div>
+                <div class="color-dot" style="background:#000000;border:1px solid #555;" onclick="setDrawColor('#000000',this)"></div>
+            </div>
+            <div class="color-input-row">
+                <input type="color" id="drawWheel" class="color-wheel" value="#fca311" oninput="onDrawWheel(this.value)">
+                <input type="text" id="drawHex" class="hex-input" value="#FCA311" maxlength="7" placeholder="#HEX" oninput="onDrawHex(this.value)">
+            </div>
+            <div class="panel-label" style="margin-top:4px;">SIZE</div>
+            <input type="range" min="1" max="40" value="5" oninput="canvas.freeDrawingBrush.width=parseInt(this.value)"
+                style="accent-color:var(--primary);width:100%;">
+        </div>
+
+        <!-- ─── TEXT PANEL ─── -->
+        <div id="textPanel" class="floating-panel">
+            <div class="panel-label">✍️ Text Color</div>
+            <div class="color-dots-row">
+                <div class="color-dot active" style="background:#ffffff;"                    onclick="setTextColor('#ffffff',this)"></div>
+                <div class="color-dot" style="background:#fca311;"                           onclick="setTextColor('#fca311',this)"></div>
+                <div class="color-dot" style="background:#e74c3c;"                           onclick="setTextColor('#e74c3c',this)"></div>
+                <div class="color-dot" style="background:#2ecc71;"                           onclick="setTextColor('#2ecc71',this)"></div>
+                <div class="color-dot" style="background:#3498db;"                           onclick="setTextColor('#3498db',this)"></div>
+                <div class="color-dot" style="background:#9b59b6;"                           onclick="setTextColor('#9b59b6',this)"></div>
+                <div class="color-dot" style="background:#000000;border:1px solid #555;"    onclick="setTextColor('#000000',this)"></div>
+            </div>
+            <div class="color-input-row">
+                <input type="color" id="textWheel" class="color-wheel" value="#ffffff" oninput="onTextWheel(this.value)">
+                <input type="text"  id="textHex"   class="hex-input"   value="#FFFFFF" maxlength="7" placeholder="#HEX" oninput="onTextHex(this.value)">
+            </div>
+            <button class="tool-btn" style="margin-top:6px;width:100%;justify-content:center;font-size:13px;"
+                onclick="addText()">+ Add Text</button>
+        </div>
+
+        <!-- ─── EMOJI PANEL ─── -->
+        <div id="emojiBox" class="floating-panel">
+            <emoji-picker></emoji-picker>
+        </div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+        <input type="text" class="caption-input" id="captionText" placeholder="Write a caption...">
+        <button class="send-btn" onclick="sendFinal()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        /* ─── STATE ──────────────────────────────────────── */
+        let cropper    = null;
+        let canvas     = new fabric.Canvas('canvas');
+        let textColor  = '#ffffff';
+
+        const fileInput   = document.getElementById('fileInput');
+        const uploadOverlay = document.getElementById('uploadOverlay');
+        const image       = document.getElementById('image');
+        const editorTools = document.getElementById('editor-tools');
+
+        /* Brush init */
+        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        canvas.freeDrawingBrush.color = '#fca311';
+        canvas.freeDrawingBrush.width = 5;
+
+        /* ─── UPLOAD ─────────────────────────────────────── */
+        function triggerUpload() { fileInput.click(); }
+
+        fileInput.onchange = e => {
+            const f = e.target.files[0];
+            if (!f) return;
+            const reader = new FileReader();
+            reader.onload = ev => startCropping(ev.target.result);
+            reader.readAsDataURL(f);
+        };
+
+        function startCropping(src) {
+            image.onload = () => {
+                uploadOverlay.style.display = 'none';
+                editorTools.style.display = 'flex';
+                image.style.opacity = 1;
+
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(image, {
+                    viewMode: 1, dragMode: 'move',
+                    autoCropArea: 0.85, background: false,
+                    responsive: true, guides: true
+                });
+
+                document.getElementById('cropBtn').innerHTML = '✂️ <i>Done Crop</i>';
+                document.getElementById('cropBtn').classList.add('active');
+            };
+            image.src = src;
+        }
+
+        /* ─── CROP ────────────────────────────────────────── */
+        function toggleCrop() {
+            if (!cropper) return;
+            const cropped = cropper.getCroppedCanvas();
+            image.style.opacity = 0;
+            image.style.pointerEvents = 'none';
+
+            const vp = document.getElementById('editorViewport');
+            const maxW = vp.clientWidth  * 0.88;
+            const maxH = vp.clientHeight * 0.82;
+            let w = cropped.width, h = cropped.height;
+            const r = w / h;
+            if (w > maxW) { w = maxW; h = w / r; }
+            if (h > maxH) { h = maxH; w = h * r; }
+
+            canvas.setWidth(w);
+            canvas.setHeight(h);
+
+            fabric.Image.fromURL(cropped.toDataURL(), img => {
+                img.set({ selectable:false, evented:false, scaleX: w/cropped.width, scaleY: h/cropped.height });
+                canvas.clear();
+                canvas.add(img);
+                canvas.sendToBack(img);
+            });
+
+            cropper.destroy(); cropper = null;
+            document.getElementById('cropBtn').innerHTML = '✂️ <i>Crop</i>';
+            document.getElementById('cropBtn').classList.remove('active');
+        }
+
+        /* ─── TEXT ────────────────────────────────────────── */
+        function toggleTextPanel() {
+            const p = document.getElementById('textPanel');
+            const btn = document.getElementById('textBtn');
+            const open = p.style.display === 'flex';
+            closeAllPanels();
+            if (!open) { p.style.display = 'flex'; btn.classList.add('active'); }
+        }
+
+        function addText() {
+            const t = new fabric.IText('Type here...', {
+                left: canvas.width / 2, top: canvas.height / 2,
+                originX: 'center', originY: 'center',
+                fill: textColor, fontSize: 42, fontFamily: 'Outfit', fontWeight: '900',
+                stroke: textColor === '#ffffff' ? '#000' : 'transparent',
+                strokeWidth: textColor === '#ffffff' ? 2 : 0,
+                paintFirst: 'stroke'
+            });
+            canvas.add(t);
+            canvas.setActiveObject(t);
+            t.enterEditing();
+        }
+
+        function setTextColor(c, el) {
+            textColor = c;
+            document.querySelectorAll('#textPanel .color-dot').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('textWheel').value = c;
+            document.getElementById('textHex').value = c.toUpperCase();
+            const obj = canvas.getActiveObject();
+            if (obj && obj.type === 'i-text') { obj.set('fill', c); canvas.renderAll(); }
+        }
+
+        function onTextWheel(c) {
+            textColor = c;
+            document.getElementById('textHex').value = c.toUpperCase();
+            document.querySelectorAll('#textPanel .color-dot').forEach(d => d.classList.remove('active'));
+            const obj = canvas.getActiveObject();
+            if (obj && obj.type === 'i-text') { obj.set('fill', c); canvas.renderAll(); }
+        }
+
+        function onTextHex(v) {
+            v = v.trim();
+            if (!v.startsWith('#')) v = '#' + v;
+            if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)) {
+                textColor = v;
+                document.getElementById('textWheel').value = v;
+                document.querySelectorAll('#textPanel .color-dot').forEach(d => d.classList.remove('active'));
+                const obj = canvas.getActiveObject();
+                if (obj && obj.type === 'i-text') { obj.set('fill', v); canvas.renderAll(); }
+            }
+        }
+
+        /* ─── DRAW ────────────────────────────────────────── */
+        function toggleDraw() {
+            canvas.isDrawingMode = !canvas.isDrawingMode;
+            const btn = document.getElementById('drawBtn');
+            const p   = document.getElementById('drawPanel');
+            if (canvas.isDrawingMode) {
+                closeAllPanels();
+                p.style.display = 'flex'; btn.classList.add('active');
+            } else {
+                p.style.display = 'none'; btn.classList.remove('active');
+            }
+        }
+
+        function setDrawColor(c, el) {
+            canvas.freeDrawingBrush.color = c;
+            document.querySelectorAll('#drawPanel .color-dot').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('drawWheel').value = c;
+            document.getElementById('drawHex').value = c.toUpperCase();
+        }
+
+        function onDrawWheel(c) {
+            canvas.freeDrawingBrush.color = c;
+            document.getElementById('drawHex').value = c.toUpperCase();
+            document.querySelectorAll('#drawPanel .color-dot').forEach(d => d.classList.remove('active'));
+        }
+
+        function onDrawHex(v) {
+            v = v.trim();
+            if (!v.startsWith('#')) v = '#' + v;
+            if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(v)) {
+                canvas.freeDrawingBrush.color = v;
+                document.getElementById('drawWheel').value = v;
+                document.querySelectorAll('#drawPanel .color-dot').forEach(d => d.classList.remove('active'));
+            }
+        }
+
+        /* ─── EMOJI ───────────────────────────────────────── */
+        function toggleEmoji() {
+            const b = document.getElementById('emojiBox');
+            const open = b.style.display === 'flex' || b.style.display === 'block';
+            closeAllPanels();
+            if (!open) b.style.display = 'block';
+        }
+
+        document.querySelector('emoji-picker').addEventListener('emoji-click', e => {
+            const em = new fabric.Text(e.detail.unicode, {
+                left: canvas.width / 2, top: canvas.height / 2, fontSize: 70
+            });
+            canvas.add(em); canvas.setActiveObject(em);
+            document.getElementById('emojiBox').style.display = 'none';
+        });
+
+        /* ─── HELPERS ─────────────────────────────────────── */
+        function closeAllPanels() {
+            document.getElementById('drawPanel').style.display = 'none';
+            document.getElementById('textPanel').style.display = 'none';
+            document.getElementById('emojiBox').style.display  = 'none';
+            document.getElementById('drawBtn').classList.remove('active');
+            document.getElementById('textBtn').classList.remove('active');
+            canvas.isDrawingMode = false;
+        }
+
+        /* Delete selected with keyboard */
+        window.addEventListener('keydown', e => {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && !e.target.matches('input,textarea')) {
+                const obj = canvas.getActiveObject();
+                if (obj && !obj.isEditing) { canvas.remove(obj); canvas.discardActiveObject(); }
+            }
+        });
+
+        /* ─── SEND ────────────────────────────────────────── */
+        function sendFinal() {
+            if (!canvas.getObjects().length) {
+                alert('Pehle image upload karein aur crop karein!');
+                return;
+            }
+            const img     = canvas.toDataURL({ format: 'png', quality: 1 });
+            const caption = document.getElementById('captionText').value;
+            console.log('IMAGE:', img);
+            console.log('CAPTION:', caption);
+            alert('Tayyar hai! Caption: ' + (caption || '(koi caption nahi)'));
+        }
+    </script>
+</body>
+</html>
