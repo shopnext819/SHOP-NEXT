@@ -14,6 +14,14 @@ ALLOWED_HOSTS = [
     'shop-next--hamzaaiserver.replit.app'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://shop-next--hamzaaiserver.replit.app"
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+USE_X_FORWARDED_HOST = True
+
 
 # =========================
 # Applications
